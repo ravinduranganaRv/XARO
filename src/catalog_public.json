@@ -1,0 +1,251 @@
+{
+ "products": [
+  {
+   "sku": "XK-C",
+   "name": "Keyboard Rug, Compact",
+   "cat": "desk",
+   "kind": "common",
+   "price": 99,
+   "size": "32 x 12 cm",
+   "desc": "Hand-tufted wrist rest in 8-ply acrylic pile, bevel-carved edges, non-slip felt back.",
+   "lead": "10-14 business days",
+   "designs": [
+    "XARO Logo",
+    "Street Crown",
+    "Neon Waves",
+    "Pixel Pad"
+   ],
+   "deposit": false,
+   "weight": "0.4 kg"
+  },
+  {
+   "sku": "XK-S",
+   "name": "Keyboard Rug, Standard",
+   "cat": "desk",
+   "kind": "common",
+   "price": 109,
+   "size": "44 x 16 cm",
+   "desc": "Full-size wrist rest for 75% to full-size boards. Same build, more pile to carve.",
+   "lead": "10-14 business days",
+   "designs": [
+    "XARO Logo",
+    "Street Crown",
+    "Neon Waves",
+    "Pixel Pad"
+   ],
+   "deposit": false,
+   "weight": "0.5 kg"
+  },
+  {
+   "sku": "XM",
+   "name": "Mouse Coaster Rug (add-on)",
+   "cat": "desk",
+   "kind": "common",
+   "price": 19,
+   "size": "12 cm round",
+   "desc": "Matching coaster for your mouse. Ships in the same tube as your keyboard rug.",
+   "lead": "Ships with keyboard rug",
+   "designs": [
+    "XARO Logo",
+    "Street Crown",
+    "Neon Waves",
+    "Pixel Pad"
+   ],
+   "deposit": false,
+   "weight": "0.1 kg"
+  },
+  {
+   "sku": "XS",
+   "name": "Keyboard + Mouse Set",
+   "cat": "desk",
+   "kind": "common",
+   "price": 119,
+   "size": "44 x 16 cm + 12 cm",
+   "desc": "The Drop 001 bundle: standard keyboard rug and matching mouse coaster. Free worldwide shipping.",
+   "lead": "10-14 business days",
+   "designs": [
+    "XARO Logo",
+    "Street Crown",
+    "Neon Waves",
+    "Pixel Pad"
+   ],
+   "deposit": false,
+   "weight": "0.6 kg"
+  },
+  {
+   "sku": "XF",
+   "name": "Floor Rug, Medium",
+   "cat": "home",
+   "kind": "common",
+   "price": 279,
+   "size": "60 x 90 cm",
+   "desc": "Street-art floor rug for the gaming corner. Latex-backed, edge-bound in black twill.",
+   "lead": "3-4 weeks",
+   "designs": [
+    "XARO Logo",
+    "Street Crown",
+    "Neon Waves",
+    "Pixel Pad"
+   ],
+   "deposit": false,
+   "weight": "2.4 kg"
+  },
+  {
+   "sku": "XW-M",
+   "name": "Mini Frame Tuft",
+   "cat": "wall",
+   "kind": "common",
+   "price": 149,
+   "size": "30 x 30 cm",
+   "desc": "A small framed contour piece. The easiest way into the wall collection.",
+   "lead": "2-3 weeks",
+   "designs": [
+    "Neon Waves",
+    "Street Crown"
+   ],
+   "deposit": false,
+   "weight": "1.1 kg"
+  },
+  {
+   "sku": "XW-S",
+   "name": "3D Contour Wall Art",
+   "cat": "wall",
+   "kind": "common",
+   "price": 649,
+   "size": "2 x 3 ft, framed",
+   "desc": "Wool-pile sculpted wall rug, carved into flowing contours and set in a black wood frame.",
+   "lead": "4-5 weeks",
+   "designs": [
+    "Neon Waves",
+    "Street Crown"
+   ],
+   "deposit": false,
+   "weight": "5 kg"
+  },
+  {
+   "sku": "XW-L",
+   "name": "3D Contour Wall Art, Large",
+   "cat": "wall",
+   "kind": "common",
+   "price": 899,
+   "size": "2 x 4 ft, framed",
+   "desc": "The statement piece. Deeper carving, wider flow, black wood frame.",
+   "lead": "5-6 weeks",
+   "designs": [
+    "Neon Waves",
+    "Street Crown"
+   ],
+   "deposit": false,
+   "weight": "7 kg"
+  },
+  {
+   "sku": "CK",
+   "name": "Custom Keyboard Rug",
+   "cat": "custom",
+   "kind": "custom",
+   "price": 139,
+   "size": "44 x 16 cm",
+   "desc": "Upload your art, pick a size, get a quote. We tuft it by hand.",
+   "lead": "3-4 weeks incl. design approval",
+   "designs": [],
+   "deposit": true,
+   "weight": "0.5 kg"
+  },
+  {
+   "sku": "CS",
+   "name": "Custom Keyboard + Mouse Set",
+   "cat": "custom",
+   "kind": "custom",
+   "price": 159,
+   "size": "44 x 16 cm + 12 cm",
+   "desc": "Your art on a keyboard rug and a matching mouse coaster.",
+   "lead": "3-4 weeks incl. design approval",
+   "designs": [],
+   "deposit": true,
+   "weight": "0.6 kg"
+  },
+  {
+   "sku": "CF",
+   "name": "Custom Floor Rug",
+   "cat": "custom",
+   "kind": "custom",
+   "price": 349,
+   "size": "60 x 90 cm",
+   "desc": "Your logo, character or artwork as a floor rug.",
+   "lead": "4-5 weeks incl. design approval",
+   "designs": [],
+   "deposit": true,
+   "weight": "2.4 kg"
+  },
+  {
+   "sku": "CL",
+   "name": "Studio Logo Rug",
+   "cat": "custom",
+   "kind": "custom",
+   "price": 399,
+   "size": "90 x 90 cm",
+   "desc": "For streamers, studios and shops. Your logo in pile.",
+   "lead": "4-5 weeks incl. design approval",
+   "designs": [],
+   "deposit": true,
+   "weight": "3 kg"
+  },
+  {
+   "sku": "CW",
+   "name": "Custom Wall Art",
+   "cat": "custom",
+   "kind": "custom",
+   "price": 799,
+   "size": "2 x 3 ft, framed",
+   "desc": "Your art as a sculpted wall piece with a black wood frame.",
+   "lead": "6-7 weeks incl. design approval",
+   "designs": [],
+   "deposit": true,
+   "weight": "5 kg"
+  }
+ ],
+ "coming": [
+  {
+   "sku": "XT",
+   "name": "Heavyweight Tee (DTF)",
+   "phase": "Phase 2",
+   "price": 39
+  },
+  {
+   "sku": "XP",
+   "name": "Aluminum Sublimation Print, 30 x 45 cm",
+   "phase": "Phase 2",
+   "price": 89
+  },
+  {
+   "sku": "XH",
+   "name": "French Terry Hoodie",
+   "phase": "Phase 3",
+   "price": 79
+  },
+  {
+   "sku": "XC",
+   "name": "Trucker Cap, patch front",
+   "phase": "Phase 4",
+   "price": 34
+  },
+  {
+   "sku": "XB",
+   "name": "Ribbed Beanie",
+   "phase": "Phase 4",
+   "price": 29
+  },
+  {
+   "sku": "XU",
+   "name": "Bucket Hat",
+   "phase": "Phase 4",
+   "price": 34
+  },
+  {
+   "sku": "XN",
+   "name": "Acrylic LED Neon Sign (from)",
+   "phase": "Phase 5",
+   "price": 129
+  }
+ ]
+}

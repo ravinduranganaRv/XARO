@@ -1,0 +1,1009 @@
+<title>XARO Industries Store</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: a fixed WebGL stage (tufted keyboard rug on a desk, then macro pile, then contour wall art) that the page scrolls through,
+   followed by stitched-edge sections: shop, custom builder, lookbook, tracking. Single committed dark look (brand: black, neon green, white). */
+:root{
+  --ink:#070807; --panel:#101310; --panel2:#171b16; --line:#262d24; --fg:#f3f6f0; --mute:#97a091;
+  --neon:#39FF14; --neon-ink:#041200; --warn:#FFB020; --bad:#FF5C5C; --paper:#ffffff;
+  --display:'Anton','Impact','Arial Narrow',sans-serif; --body:'Archivo','Helvetica Neue',Arial,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+img{max-width:100%;display:block}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.wrap{width:100%;max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.disp{font-family:var(--display);text-transform:uppercase;line-height:.92;letter-spacing:.005em;font-weight:400;text-wrap:balance}
+.neon{color:var(--neon);text-shadow:0 0 30px rgba(57,255,20,.45)}
+:focus-visible{outline:3px solid var(--neon);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* stage canvas */
+#stage{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;background:#050605}
+.nogl #stage{display:none}
+.nogl .stage-sec{background:linear-gradient(180deg,rgba(7,8,7,.5),rgba(7,8,7,.9)),var(--fallback) center/cover}
+main{position:relative;z-index:1}
+
+/* header */
+.top{position:fixed;z-index:60;left:0;right:0;top:0;padding-top:env(safe-area-inset-top,0px);background:linear-gradient(180deg,rgba(5,6,5,.88),rgba(5,6,5,0))}
+.top .wrap{display:flex;align-items:center;gap:14px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{height:42px;width:auto;border-radius:6px}
+.nav{display:flex;gap:6px;margin-left:auto;align-items:center}
+.nav a.lnk{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;padding:10px 12px;color:#dfe5da}
+.nav a.lnk:hover{color:var(--neon)}
+.sel{background:rgba(16,19,16,.85);border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-family:var(--mono);font-size:12px;letter-spacing:.08em}
+.cartbtn{display:inline-flex;align-items:center;gap:8px;background:var(--neon);color:var(--neon-ink);border:0;border-radius:999px;padding:10px 16px;font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.cartbtn b{background:var(--neon-ink);color:var(--neon);border-radius:999px;min-width:22px;height:22px;display:inline-grid;place-items:center;padding:0 6px}
+@media (max-width:760px){.nav a.lnk{display:none}.brand img{height:36px}}
+
+/* stage sections */
+.stage-sec{min-height:100vh;display:flex;align-items:flex-end;padding:120px 0 56px}
+.stage-sec.mid{align-items:center}
+.copy{max-width:560px}
+.copy.right{margin-left:auto;text-align:left}
+.copy.panelled{background:rgba(6,8,6,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:28px 28px 30px;border-left:3px solid var(--neon)}
+.copy .kick{color:var(--neon);font-size:12px;margin-bottom:14px;display:block}
+.copy h1,.copy h2{font-size:clamp(64px,13vw,168px);margin:0 0 18px}
+.copy h2{font-size:clamp(46px,8vw,104px)}
+.copy p{color:#dfe5da;font-size:17px;max-width:46ch;text-shadow:0 2px 18px #000}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
+.chip{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);background:rgba(10,12,10,.72);backdrop-filter:blur(6px);border-radius:999px;padding:8px 14px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 10px var(--neon)}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:15px 26px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:2px solid var(--neon);background:var(--neon);color:var(--neon-ink);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(57,255,20,.3)}
+.btn.ghost{background:rgba(10,12,10,.6);color:var(--fg);border-color:#4a5546}
+.btn.ghost:hover{border-color:var(--neon);color:var(--neon);box-shadow:none}
+.btn.sm{padding:11px 18px;font-size:12px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.facts div{border-top:2px dashed var(--neon);padding-top:10px;font-size:14px;color:#dfe5da}
+.facts b{display:block;font-family:var(--display);font-size:30px;font-weight:400;color:var(--fg);line-height:1;margin-bottom:4px}
+@media (max-width:640px){.facts{grid-template-columns:1fr}.stage-sec{padding-top:96px}#hero .copy{background:rgba(6,8,6,.66);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:22px 20px 24px;border-left:3px solid var(--neon)}#hero .copy h1{font-size:clamp(56px,20vw,96px);margin-bottom:10px}#hero .copy p{font-size:15px;margin:0 0 4px}.hero-meta{margin:14px 0}.hero-meta .chip:nth-child(n+2){display:none}.btns{gap:10px}.btn{padding:13px 22px}}
+.scrollhint{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);font-size:11px;color:var(--mute)}
+
+/* solid sections */
+.solid{background:var(--ink);position:relative;padding:88px 0;border-top:3px dashed var(--neon)}
+.solid + .solid{border-top-color:var(--line)}
+.sec-head{display:flex;flex-wrap:wrap;gap:16px 40px;align-items:end;justify-content:space-between;margin-bottom:34px}
+.sec-head h2{font-size:clamp(44px,7vw,92px);margin:0}
+.sec-head p{max-width:46ch;color:var(--mute);margin:0}
+
+/* shop */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.fbtn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:10px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--neon);color:var(--neon-ink);border-color:var(--neon)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px}
+.card{background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0;transition:border-color .2s,transform .2s}
+.card:hover{border-color:var(--neon);transform:translateY(-3px)}
+.card .ph{position:relative;aspect-ratio:1/1;background:#0b0d0b;overflow:hidden;border-bottom:1px solid var(--line);cursor:pointer;border:0;padding:0;width:100%}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .badge{position:absolute;left:12px;top:12px;background:var(--neon);color:var(--neon-ink);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;padding:5px 10px;text-transform:uppercase}
+.card .view{position:absolute;right:12px;bottom:12px;background:rgba(5,6,5,.82);border:1px solid var(--neon);color:var(--neon);font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:6px 10px;text-transform:uppercase}
+.card .body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.card h3{margin:0;font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:26px;line-height:1}
+.card .sz{font-family:var(--mono);font-size:12px;color:var(--mute);letter-spacing:.06em}
+.card p{margin:0;font-size:14px;color:#c9d1c3}
+.card .row{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:6px}
+.price{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:.02em}
+.price small{display:block;font-size:11px;font-weight:500;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw{border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:5px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.sw[aria-pressed="true"]{border-color:var(--neon);color:var(--neon)}
+.note{font-size:13px;color:var(--mute)}
+.soonlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:8px}
+.soon{border:1px dashed #3c4638;padding:14px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--panel)}
+.soon b{font-weight:600}
+.soon span{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
+
+/* builder */
+.builder{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.builder{grid-template-columns:minmax(0,1fr)}.builder .viewbox{aspect-ratio:auto;height:320px;min-height:0}}
+.viewbox{position:relative;background:#050605;border:1px solid var(--line);aspect-ratio:4/3;min-height:300px}
+.viewbox{min-width:0;overflow:hidden}
+.viewbox canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.viewbox .hint{position:absolute;left:12px;bottom:10px;font-size:11px;color:var(--mute);pointer-events:none}
+.viewbox .fb{position:absolute;inset:0;display:none}
+.nogl .viewbox .fb{display:block}
+.nogl .viewbox .fb img{width:100%;height:100%;object-fit:cover}
+.panel{background:var(--panel);border:1px solid var(--line);padding:22px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-width:0}
+.field label,.lbl{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.inp{background:#0a0c0a;border:1px solid #333c30;border-radius:4px;padding:12px 14px;width:100%;min-width:0}
+.inp:focus{border-color:var(--neon);outline:none;box-shadow:0 0 0 3px rgba(57,255,20,.2)}
+textarea.inp{min-height:84px;resize:vertical}
+.drop{display:flex;align-items:center;justify-content:center;text-align:center;border:2px dashed #3c4638;padding:22px;cursor:pointer;background:#0a0c0a;min-height:96px;font-size:14px;color:var(--mute)}
+.drop.on{border-color:var(--neon);color:var(--fg)}
+.quote{border-top:2px dashed var(--neon);margin-top:8px;padding-top:16px;display:grid;gap:8px}
+.quote .r{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:13px;letter-spacing:.04em}
+.quote .r.t{font-size:18px;font-weight:700;color:var(--neon)}
+.err{color:var(--bad);font-size:13px;min-height:18px}
+
+/* lookbook */
+.look{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.look figure{margin:0;position:relative;background:#0b0d0b;border:1px solid var(--line);overflow:hidden;min-width:0}
+.look img{width:100%;height:100%;object-fit:cover}
+.look figcaption{position:absolute;left:0;bottom:0;right:0;padding:26px 16px 12px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.85));font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.look .a{grid-column:span 7}.look .b{grid-column:span 5}.look .c{grid-column:span 5}.look .d{grid-column:span 7}
+@media (max-width:760px){.look .a,.look .b,.look .c,.look .d{grid-column:span 12}}
+
+/* faq + track */
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+@media (max-width:860px){.two{grid-template-columns:minmax(0,1fr)}}
+details{border-top:1px solid var(--line);padding:16px 0}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font-weight:600;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::after{content:"+";font-family:var(--mono);color:var(--neon)}
+details[open] summary::after{content:"-"}
+details p{color:#c9d1c3;margin:10px 0 0;max-width:60ch}
+.steps{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:0}
+.steps li{display:grid;grid-template-columns:28px 1fr;gap:14px;padding-bottom:20px;position:relative}
+.steps li::before{content:"";position:absolute;left:13px;top:28px;bottom:0;border-left:2px dashed #3c4638}
+.steps li:last-child::before{display:none}
+.steps .dot{width:28px;height:28px;border-radius:50%;border:2px solid #3c4638;background:var(--ink);display:grid;place-items:center;font-family:var(--mono);font-size:12px}
+.steps li.done .dot{background:var(--neon);border-color:var(--neon);color:var(--neon-ink)}
+.steps li.now .dot{border-color:var(--neon);box-shadow:0 0 14px rgba(57,255,20,.6)}
+.steps b{display:block}
+.steps span{color:var(--mute);font-size:14px}
+
+footer{background:#040504;border-top:3px dashed var(--neon);padding:48px 0 calc(48px + env(safe-area-inset-bottom,0px));position:relative}
+footer .cols{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:28px}
+@media (max-width:760px){footer .cols{grid-template-columns:1fr}}
+footer img{height:64px;width:auto;border-radius:8px;margin-bottom:14px}
+footer small{color:var(--mute)}
+
+/* drawer + modals */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+#cart{position:fixed;z-index:90;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--panel);border-left:2px solid var(--neon);transform:translateX(102%);transition:transform .28s ease;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#cart.on{transform:none}
+.dh{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.dh h3{margin:0;font-family:var(--display);font-weight:400;font-size:30px;text-transform:uppercase}
+.x{background:none;border:1px solid var(--line);border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:18px;line-height:1}
+.x:hover{border-color:var(--neon);color:var(--neon)}
+#cartItems{flex:1;overflow:auto;padding:8px 20px}
+.ci{display:grid;grid-template-columns:76px 1fr auto;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+.ci img{width:76px;height:76px;object-fit:cover;border:1px solid var(--line)}
+.ci b{font-weight:600;display:block}
+.ci small{color:var(--mute);display:block;font-size:12px;font-family:var(--mono);letter-spacing:.04em}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);margin-top:8px}
+.qty button{background:none;border:0;width:30px;height:30px;cursor:pointer;font-size:16px}
+.qty span{min-width:28px;text-align:center;font-family:var(--mono)}
+.rm{background:none;border:0;color:var(--mute);cursor:pointer;font-size:12px;text-decoration:underline;margin-top:6px;padding:0;display:block}
+.cf{padding:18px 20px;border-top:1px solid var(--line);display:grid;gap:10px}
+.cf .r{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px}
+.cf .r.t{font-size:18px;font-weight:700}
+.empty{padding:40px 0;text-align:center;color:var(--mute)}
+
+.modal{position:fixed;z-index:100;inset:0;display:none;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:2px solid var(--neon);width:min(1060px,100%);max-height:100%;overflow:auto;position:relative}
+.sheet .close{position:absolute;right:12px;top:12px;z-index:3;background:rgba(5,6,5,.8)}
+.pv{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+@media (max-width:860px){.pv{grid-template-columns:minmax(0,1fr)}}
+.pv .viewbox{border:0;border-right:1px solid var(--line);aspect-ratio:auto;height:min(70vh,620px);min-height:340px}
+@media (max-width:860px){.pv .viewbox{height:46vh;border-right:0;border-bottom:1px solid var(--line)}}
+.pv .info{padding:30px 26px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.pv h3{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:44px;line-height:.95;margin:0;padding-right:40px}
+.pv .tools{display:flex;gap:8px;flex-wrap:wrap}
+.specs{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:14px;margin:0}
+.specs dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);padding-top:2px}
+.specs dd{margin:0}
+.co{max-width:760px}
+.co .in{padding:28px 26px;display:grid;gap:6px}
+.co h3{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:40px;margin:0 0 6px}
+.banner{border:1px dashed var(--warn);color:var(--warn);padding:10px 14px;font-size:13px;margin-bottom:14px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media (max-width:620px){.f2{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--neon);color:var(--neon-ink);font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:12px 20px;opacity:0;pointer-events:none;transition:.25s;z-index:120;max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#hero" aria-label="XARO Industries home"><img data-img="logoBlock" alt="XARO Industries (Pvt) Ltd logo" width="50" height="42"></a>
+    <nav class="nav" aria-label="Main">
+      <a class="lnk" href="#shop">Shop</a><a class="lnk" href="#custom">Custom</a><a class="lnk" href="#lookbook">Lookbook</a><a class="lnk" href="#track">Track</a>
+      <label class="sr" for="cur">Currency</label>
+      <select class="sel" id="cur"><option>USD</option><option>AED</option><option>GBP</option><option>EUR</option></select>
+      <button class="cartbtn" id="openCart" aria-label="Open cart">Cart <b id="cartN">0</b></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="hero" class="stage-sec" style="--fallback:url(#)">
+    <div class="wrap"><div class="copy">
+      <span class="kick mono">Hand-tufted in Sri Lanka | Shipped worldwide</span>
+      <h1 class="disp">Drop <span class="neon">001</span></h1>
+      <p>Keyboard rugs and 3D contour wall art, tufted by hand and carved to a bevel. Twenty-five pieces. Then the next drop.</p>
+      <div class="hero-meta"><span class="chip"><i></i>25 pieces worldwide</span><span class="chip">Free shipping</span><span class="chip" id="dropDate">Launch date to waitlist first</span></div>
+      <div class="btns"><a class="btn" href="#shop">Shop Drop 001</a><a class="btn ghost" href="#custom">Build a custom rug</a></div>
+    </div></div>
+    <div class="scrollhint mono">Scroll to move through the studio</div>
+  </section>
+
+  <section id="craft" class="stage-sec mid">
+    <div class="wrap"><div class="copy right panelled">
+      <span class="kick mono">Close up | the pile</span>
+      <h2 class="disp">Every strand <span class="neon">set by hand</span></h2>
+      <p>This is the real structure of a tufted rug: loops cut into a pile, then sheared and bevel-carved so each colour edge stands off the next.</p>
+      <div class="facts"><div><b>8-ply</b>Acrylic pile, worsted weight</div><div><b>45&deg;</b>Bevel-carved colour edges</div><div><b>Non-slip</b>PVC dot felt backing</div></div>
+    </div></div>
+  </section>
+
+  <section id="wall" class="stage-sec mid">
+    <div class="wrap"><div class="copy panelled">
+      <span class="kick mono">Tier 2 | wall art</span>
+      <h2 class="disp">3D contour <span class="neon">wall art</span></h2>
+      <p>Wool pile sculpted into flowing layers, set in a black wood frame. Move your light and the relief moves with it.</p>
+      <div class="btns"><a class="btn" href="#shop" data-filter-go="wall">See wall art</a><a class="btn ghost" href="#custom">Commission yours</a></div>
+    </div></div>
+  </section>
+
+  <section id="shop" class="solid"><div class="wrap">
+    <div class="sec-head"><h2 class="disp">The <span class="neon">shop</span></h2><p>Drop 001 pieces are made to order in small batches. Free shipping, duties handled by us on US and UAE orders. Open any piece in 3D.</p></div>
+    <div class="filters" role="group" aria-label="Filter products" id="filters"></div>
+    <div class="grid" id="grid"></div>
+    <p class="note" style="margin-top:18px">Prices in US dollars. Other currencies are indicative display values only; checkout is charged in USD.</p>
+    <div style="margin-top:56px"><h3 class="disp" style="font-size:44px;margin:0 0 6px">Coming <span class="neon">later</span></h3>
+      <p class="note" style="margin:0 0 14px">Apparel, headwear and laser pieces unlock after Drop 001 proves demand. Indicative launch prices, subject to change. Join the waitlist to hear first.</p>
+      <div class="soonlist" id="soon"></div>
+      <form id="waitForm" class="btns" style="margin-top:20px" novalidate>
+        <label class="sr" for="waitEmail">Email for the waitlist</label>
+        <input class="inp" id="waitEmail" type="email" placeholder="you@email.com" autocomplete="email" style="max-width:320px">
+        <button class="btn" type="submit">Join waitlist</button>
+        <span class="err" id="waitErr" role="status"></span>
+      </form>
+    </div>
+  </div></section>
+
+  <section id="custom" class="solid"><div class="wrap">
+    <div class="sec-head"><h2 class="disp">Custom <span class="neon">rug builder</span></h2><p>Upload your art, pick a product and watch it become a tufted pile in 3D. Pay 50% to start; the balance is due when you approve the design mockup.</p></div>
+    <div class="builder">
+      <div class="viewbox" id="bView"><canvas id="bCanvas" aria-label="Interactive 3D preview of your custom rug"></canvas><div class="fb"><img data-img="p_CK" alt="Custom keyboard rug preview"></div><span class="hint mono">Drag to rotate | scroll to zoom</span></div>
+      <div class="panel">
+        <div class="field"><label for="bProd">Product</label><select class="inp" id="bProd"></select></div>
+        <div class="field"><span class="lbl" id="dropLbl">Your artwork</span>
+          <label class="drop" id="drop" for="bFile" aria-describedby="dropLbl"><span id="dropTxt">Click to upload or drop a PNG or JPG (max 6 MB)</span></label>
+          <input id="bFile" type="file" accept="image/png,image/jpeg,image/webp" class="sr"></div>
+        <div class="field"><label for="bNote">Colours, text and anything else</label><textarea class="inp" id="bNote" placeholder="e.g. keep the black background, make the logo neon green, no text"></textarea></div>
+        <div class="quote">
+          <div class="r"><span id="qName">Custom Keyboard Rug</span><span id="qPrice"></span></div>
+          <div class="r"><span>Due today (50% deposit)</span><span id="qDep"></span></div>
+          <div class="r t"><span>Balance on approval</span><span id="qBal"></span></div>
+          <div class="note" id="qLead"></div>
+        </div>
+        <div class="err" id="bErr" role="status"></div>
+        <div class="btns"><button class="btn" id="bAdd" type="button">Add deposit to cart</button></div>
+        <p class="note" style="margin-bottom:0">The 3D preview posterizes your art to a limited tufting palette. In the live store your original file uploads with the order.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="lookbook" class="solid"><div class="wrap">
+    <div class="sec-head"><h2 class="disp">Look<span class="neon">book</span></h2><p>Concept renders of the range. Final products are hand-made, so small variations in pile and carving are part of each piece.</p></div>
+    <div class="look">
+      <figure class="a"><img data-img="desk" alt="Concept render of a XARO keyboard rug on a gaming desk"><figcaption>Desk setup | keyboard rug + mouse coaster</figcaption></figure>
+      <figure class="b"><img data-img="designs" alt="Four keyboard rug designs"><figcaption>Four launch designs</figcaption></figure>
+      <figure class="c"><img data-img="wall" alt="Framed contour wall art"><figcaption>3D contour wall art</figcaption></figure>
+      <figure class="d"><img data-img="pack" alt="Matte black XARO shipping tube with stickers and care card"><figcaption>Black tube | stickers | care card</figcaption></figure>
+      <figure class="a"><img data-img="apparel" alt="Concept render of XARO tee and hoodie"><figcaption>Coming later | tees + hoodies</figcaption></figure>
+      <figure class="b"><img data-img="headwear" alt="Concept render of XARO cap, beanie and bucket hat"><figcaption>Coming later | headwear</figcaption></figure>
+    </div>
+  </div></section>
+
+  <section id="track" class="solid"><div class="wrap two">
+    <div>
+      <h2 class="disp" style="font-size:clamp(44px,7vw,84px);margin:0 0 18px">Track <span class="neon">order</span></h2>
+      <form id="trackForm" novalidate>
+        <div class="field"><label for="tNum">Order number</label><input class="inp" id="tNum" placeholder="XARO-10482" autocomplete="off"></div>
+        <div class="field"><label for="tMail">Email used at checkout</label><input class="inp" id="tMail" type="email" autocomplete="email"></div>
+        <div class="err" id="tErr" role="status"></div>
+        <button class="btn" type="submit">Find my order</button>
+      </form>
+      <div id="tResult" style="margin-top:24px"></div>
+    </div>
+    <div id="faq">
+      <h2 class="disp" style="font-size:clamp(44px,7vw,84px);margin:0 0 18px">Good <span class="neon">to know</span></h2>
+      <details open><summary>How long does an order take?</summary><p>Drop 001 sets dispatch in 10 to 14 business days. Wall art takes 4 to 6 weeks. Custom pieces add design approval time. Carrier time is extra and varies by destination.</p></details>
+      <details><summary>Where do you ship?</summary><p>We launch with the United States and the United Arab Emirates, tracked by express courier. More countries open as duty and VAT rules are confirmed. Join the waitlist for your region.</p></details>
+      <details><summary>Are duties and taxes included?</summary><p>On US and UAE orders the price you see is the price you pay. We handle customs entry so nothing is collected at your door.</p></details>
+      <details><summary>Returns and damage</summary><p>Custom pieces cannot be returned for change of mind. If anything arrives damaged, defective or wrong, tell us within 14 days of delivery and we will repair or replace it. Standard pieces can be exchanged within 14 days.</p></details>
+      <details><summary>How do I care for my rug?</summary><p>Vacuum gently on low suction, spot clean with a damp cloth, keep away from heat. Never machine wash.</p></details>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap cols">
+  <div><img data-img="logoBlock" alt="XARO Industries (Pvt) Ltd"><div><b>XARO Industries (Pvt) Ltd</b><br><small>Made in Sri Lanka. Shipped worldwide.</small></div></div>
+  <div><div class="lbl" style="margin-bottom:10px">Shop</div><div><a href="#shop">All products</a><br><a href="#custom">Custom builder</a><br><a href="#track">Track order</a></div></div>
+  <div><div class="lbl" style="margin-bottom:10px">Preview store</div><small>This page is a working front-end preview. No payment is taken and nothing is shipped from it. Orders and the waitlist are saved only in this browser.</small></div>
+</div></footer>
+
+<div class="scrim" id="scrim"></div>
+<aside id="cart" aria-label="Shopping cart" aria-hidden="true">
+  <div class="dh"><h3>Your cart</h3><button class="x" id="closeCart" aria-label="Close cart">&times;</button></div>
+  <div id="cartItems"></div>
+  <div class="cf" id="cartFoot"></div>
+</aside>
+
+<div class="modal" id="pvModal" role="dialog" aria-modal="true" aria-label="Product viewer"><div class="sheet pv" id="pvSheet">
+  <button class="x close" id="pvClose" aria-label="Close viewer">&times;</button>
+  <div class="viewbox" id="pvView"><canvas id="pvCanvas" aria-label="Interactive 3D product view"></canvas><div class="fb"><img id="pvFb" alt=""></div><span class="hint mono">Drag to rotate | scroll to zoom</span></div>
+  <div class="info" id="pvInfo"></div>
+</div></div>
+
+<div class="modal" id="coModal" role="dialog" aria-modal="true" aria-label="Checkout"><div class="sheet co">
+  <button class="x close" id="coClose" aria-label="Close checkout">&times;</button>
+  <div class="in" id="coBody"></div>
+</div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const IMG = /*%IMG%*/;
+const CATALOG = /*%CATALOG%*/;
+</script>
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+$$('[data-img]').forEach(im => { im.src = IMG[im.dataset.img]; });
+
+/* ============================================================ math */
+const V = {
+  sub: (a, b) => [a[0]-b[0], a[1]-b[1], a[2]-b[2]],
+  cross: (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]],
+  dot: (a, b) => a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  norm: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0]/l, a[1]/l, a[2]/l]; },
+  mix: (a, b, t) => [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]
+};
+const M = {
+  ident: () => new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]),
+  mul(a, b) { const o = new Float32Array(16); for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k*4+r]*b[c*4+k]; o[c*4+r] = s; } return o; },
+  persp(fov, asp, n, f) { const t = 1/Math.tan(fov/2), o = new Float32Array(16); o[0] = t/asp; o[5] = t; o[10] = (f+n)/(n-f); o[11] = -1; o[14] = 2*f*n/(n-f); return o; },
+  look(e, c, u) {
+    const z = V.norm(V.sub(e, c)), x = V.norm(V.cross(u, z)), y = V.cross(z, x), o = new Float32Array(16);
+    o[0]=x[0]; o[1]=y[0]; o[2]=z[0]; o[4]=x[1]; o[5]=y[1]; o[6]=z[1]; o[8]=x[2]; o[9]=y[2]; o[10]=z[2];
+    o[12]=-V.dot(x,e); o[13]=-V.dot(y,e); o[14]=-V.dot(z,e); o[15]=1; return o;
+  },
+  T: (x, y, z) => new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]),
+  S: (x, y, z) => new Float32Array([x,0,0,0, 0,y,0,0, 0,0,z,0, 0,0,0,1]),
+  Rx(a) { const c = Math.cos(a), s = Math.sin(a); return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]); },
+  Ry(a) { const c = Math.cos(a), s = Math.sin(a); return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]); },
+  Rz(a) { const c = Math.cos(a), s = Math.sin(a); return new Float32Array([c,s,0,0, -s,c,0,0, 0,0,1,0, 0,0,0,1]); },
+  chain(...m) { return m.reduce((a, b) => M.mul(a, b)); }
+};
+const hsl = (h, s, l) => { h = ((h % 1) + 1) % 1; const f = n => { const k = (n + h*12) % 12, a = s*Math.min(l, 1-l); return l - a*Math.max(-1, Math.min(k-3, 9-k, 1)); }; return [f(0), f(8), f(4)]; };
+
+/* ============================================================ shaders */
+const VS_SOLID = `attribute vec3 aPos;attribute vec3 aN;attribute vec2 aUV;uniform mat4 uVP;uniform mat4 uModel;
+varying vec3 vN;varying vec3 vW;varying vec2 vUV;
+void main(){vec4 w=uModel*vec4(aPos,1.0);vW=w.xyz;vN=(uModel*vec4(aN,0.0)).xyz;vUV=aUV;gl_Position=uVP*w;}`;
+const FS_SOLID = `precision highp float;varying vec3 vN;varying vec3 vW;varying vec2 vUV;
+uniform vec3 uColor,uEmis,uCam,uKeyDir,uKeyCol,uFillDir,uFillCol,uAmb,uPt,uPtCol,uFogCol;
+uniform float uSpec,uUseTex,uLit,uAlpha,uFogK;uniform sampler2D uTex;
+void main(){
+ vec3 N=normalize(vN);vec3 Vv=normalize(uCam-vW);
+ vec3 base=uColor;if(uUseTex>0.5)base*=texture2D(uTex,vUV).rgb;
+ float d1=max(dot(N,uKeyDir),0.0),d2=max(dot(N,uFillDir),0.0);
+ vec3 Lp=uPt-vW;float dist=length(Lp);float d3=max(dot(N,Lp/dist),0.0)/(1.0+0.16*dist*dist);
+ vec3 H=normalize(uKeyDir+Vv);float sp=pow(max(dot(N,H),0.0),40.0)*uSpec;
+ float rim=pow(1.0-max(dot(N,Vv),0.0),3.0)*uSpec*0.5;
+ vec3 lit=base*(uAmb+uKeyCol*d1+uFillCol*d2+uPtCol*d3)+uKeyCol*sp+uPtCol*rim;
+ vec3 col=mix(base,lit,uLit)+uEmis;
+ float fog=1.0-exp(-uFogK*length(uCam-vW));col=mix(col,uFogCol,fog);
+ gl_FragColor=vec4(col,uAlpha);}`;
+const VS_PILE = `attribute vec3 aPos;attribute vec2 aUV;attribute float aShell;uniform mat4 uVP;uniform mat4 uModel;uniform vec3 uN;uniform float uPile;
+varying vec2 vUV;varying float vF;varying vec3 vW;
+void main(){vec4 w=uModel*vec4(aPos,1.0);w.xyz+=uN*aShell*uPile;vW=w.xyz;vUV=aUV;vF=aShell;gl_Position=uVP*w;}`;
+const FS_PILE = `precision highp float;varying vec2 vUV;varying float vF;varying vec3 vW;
+uniform sampler2D uCol;uniform sampler2D uHgt;
+uniform vec2 uSize,uTexel;uniform float uDens,uRad,uCircle,uBorder,uCarve,uLod,uTime,uSway,uPile,uFogK;
+uniform vec3 uTape,uCam,uT,uB,uN,uKeyDir,uKeyCol,uFillDir,uFillCol,uAmb,uPt,uPtCol,uFogCol;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}
+void main(){
+ float f=vF;vec2 q=(vUV-0.5)*uSize;vec2 hs=0.5*uSize;float d;
+ if(uCircle>0.5){d=length(q)-hs.x;}else{vec2 r=abs(q)-hs+vec2(uRad);d=length(max(r,0.0))+min(max(r.x,r.y),0.0)-uRad;}
+ if(d>0.0)discard;
+ float inside=-d;vec3 col;
+ if(inside<uBorder){
+  if(f>0.001)discard;
+  float wv=0.5+0.5*sin((vUV.x*uSize.x+vUV.y*uSize.y)*uDens*7.5);
+  col=uTape*(0.62+0.38*wv)*(uAmb+uKeyCol*max(dot(uN,uKeyDir),0.0)+uFillCol*max(dot(uN,uFillDir),0.0));
+ }else{
+  vec2 sway=vec2(sin(uTime*1.6+vUV.y*18.0),cos(uTime*1.3+vUV.x*14.0))*uSway*f*f;
+  vec2 g=(vUV+sway)*uSize*uDens;vec2 id=floor(g);vec2 fr=fract(g)-0.5;
+  float rnd=hash(id);
+  vec2 cuv=clamp((id+0.5)/(uSize*uDens),0.0,1.0);
+  float hh=texture2D(uHgt,cuv).r;vec3 base=texture2D(uCol,cuv).rgb;
+  if(f>0.001){
+   if(f>hh*(0.82+0.18*rnd))discard;
+   vec2 jit=(vec2(hash(id+1.7),hash(id+9.3))-0.5)*0.55*f*(1.0-uLod);
+   float rad=mix(0.44*(1.0-0.4*f)+0.05,0.84,uLod);
+   if(length(fr-jit)>rad)discard;
+  }
+  float hl=texture2D(uHgt,vUV-vec2(uTexel.x,0.0)).r,hr=texture2D(uHgt,vUV+vec2(uTexel.x,0.0)).r;
+  float hd=texture2D(uHgt,vUV-vec2(0.0,uTexel.y)).r,hu=texture2D(uHgt,vUV+vec2(0.0,uTexel.y)).r;
+  vec2 gr=vec2((hr-hl)/(2.0*uTexel.x*uSize.x),(hu-hd)/(2.0*uTexel.y*uSize.y))*uPile*uCarve;
+  vec2 tilt=fr*0.5*f*(1.0-uLod);
+  vec3 n=normalize(vec3(-gr-tilt,1.0));
+  vec3 Nw=normalize(uT*n.x+uB*n.y+uN*n.z);
+  vec3 Vv=normalize(uCam-vW);
+  float dk=max(dot(Nw,uKeyDir),0.0),df=max(dot(Nw,uFillDir),0.0);
+  vec3 Lp=uPt-vW;float dist=length(Lp);float dp=max(dot(Nw,Lp/dist),0.0)/(1.0+0.2*dist*dist);
+  float ao=mix(0.24,1.0,pow(f,0.75));ao=mix(ao,0.86,uLod*0.6);
+  float sheen=pow(1.0-max(dot(Nw,Vv),0.0),3.0);
+  col=base*(uAmb+uKeyCol*dk+uFillCol*df+uPtCol*dp)*ao*(0.86+0.28*rnd)+base*sheen*0.3*f+uKeyCol*pow(max(dot(Nw,normalize(uKeyDir+Vv)),0.0),28.0)*0.05*f;
+  if(f<0.001)col*=0.42;
+ }
+ float fog=1.0-exp(-uFogK*length(uCam-vW));col=mix(col,uFogCol,fog);
+ gl_FragColor=vec4(col,1.0);}`;
+const VS_PTS = `attribute vec4 aP;uniform mat4 uVP;uniform float uTime,uSize;
+void main(){vec3 p=aP.xyz;p.y=mod(p.y+uTime*(0.05+aP.w*0.1),6.0);p.x+=sin(uTime*0.3+aP.w*30.0)*0.35;
+ vec4 c=uVP*vec4(p,1.0);gl_Position=c;gl_PointSize=max(1.0,uSize*(0.4+aP.w)/max(c.w,0.1));}`;
+const FS_PTS = `precision mediump float;uniform vec3 uColor;
+void main(){float d=length(gl_PointCoord-0.5);if(d>0.5)discard;gl_FragColor=vec4(uColor*(1.0-d*2.0),1.0);}`;
+
+/* ============================================================ engine */
+class Engine {
+  constructor(canvas) {
+    const gl = canvas.getContext('webgl', { antialias: true, alpha: false, powerPreference: 'high-performance' }) || canvas.getContext('experimental-webgl');
+    if (!gl) throw new Error('WebGL unavailable');
+    this.gl = gl; this.canvas = canvas; this.cache = new Map(); this.meshes = {}; this.shellGeo = {};
+    this.pSolid = this.prog(VS_SOLID, FS_SOLID);
+    this.pPile = this.prog(VS_PILE, FS_PILE);
+    this.pPts = this.prog(VS_PTS, FS_PTS);
+    gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+    this.cube = this.mkMesh(cubeData()); this.plane = this.mkMesh(planeData()); this.sphere = this.mkMesh(sphereData(28, 18));
+    this.scene = {};
+    this.dust = null;
+  }
+  prog(vs, fs) {
+    const gl = this.gl, mk = (t, s) => { const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); return sh; };
+    const p = gl.createProgram(); gl.attachShader(p, mk(gl.VERTEX_SHADER, vs)); gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    p.u = {}; p.a = {};
+    const nu = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS), na = gl.getProgramParameter(p, gl.ACTIVE_ATTRIBUTES);
+    for (let i = 0; i < nu; i++) { const n = gl.getActiveUniform(p, i).name; p.u[n] = gl.getUniformLocation(p, n); }
+    for (let i = 0; i < na; i++) { const n = gl.getActiveAttrib(p, i).name; p.a[n] = gl.getAttribLocation(p, n); }
+    return p;
+  }
+  mkMesh(d) {
+    const gl = this.gl, vb = gl.createBuffer(), ib = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vb); gl.bufferData(gl.ARRAY_BUFFER, d.v, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, d.i, gl.STATIC_DRAW);
+    return { vb, ib, n: d.i.length, type: d.i instanceof Uint32Array ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT };
+  }
+  shells(n) {
+    if (this.shellGeo[n]) return this.shellGeo[n];
+    const v = new Float32Array(n * 4 * 6), idx = new Uint16Array(n * 6);
+    for (let s = 0; s < n; s++) {
+      const f = s / (n - 1), q = [[-.5,-.5,0,0], [.5,-.5,1,0], [.5,.5,1,1], [-.5,.5,0,1]];
+      q.forEach((p, k) => { v.set([p[0], p[1], 0, p[2], p[3], f], (s*4+k)*6); });
+      idx.set([s*4, s*4+1, s*4+2, s*4, s*4+2, s*4+3], s*6);
+    }
+    return (this.shellGeo[n] = this.mkMesh({ v, i: idx }));
+  }
+  tex(cv, opt = {}) {
+    const key = opt.key || cv;
+    if (this.cache.has(key)) return this.cache.get(key);
+    const gl = this.gl, t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cv);
+    const pot = (n) => (n & (n - 1)) === 0, can = pot(cv.width) && pot(cv.height);
+    if (opt.mip && can) { gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); }
+    else gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    const wrap = opt.repeat && can ? gl.REPEAT : gl.CLAMP_TO_EDGE;
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
+    t.w = cv.width; t.h = cv.height; this.cache.set(key, t); return t;
+  }
+  resize() {
+    const c = this.canvas, dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    const w = Math.max(2, Math.floor(c.clientWidth * dpr)), h = Math.max(2, Math.floor(c.clientHeight * dpr));
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+    return w / h;
+  }
+  begin(S) {
+    const gl = this.gl; this.scene = S;
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.clearColor(S.fogCol[0], S.fogCol[1], S.fogCol[2], 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  }
+  lights(p, S) {
+    const gl = this.gl, u = p.u;
+    gl.uniformMatrix4fv(u.uVP, false, S.vp);
+    gl.uniform3fv(u.uCam, S.cam); gl.uniform3fv(u.uKeyDir, S.keyDir); gl.uniform3fv(u.uKeyCol, S.keyCol);
+    gl.uniform3fv(u.uFillDir, S.fillDir); gl.uniform3fv(u.uFillCol, S.fillCol); gl.uniform3fv(u.uAmb, S.amb);
+    gl.uniform3fv(u.uPt, S.pt); gl.uniform3fv(u.uPtCol, S.ptCol); gl.uniform3fv(u.uFogCol, S.fogCol); gl.uniform1f(u.uFogK, S.fogK);
+  }
+  solid(mesh, model, o = {}) {
+    const gl = this.gl, p = this.pSolid, u = p.u, S = this.scene;
+    gl.useProgram(p); this.lights(p, S);
+    gl.uniformMatrix4fv(u.uModel, false, model);
+    gl.uniform3fv(u.uColor, o.color || [1,1,1]); gl.uniform3fv(u.uEmis, o.emis || [0,0,0]);
+    gl.uniform1f(u.uSpec, o.spec || 0); gl.uniform1f(u.uLit, o.lit === undefined ? 1 : o.lit); gl.uniform1f(u.uAlpha, o.alpha === undefined ? 1 : o.alpha);
+    if (o.tex) { gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, o.tex); gl.uniform1i(u.uTex, 0); gl.uniform1f(u.uUseTex, 1); } else gl.uniform1f(u.uUseTex, 0);
+    if (o.additive) { gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE); gl.depthMask(false); } else { gl.disable(gl.BLEND); gl.depthMask(true); }
+    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vb); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.ib);
+    const a = p.a; gl.enableVertexAttribArray(a.aPos); gl.vertexAttribPointer(a.aPos, 3, gl.FLOAT, false, 32, 0);
+    gl.enableVertexAttribArray(a.aN); gl.vertexAttribPointer(a.aN, 3, gl.FLOAT, false, 32, 12);
+    gl.enableVertexAttribArray(a.aUV); gl.vertexAttribPointer(a.aUV, 2, gl.FLOAT, false, 32, 24);
+    gl.drawElements(gl.TRIANGLES, mesh.n, mesh.type, 0);
+    gl.depthMask(true); gl.disable(gl.BLEND);
+  }
+  pile(model, o) {
+    const gl = this.gl, p = this.pPile, u = p.u, S = this.scene, geo = this.shells(o.shells || 30);
+    gl.useProgram(p); this.lights(p, S);
+    gl.uniformMatrix4fv(u.uModel, false, model);
+    const col = (i) => V.norm([model[i*4], model[i*4+1], model[i*4+2]]);
+    gl.uniform3fv(u.uT, col(0)); gl.uniform3fv(u.uB, col(1)); gl.uniform3fv(u.uN, col(2));
+    gl.uniform2fv(u.uSize, o.size); gl.uniform2f(u.uTexel, 1 / o.hgt.w, 1 / o.hgt.h);
+    gl.uniform1f(u.uDens, o.dens); gl.uniform1f(u.uRad, o.rad || 0.1); gl.uniform1f(u.uCircle, o.circle ? 1 : 0);
+    gl.uniform1f(u.uBorder, o.border === undefined ? 0.07 : o.border); gl.uniform1f(u.uCarve, o.carve === undefined ? 0.7 : o.carve);
+    gl.uniform1f(u.uLod, o.lod || 0); gl.uniform1f(u.uTime, S.time || 0); gl.uniform1f(u.uSway, RM ? 0 : (o.sway === undefined ? 0.0012 : o.sway));
+    gl.uniform1f(u.uPile, o.pile); gl.uniform3fv(u.uTape, o.tape || [0.07, 0.07, 0.075]);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, o.col); gl.uniform1i(u.uCol, 0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, o.hgt); gl.uniform1i(u.uHgt, 1);
+    gl.disable(gl.BLEND); gl.depthMask(true);
+    gl.bindBuffer(gl.ARRAY_BUFFER, geo.vb); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, geo.ib);
+    const a = p.a; gl.enableVertexAttribArray(a.aPos); gl.vertexAttribPointer(a.aPos, 3, gl.FLOAT, false, 24, 0);
+    gl.enableVertexAttribArray(a.aUV); gl.vertexAttribPointer(a.aUV, 2, gl.FLOAT, false, 24, 12);
+    gl.enableVertexAttribArray(a.aShell); gl.vertexAttribPointer(a.aShell, 1, gl.FLOAT, false, 24, 20);
+    gl.drawElements(gl.TRIANGLES, geo.n, geo.type, 0);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+  points(color, size) {
+    const gl = this.gl, p = this.pPts, S = this.scene;
+    if (!this.dust) {
+      const n = 160, d = new Float32Array(n * 4); let s = 7;
+      const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+      for (let i = 0; i < n; i++) d.set([(r() - .5) * 16, r() * 6, (r() - .5) * 12 - 1, r()], i * 4);
+      const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, d, gl.STATIC_DRAW); this.dust = { b, n };
+    }
+    gl.useProgram(p); gl.uniformMatrix4fv(p.u.uVP, false, S.vp); gl.uniform1f(p.u.uTime, S.time || 0); gl.uniform1f(p.u.uSize, size); gl.uniform3fv(p.u.uColor, color);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.dust.b); gl.enableVertexAttribArray(p.a.aP); gl.vertexAttribPointer(p.a.aP, 4, gl.FLOAT, false, 16, 0);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE); gl.depthMask(false);
+    gl.drawArrays(gl.POINTS, 0, this.dust.n);
+    gl.depthMask(true); gl.disable(gl.BLEND);
+  }
+}
+function cubeData() {
+  const f = [[[0,0,1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]], [[0,0,-1],[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]],
+    [[0,1,0],[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]], [[0,-1,0],[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]],
+    [[1,0,0],[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]], [[-1,0,0],[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]]];
+  const v = [], i = []; f.forEach((q, k) => { const n = q[0]; [[0,0],[1,0],[1,1],[0,1]].forEach((uv, j) => v.push(q[j+1][0]*.5, q[j+1][1]*.5, q[j+1][2]*.5, n[0], n[1], n[2], uv[0], uv[1])); i.push(k*4, k*4+1, k*4+2, k*4, k*4+2, k*4+3); });
+  return { v: new Float32Array(v), i: new Uint16Array(i) };
+}
+function planeData() { return { v: new Float32Array([-.5,-.5,0, 0,0,1, 0,0,  .5,-.5,0, 0,0,1, 1,0,  .5,.5,0, 0,0,1, 1,1,  -.5,.5,0, 0,0,1, 0,1]), i: new Uint16Array([0,1,2,0,2,3]) }; }
+function sphereData(nx, ny) {
+  const v = [], i = [];
+  for (let y = 0; y <= ny; y++) for (let x = 0; x <= nx; x++) { const th = y/ny*Math.PI, ph = x/nx*Math.PI*2, nxv = Math.sin(th)*Math.cos(ph), nyv = Math.cos(th), nzv = Math.sin(th)*Math.sin(ph); v.push(nxv*.5, nyv*.5, nzv*.5, nxv, nyv, nzv, x/nx, y/ny); }
+  for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) { const a = y*(nx+1)+x, b = a+nx+1; i.push(a, b, a+1, b, b+1, a+1); }
+  return { v: new Float32Array(v), i: new Uint16Array(i) };
+}
+
+/* ============================================================ art textures (canvas) */
+const mkc = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const GREEN = '#39FF14';
+function plus(ctx, w, h, col = '#1b1b1b') { ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); for (let y = 14; y < h; y += 26) for (let x = 14; x < w; x += 26) { ctx.moveTo(x-4, y); ctx.lineTo(x+4, y); ctx.moveTo(x, y-4); ctx.lineTo(x, y+4); } ctx.stroke(); }
+function crownPath(ctx, x, y, s) { ctx.beginPath(); ctx.moveTo(x, y+40*s); ctx.lineTo(x+8*s, y+6*s); ctx.lineTo(x+26*s, y+26*s); ctx.lineTo(x+40*s, y); ctx.lineTo(x+54*s, y+26*s); ctx.lineTo(x+72*s, y+6*s); ctx.lineTo(x+80*s, y+40*s); ctx.closePath(); }
+function glowEllipse(ctx, cx, cy, rx, ry, a) { ctx.save(); ctx.translate(cx, cy); ctx.scale(1, ry/rx); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx); g.addColorStop(0, `rgba(57,255,20,${a})`); g.addColorStop(1, 'rgba(57,255,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rx, 0, 7); ctx.fill(); ctx.restore(); }
+function wavePolys(w, h, n, cols) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const y0 = h*(0.04+0.96*i/n), amp = h*(w > h ? 0.075 : 0.05), lam = w*((w > h ? 0.55 : 0.9)+0.07*(i % 4)), ph = i*0.6, pts = [];
+    for (let x = -4; x <= w+8; x += Math.max(3, w/160)) pts.push([x, y0+amp*Math.sin(Math.PI*2*x/lam+ph)]);
+    out.push({ pts, col: cols[i % cols.length], lvl: i/(n-1) });
+  }
+  return out;
+}
+const PAL = { neon: ['#0d0d0d', '#2fcc12', GREEN, '#0d0d0d', '#ffffff', '#0d0d0d', GREEN, '#1f9a0c'], dune: ['#0d0d0d', '#c9a56a', '#8a6a3a', '#0d0d0d', '#e6d3a8', '#0d0d0d', '#c9a56a', '#6e5430'] };
+const DESIGNS = {
+  logo: { name: 'XARO Logo', color(ctx, w, h) { ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h); const im = DESIGNS.logo.img; if (im && im.complete) { const s = Math.min(w/im.width, h/im.height)*0.98; ctx.drawImage(im, (w-im.width*s)/2, (h-im.height*s)/2, im.width*s, im.height*s); } } },
+  crown: { name: 'Street Crown', color(ctx, w, h) { ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h); plus(ctx, w, h); glowEllipse(ctx, w/2, h*.58, w*.42, h*.36, .24);
+      let s = 5; for (let i = 0; i < 30; i++) { s = (s*16807) % 2147483647; const x = s/2147483647*w; s = (s*16807) % 2147483647; const y = s/2147483647*h; ctx.fillStyle = GREEN; ctx.globalAlpha = .8; ctx.beginPath(); ctx.arc(x, y, 2+(i % 4)*1.4, 0, 7); ctx.fill(); } ctx.globalAlpha = 1;
+      const m = Math.min(w, h*2.6), cs = m*0.0034; ctx.strokeStyle = GREEN; ctx.lineWidth = Math.max(5, m*.009); ctx.lineJoin = 'round'; crownPath(ctx, w/2-40*cs, h*.05, cs); ctx.stroke();
+      const fs = Math.min(h*.6, w*.3); ctx.font = `italic 400 ${fs}px Anton, Impact, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineWidth = fs*.05; ctx.strokeStyle = '#fff'; ctx.lineJoin = 'round'; ctx.fillStyle = GREEN; const ty = h*.9; ctx.strokeText('XARO', w/2, ty); ctx.fillText('XARO', w/2, ty); } },
+  waves: { name: 'Neon Waves', polys(w, h) { return wavePolys(w, h, 11, PAL.neon); } },
+  dune: { name: 'Desert Dune', polys(w, h) { return wavePolys(w, h, 14, PAL.dune); } },
+  pixel: { name: 'Pixel Pad', color(ctx, w, h) { ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h); plus(ctx, w, h);
+      const rows = {0:[[6,25]],1:[[4,27]],2:[[3,28]],3:[[2,29]],4:[[1,30]],5:[[1,30]],6:[[1,30]],7:[[1,30]],8:[[1,30]],9:[[2,29]],10:[[2,12],[19,29]],11:[[2,10],[21,29]],12:[[3,8],[23,28]],13:[[3,7],[24,28]]};
+      const p = Math.min(w/34, h/20), ox = (w-32*p)/2, oy = (h-16*p)/2-h*.04; ctx.fillStyle = GREEN; for (const y in rows) rows[y].forEach(([a, b]) => ctx.fillRect(ox+a*p, oy+(+y)*p, (b-a+1)*p+.6, p+.6));
+      ctx.fillStyle = '#fff'; [[7,4],[7,5],[7,6],[6,5],[8,5]].forEach(([x, y]) => ctx.fillRect(ox+x*p, oy+y*p, p, p)); [[23,4],[26,5],[23,6],[20,5]].forEach(([x, y]) => ctx.fillRect(ox+x*p, oy+y*p, p*2, p*2));
+      ctx.fillStyle = '#0b0b0b'; [[12,8],[19,8]].forEach(([x, y]) => ctx.fillRect(ox+x*p, oy+y*p, p*3, p*3)); ctx.fillRect(ox+14*p, oy+2*p, p*4, p);
+      ctx.fillStyle = '#fff'; ctx.font = `400 ${h*.1}px Anton, Impact, sans-serif`; ctx.textAlign = 'center'; ctx.fillText('PLAYER 1', w/2, h*.95); } },
+  mono: { name: 'Crown X', color(ctx, w, h) { ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h); plus(ctx, w, h); glowEllipse(ctx, w/2, h/2, w*.38, w*.38, .22);
+      const cs = w*0.0034; ctx.strokeStyle = GREEN; ctx.lineWidth = Math.max(5, w*.012); ctx.lineJoin = 'round'; crownPath(ctx, w/2-40*cs, h*.12, cs); ctx.stroke();
+      ctx.font = `italic 400 ${w*.52}px Anton, Impact, sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = w*.02; ctx.strokeStyle = '#fff'; ctx.fillStyle = GREEN; ctx.strokeText('X', w/2, h*.84); ctx.fillText('X', w/2, h*.84); } },
+  placeholder: { name: 'Your Art', color(ctx, w, h) { ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, w, h); plus(ctx, w, h); ctx.setLineDash([22, 16]); ctx.strokeStyle = GREEN; ctx.lineWidth = 6; ctx.strokeRect(24, 24, w-48, h-48); ctx.setLineDash([]);
+      const fs = Math.min(w*.14, h*.2); ctx.font = `italic 400 ${fs}px Anton, Impact, sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = GREEN; ctx.fillText('YOUR ART', w/2, h*.5); ctx.fillStyle = '#fff'; ctx.fillText('HERE', w/2, h*.5+fs*1.05); } }
+};
+function blurGray(a, w, h, r) {
+  const t = new Float32Array(w*h);
+  for (let p = 0; p < 2; p++) {
+    for (let y = 0; y < h; y++) { let s = 0, c = 0; for (let x = -r; x <= r; x++) { const xx = Math.min(w-1, Math.max(0, x)); s += a[y*w+xx]; c++; } for (let x = 0; x < w; x++) { t[y*w+x] = s/c; const o = Math.max(0, x-r), n = Math.min(w-1, x+r+1); s += a[y*w+n]-a[y*w+o]; } }
+    for (let x = 0; x < w; x++) { let s = 0, c = 0; for (let y = -r; y <= r; y++) { const yy = Math.min(h-1, Math.max(0, y)); s += t[yy*w+x]; c++; } for (let y = 0; y < h; y++) { a[y*w+x] = s/c; const o = Math.max(0, y-r), n = Math.min(h-1, y+r+1); s += t[n*w+x]-t[o*w+x]; } }
+  }
+}
+function heightFromColor(cv, lo = 0.4, span = 0.56, r = 2) {
+  const w = cv.width, h = cv.height, d = cv.getContext('2d').getImageData(0, 0, w, h).data, g = new Float32Array(w*h);
+  for (let i = 0; i < w*h; i++) { const l = (0.3*d[i*4]+0.59*d[i*4+1]+0.11*d[i*4+2])/255; g[i] = lo+span*Math.pow(l, 0.8); }
+  blurGray(g, w, h, r); return grayCanvas(g, w, h);
+}
+function grayCanvas(g, w, h) { const o = mkc(w, h), c = o.getContext('2d'), im = c.createImageData(w, h); for (let i = 0; i < w*h; i++) { const v = Math.max(0, Math.min(255, Math.round(g[i]*255))); im.data[i*4] = im.data[i*4+1] = im.data[i*4+2] = v; im.data[i*4+3] = 255; } c.putImageData(im, 0, 0); return o; }
+const artCache = new Map();
+function buildArt(id, aspect, userImg) {
+  const key = id + '|' + aspect.toFixed(2) + (userImg ? '|u' + userImg.__id : '');
+  if (artCache.has(key)) return artCache.get(key);
+  const W = aspect >= 1 ? 1024 : Math.round(1024*aspect), H = aspect >= 1 ? Math.round(1024/aspect) : 1024;
+  const color = mkc(W, H), ctx = color.getContext('2d'); let hgt;
+  const D = DESIGNS[id];
+  if (userImg) {
+    ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0, 0, W, H);
+    const s = Math.max(W/userImg.width, H/userImg.height); ctx.drawImage(userImg, (W-userImg.width*s)/2, (H-userImg.height*s)/2, userImg.width*s, userImg.height*s);
+    const im = ctx.getImageData(0, 0, W, H), lv = 6; for (let i = 0; i < im.data.length; i += 4) for (let k = 0; k < 3; k++) im.data[i+k] = Math.round(im.data[i+k]/255*lv)/lv*255; ctx.putImageData(im, 0, 0);
+    hgt = heightFromColor(color, .42, .5, 2);
+  } else if (D.polys) {
+    ctx.fillStyle = '#090909'; ctx.fillRect(0, 0, W, H);
+    const polys = D.polys(W, H); polys.forEach(p => { ctx.beginPath(); ctx.moveTo(-4, H+10); p.pts.forEach(q => ctx.lineTo(q[0], q[1])); ctx.lineTo(W+8, H+10); ctx.closePath(); ctx.fillStyle = p.col; ctx.fill(); ctx.lineWidth = Math.max(3, W*.004); ctx.strokeStyle = '#000'; ctx.stroke(); });
+    const g = mkc(W, H), gc = g.getContext('2d'); gc.fillStyle = '#222'; gc.fillRect(0, 0, W, H);
+    polys.forEach(p => { gc.beginPath(); gc.moveTo(-4, H+10); p.pts.forEach(q => gc.lineTo(q[0], q[1])); gc.lineTo(W+8, H+10); gc.closePath(); const v = Math.round(255*(0.32+0.66*p.lvl)); gc.fillStyle = `rgb(${v},${v},${v})`; gc.fill(); });
+    const d = gc.getImageData(0, 0, W, H).data, arr = new Float32Array(W*H); for (let i = 0; i < W*H; i++) arr[i] = d[i*4]/255; blurGray(arr, W, H, 3); hgt = grayCanvas(arr, W, H);
+  } else { D.color(ctx, W, H); hgt = heightFromColor(color); }
+  const r = { color, hgt }; artCache.set(key, r); return r;
+}
+
+/* ============================================================ hero scene */
+const stage = $('#stage'); let hero = null, glOK = true;
+const FOG = [0.02, 0.025, 0.02];
+function bgTex(kind) {
+  const c = mkc(1024, kind === 'desk' ? 1024 : 512), x = c.getContext('2d'), w = c.width, h = c.height;
+  x.fillStyle = '#0b0c0b'; x.fillRect(0, 0, w, h);
+  let s = kind === 'desk' ? 11 : 23; const r = () => (s = (s*16807) % 2147483647)/2147483647;
+  if (kind === 'wall') {
+    x.strokeStyle = '#1e211d'; x.lineWidth = 3; x.lineCap = 'round';
+    for (let i = 0; i < 70; i++) { const cx = r()*w, cy = r()*h, k = r(), sz = 22+r()*54; x.beginPath();
+      if (k < .25) { x.arc(cx, cy, sz*.5, 0, 7); } else if (k < .5) { for (let a = 0; a < 5; a++) { const an = a/5*6.283-1.57, an2 = (a+.5)/5*6.283-1.57; x.lineTo(cx+Math.cos(an)*sz*.5, cy+Math.sin(an)*sz*.5); x.lineTo(cx+Math.cos(an2)*sz*.22, cy+Math.sin(an2)*sz*.22); } x.closePath(); }
+      else if (k < .75) { for (let t = 0; t < 40; t++) x.lineTo(cx+Math.cos(t*.5)*t*sz*.012, cy+Math.sin(t*.5)*t*sz*.012); } else { x.moveTo(cx-sz*.4, cy); x.quadraticCurveTo(cx, cy-sz*.6, cx+sz*.4, cy); x.quadraticCurveTo(cx, cy+sz*.6, cx-sz*.4, cy); x.moveTo(cx+sz*.1, cy); x.arc(cx, cy, sz*.1, 0, 7); }
+      x.stroke(); }
+  } else {
+    plus(x, w, h, '#141614');
+    for (let i = 0; i < 5000; i++) { x.fillStyle = `rgba(255,255,255,${r()*.035})`; x.fillRect(r()*w, r()*h, 2, 2); }
+  }
+  return c;
+}
+function glowTex() { const c = mkc(128, 128), x = c.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, '#fff'); g.addColorStop(.35, 'rgba(160,160,160,1)'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, 128, 128); return c; }
+
+async function initHero() {
+  let eng; try { eng = new Engine(stage); } catch (e) { glOK = false; document.documentElement.classList.add('nogl'); $('#hero').style.setProperty('--fallback', `url(${IMG.desk})`); return; }
+  const logoImg = new Image(); await new Promise(r => { logoImg.onload = r; logoImg.onerror = r; logoImg.src = IMG.logoWord; }); DESIGNS.logo.img = logoImg;
+  const logoPlane = new Image(); await new Promise(r => { logoPlane.onload = r; logoPlane.onerror = r; logoPlane.src = IMG.logoBlock; });
+  const A1 = buildArt('logo', 4.4/1.6), A2 = buildArt('mono', 1), W1 = buildArt('waves', 3.4/5.1);
+  const T = {
+    desk: eng.tex(bgTex('desk'), { key: 'desk', mip: true, repeat: true }), wall: eng.tex(bgTex('wall'), { key: 'wall', mip: true, repeat: true }),
+    glow: eng.tex(glowTex(), { key: 'glow' }), logo: eng.tex(logoPlane, { key: 'logo' }),
+    c1: eng.tex(A1.color, { key: 'c1' }), h1: eng.tex(A1.hgt, { key: 'h1' }), c2: eng.tex(A2.color, { key: 'c2' }), h2: eng.tex(A2.hgt, { key: 'h2' }),
+    cw: eng.tex(W1.color, { key: 'cw' }), hw: eng.tex(W1.hgt, { key: 'hw' })
+  };
+  const KF = [
+    { p: [0.0, 2.35, 7.7], t: [0.0, 1.05, 0.5], fov: 42 },
+    { p: [-0.7, 0.62, 3.15], t: [-0.55, 0.03, 1.2], fov: 36 },
+    { p: [18, 3.5, 6.4], t: [18, 3.45, -5], fov: 40 }
+  ];
+  hero = { eng, T, KF, aspect: 1, ptr: [0, 0], ptrS: [0, 0], vis: true };
+  addEventListener('pointermove', e => { hero.ptr = [e.clientX/innerWidth*2-1, e.clientY/innerHeight*2-1]; }, { passive: true });
+  requestAnimationFrame(heroFrame);
+}
+function stageProgress() {
+  const ids = ['hero', 'craft', 'wall'], mid = ids.map(i => { const r = $('#'+i).getBoundingClientRect(); return r.top + scrollY + r.height/2; }), c = scrollY + innerHeight/2;
+  if (c <= mid[0]) return 0; if (c >= mid[2]) return 2;
+  const k = c < mid[1] ? 0 : 1, t = (c-mid[k])/(mid[k+1]-mid[k]); const e = t*t*(3-2*t); return k+e;
+}
+function camAt(s, asp, time) {
+  const k = Math.min(1, Math.floor(s)), t = s-k, a = hero.KF[k], b = hero.KF[Math.min(2, k+1)];
+  let p = V.mix(a.p, b.p, t), tg = V.mix(a.t, b.t, t), fov = a.fov+(b.fov-a.fov)*t;
+  if (!RM) { const orb = Math.sin(time*0.18)*0.35*(s < 1.5 ? 1-Math.min(1, Math.abs(s-0)) *0 : 1), dx = p[0]-tg[0], dz = p[2]-tg[2], c = Math.cos(orb*0.4), sn = Math.sin(orb*0.4); p = [tg[0]+dx*c+dz*sn, p[1]+Math.sin(time*0.23)*0.12, tg[2]-dx*sn+dz*c]; }
+  if (asp < 1.1) { const k = Math.min(3.2, Math.max(1, 1.45/asp)); const up = Math.max(0, 1-s)*3.2; tg = [tg[0], tg[1]-up, tg[2]]; p = [tg[0]+(p[0]-tg[0])*k, tg[1]+(p[1]-tg[1])*k, tg[2]+(p[2]-tg[2])*k]; }
+  const sh = asp > 1.15 ? 1.25 : 0; if (sh && s < 1.6) { const w = 1-Math.min(1, s/1.6); p[0] -= sh*w; tg[0] -= sh*w; }
+  if (asp > 1.15 && s > 1.2) { const w2 = Math.min(1, (s-1.2)/0.8)*2.0; p[0] -= w2; tg[0] -= w2; }
+  p = [p[0]+hero.ptrS[0]*0.35, p[1]-hero.ptrS[1]*0.18, p[2]]; return { p, t: tg, fov };
+}
+function heroFrame(ms) {
+  requestAnimationFrame(heroFrame);
+  if (!hero || document.hidden) return;
+  const shopTop = $('#shop').getBoundingClientRect().top; if (shopTop <= 0) return;
+  const T = hero.T, time = ms/1000, e = hero.eng; hero.ptrS[0] += (hero.ptr[0]-hero.ptrS[0])*0.05; hero.ptrS[1] += (hero.ptr[1]-hero.ptrS[1])*0.05;
+  const asp = e.resize(), s = stageProgress(), cam = camAt(s, asp, time);
+  const vp = M.mul(M.persp(cam.fov*Math.PI/180, asp, 0.05, 80), M.look(cam.p, cam.t, [0, 1, 0]));
+  const hue = 0.36 + 0.2*Math.sin(time*0.25), rgb = hsl(hue, 1, .5), ex = k => rgb.map(v => v*k);
+  const wallZone = s > 1.5, la = time*0.25;
+  const S = { vp, cam: cam.p, time, fogCol: FOG, fogK: 0.012, amb: [0.2, 0.22, 0.2],
+    keyDir: wallZone ? V.norm([Math.sin(la)*1.3, 0.35, 0.55]) : V.norm([-0.45, 0.85, 0.55]), keyCol: wallZone ? [1.25, 1.2, 1.1] : [0.95, 0.95, 0.9],
+    fillDir: V.norm([0.7, 0.3, -0.1]), fillCol: [0.28, 0.22, 0.5], pt: wallZone ? [18, 3.6, -3] : [0, 0.5, -0.3], ptCol: wallZone ? [0.5, 1.2, 0.4] : ex(1.1) };
+  e.begin(S);
+  const lod = Math.min(1, Math.max(0, (V.sub(cam.p, [0, 0, 1.2]).reduce((a, b) => a+b*b, 0)**0.5-3.5)/8));
+  const gl = e.gl;
+  // desk and wall (long)
+  e.solid(e.plane, M.chain(M.T(0, 0, 0), M.Rx(-Math.PI/2), M.S(140, 40, 1)), { tex: T.desk, color: [1.0, 1.0, 1.0], lit: 0.9, spec: 0.1 });
+  e.solid(e.plane, M.chain(M.T(0, 5, -5.8), M.S(140, 16, 1)), { tex: T.wall, color: [1.2, 1.2, 1.2], lit: 0.5 });
+  // wall neon logo + halo
+  e.solid(e.plane, M.chain(M.T(0, 2.45, -5.74), M.S(7.2, 7.2, 1)), { tex: T.glow, color: [0.05, 0.28, 0.04], lit: 0, additive: true });
+  e.solid(e.plane, M.chain(M.T(0, 2.4, -5.7), M.S(4.3, 3.59, 1)), { tex: T.logo, color: [1.08, 1.08, 1.08], lit: 0, emis: [0.02, 0.02, 0.02] });
+  // floor neon strip
+  e.solid(e.cube, M.chain(M.T(0, 0.04, -5.6), M.S(30, 0.05, 0.08)), { color: [0.2, 1, 0.1], lit: 0, emis: [0.2, 0.9, 0.1] });
+  e.solid(e.plane, M.chain(M.T(0, 0.35, -5.55), M.S(30, 1.4, 1)), { tex: T.glow, color: [0.0, 0.2, 0.0], lit: 0, additive: true });
+  // keyboard
+  const kb = M.chain(M.T(0, 0, -0.3), M.Rx(0.045));
+  e.solid(e.plane, M.chain(M.T(0, 0.012, -0.3), M.Rx(-Math.PI/2), M.S(5.6, 2.4, 1)), { tex: T.glow, color: ex(0.32), lit: 0, additive: true });
+  e.solid(e.cube, M.mul(kb, M.chain(M.T(0, 0.12, 0), M.S(3.75, 0.24, 1.38))), { color: [0.05, 0.055, 0.05], spec: 0.8 });
+  e.solid(e.cube, M.mul(kb, M.chain(M.T(0, 0.25, 0), M.S(3.62, 0.04, 1.26))), { color: [0.035, 0.038, 0.035], spec: 0.5 });
+  const pitch = 0.245, k0 = -6.5*pitch; let nk = 0;
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 14; c++) {
+    if (r === 4 && c >= 3 && c <= 9) { if (c !== 3) continue; }
+    const span = (r === 4 && c === 3) ? 7 : 1, x = k0 + (c + (span-1)/2)*pitch, z = -0.52 + r*pitch, accent = (r === 0 && (c === 0 || c === 13)) || (r === 2 && c === 13);
+    e.solid(e.cube, M.mul(kb, M.chain(M.T(x, 0.31, z), M.S(pitch*span-0.03, 0.09, pitch-0.03))), { color: accent ? [0.06, 0.2, 0.05] : [0.07, 0.075, 0.07], spec: 0.5, emis: ex(0.006) });
+    e.solid(e.cube, M.mul(kb, M.chain(M.T(x, 0.375, z), M.S(pitch*span-0.07, 0.05, pitch-0.07))), { color: accent ? [0.12, 0.42, 0.1] : [0.13, 0.14, 0.13], spec: 0.9, emis: ex(0.012) });
+    nk++;
+  }
+  // rug (logo), coaster, mouse
+  e.pile(M.chain(M.T(0, 0.012, 1.3), M.Rx(-Math.PI/2), M.S(4.4, 1.6, 1)), { col: T.c1, hgt: T.h1, size: [4.4, 1.6], dens: 62, pile: 0.075, rad: 0.2, shells: 30, lod, carve: 0.7 });
+  e.pile(M.chain(M.T(3.4, 0.012, 0.75), M.Rx(-Math.PI/2), M.S(1.5, 1.5, 1)), { col: T.c2, hgt: T.h2, size: [1.5, 1.5], dens: 62, pile: 0.07, circle: true, shells: 26, lod, carve: 0.7 });
+  e.solid(e.plane, M.chain(M.T(3.4, 0.05, 0.75), M.Rx(-Math.PI/2), M.S(2.6, 2.6, 1)), { tex: T.glow, color: ex(0.22), lit: 0, additive: true });
+  e.solid(e.sphere, M.chain(M.T(3.4, 0.16, 0.7), M.Ry(-0.25), M.S(0.62, 0.3, 1.02)), { color: [0.05, 0.055, 0.05], spec: 1.2 });
+  e.solid(e.cube, M.chain(M.T(3.4, 0.2, 0.35), M.Ry(-0.25), M.S(0.04, 0.12, 0.2)), { color: [0.2, 1, 0.1], lit: 0, emis: ex(0.9) });
+  // wall art zone
+  const wx = 18;
+  e.solid(e.plane, M.chain(M.T(wx, 3.6, -5.74), M.S(10, 10, 1)), { tex: T.glow, color: [0.02, 0.1, 0.02], lit: 0, additive: true });
+  const fw = 3.4, fh = 5.1, ft = 0.2, fd = 0.34;
+  [[0, fh/2+ft/2, fw+ft*2, ft], [0, -fh/2-ft/2, fw+ft*2, ft], [fw/2+ft/2, 0, ft, fh], [-fw/2-ft/2, 0, ft, fh]].forEach(f => e.solid(e.cube, M.chain(M.T(wx+f[0], 3.65+f[1], -5.5+fd/2-0.02), M.S(f[2], f[3], fd)), { color: [0.03, 0.032, 0.03], spec: 0.12 }));
+  e.pile(M.chain(M.T(wx, 3.65, -5.52), M.S(fw, fh, 1)), { col: T.cw, hgt: T.hw, size: [fw, fh], dens: 46, pile: 0.2, rad: 0.02, border: 0, shells: 40, lod: lod*0.5, carve: 1.2, sway: 0.0004 });
+  if (!RM) e.points(rgb.map(v => v*0.5), 120*Math.min(innerHeight, 900)/900);
+}
+
+/* ============================================================ product viewer */
+const GEO = {
+  'XK-C': { k: 'rug', w: 3.2, h: 1.2, dens: 64, pile: .07, rad: .16 }, 'XK-S': { k: 'rug', w: 4.4, h: 1.6, dens: 60, pile: .075, rad: .2 },
+  'XM': { k: 'rug', w: 1.8, h: 1.8, dens: 64, pile: .07, circle: true, defd: 'mono' }, 'XS': { k: 'set' },
+  'XF': { k: 'rug', w: 2.4, h: 3.6, dens: 40, pile: .14, rad: .12, defd: 'pixel' },
+  'XW-M': { k: 'wall', w: 3, h: 3, dens: 46, pile: .16, defd: 'waves' }, 'XW-S': { k: 'wall', w: 2.6, h: 3.9, dens: 46, pile: .18, defd: 'waves' }, 'XW-L': { k: 'wall', w: 2.1, h: 4.2, dens: 44, pile: .18, defd: 'dune' },
+  'CK': { k: 'rug', w: 4.4, h: 1.6, dens: 60, pile: .075, rad: .2 }, 'CS': { k: 'set' }, 'CF': { k: 'rug', w: 2.4, h: 3.6, dens: 40, pile: .14, rad: .12 },
+  'CL': { k: 'rug', w: 3.4, h: 3.4, dens: 46, pile: .1, rad: .2 }, 'CW': { k: 'wall', w: 2.6, h: 3.9, dens: 46, pile: .18 }
+};
+class Viewer {
+  constructor(canvas) {
+    this.canvas = canvas; this.eng = new Engine(canvas); this.yaw = 0; this.tilt = 0; this.vy = 0; this.vt = 0; this.dist = 8.6; this.idle = 0; this.vis = false; this.t0 = performance.now();
+    this.tglow = this.eng.tex(glowTex(), { key: 'glow' }); this.prod = null; this.design = null; this.img = null; this.drag = null;
+    const c = canvas;
+    c.addEventListener('pointerdown', e => { this.drag = { x: e.clientX, y: e.clientY }; c.setPointerCapture(e.pointerId); c.style.cursor = 'grabbing'; });
+    c.addEventListener('pointermove', e => { if (!this.drag) return; this.yaw += (e.clientX-this.drag.x)*0.008; this.tilt = Math.max(-1.3, Math.min(0.5, this.tilt+(e.clientY-this.drag.y)*0.006)); this.drag = { x: e.clientX, y: e.clientY }; this.idle = performance.now(); });
+    const up = () => { this.drag = null; c.style.cursor = 'grab'; }; c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+    c.addEventListener('wheel', e => { e.preventDefault(); this.dist = Math.max(4.2, Math.min(13, this.dist+e.deltaY*0.006)); }, { passive: false });
+    c.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') this.yaw -= .1; if (e.key === 'ArrowRight') this.yaw += .1; if (e.key === 'ArrowUp') this.tilt = Math.max(-1.3, this.tilt-.08); if (e.key === 'ArrowDown') this.tilt = Math.min(.5, this.tilt+.08); });
+    c.tabIndex = 0;
+    new IntersectionObserver(en => { this.vis = en[0].isIntersecting; }).observe(c);
+    this.loop = this.loop.bind(this); requestAnimationFrame(this.loop);
+  }
+  set(prod, design, img) {
+    this.prod = prod; this.design = design; this.img = img; const g = GEO[prod.sku]; this.g = g;
+    this.tilt = g.k === 'wall' ? -0.08 : -0.85; this.yaw = 0; this.dist = g.k === 'wall' ? 9 : (g.k === 'set' ? 10.4 : 8.4); this.idle = 0;
+  }
+  art(w, h, defd) {
+    const id = this.img ? 'custom' : (this.design && DESIGNS[this.design] ? this.design : (defd || 'crown'));
+    const a = buildArt(this.img ? 'placeholder' : id, w/h, this.img || null), e = this.eng;
+    return { col: e.tex(a.color, { key: a.color }), hgt: e.tex(a.hgt, { key: a.hgt }) };
+  }
+  loop(ms) {
+    requestAnimationFrame(this.loop);
+    if (!this.vis || !this.prod || document.hidden) return;
+    const e = this.eng, t = ms/1000, asp = e.resize(), g = this.g;
+    if (!RM && (!this.idle || ms-this.idle > 3500) && !this.drag) { this.yaw += (Math.sin(t*0.55)*0.5-this.yaw)*0.02; }
+    const cam = [0, 0.6, this.dist], vp = M.mul(M.persp(34*Math.PI/180, asp, 0.1, 60), M.look(cam, [0, 0, 0], [0, 1, 0]));
+    const wall = g.k === 'wall', la = t*0.5, rgb = hsl(0.36 + 0.2*Math.sin(t*0.3), 1, .5);
+    const S = { vp, cam, time: t, fogCol: [0.02, 0.025, 0.02], fogK: 0.0, amb: [0.2, 0.22, 0.2], keyDir: wall ? V.norm([Math.sin(la)*1.2, 0.4, 0.6]) : V.norm([-0.4+Math.sin(la)*0.3, 0.8, 0.6]), keyCol: [1.1, 1.08, 1.0], fillDir: V.norm([0.7, 0.2, 0.3]), fillCol: [0.3, 0.25, 0.5], pt: [0, -1, 2], ptCol: rgb.map(v => v*1.2) };
+    e.begin(S);
+    e.solid(e.plane, M.chain(M.T(0, 0.3, -3.5), M.S(16, 12, 1)), { tex: this.tglow, color: [0.03, 0.13, 0.03], lit: 0, additive: true });
+    const base = M.chain(M.Rx(this.tilt), M.Ry(this.yaw)), lod = 0.0;
+    const rug = (m, w, h, o) => { const A = this.art(w, h, o.defd); e.pile(M.mul(base, M.mul(m, M.S(w, h, 1))), Object.assign({ col: A.col, hgt: A.hgt, size: [w, h], shells: 34, lod: lod, carve: .8, rad: g.rad || .15 }, o)); };
+    if (g.k === 'set') {
+      const aw = this.img ? 4.4 : 4.4; rug(M.T(-0.7, 0.45, 0), 4.0, 1.46, { dens: 60, pile: .075, rad: .18 });
+      const Ac = this.art(1.5, 1.5, 'mono'), cm = M.mul(base, M.mul(M.T(2.15, -0.95, 0.1), M.S(1.5, 1.5, 1)));
+      e.pile(cm, { col: Ac.col, hgt: Ac.hgt, size: [1.5, 1.5], dens: 60, pile: .07, circle: true, shells: 30, lod: lod, carve: .8 });
+    } else if (g.k === 'rug') {
+      rug(M.ident(), g.w, g.h, { dens: g.dens, pile: g.pile, circle: g.circle, rad: g.rad, defd: g.defd });
+    } else {
+      const fw = g.w, fh = g.h, ft = 0.2, fd = 0.36, bd = M.T(0, 0, -0.04);
+      [[0, fh/2+ft/2, fw+ft*2, ft], [0, -fh/2-ft/2, fw+ft*2, ft], [fw/2+ft/2, 0, ft, fh], [-fw/2-ft/2, 0, ft, fh]].forEach(f => e.solid(e.cube, M.mul(base, M.chain(M.T(f[0], f[1], fd/2-0.1), M.S(f[2], f[3], fd))), { color: [0.035, 0.037, 0.035], spec: 0.15 }));
+      e.solid(e.cube, M.mul(base, M.chain(M.T(0, 0, -0.14), M.S(fw+0.02, fh+0.02, 0.04))), { color: [0.01, 0.01, 0.01] });
+      rug(bd, fw, fh, { dens: g.dens, pile: g.pile, border: 0, rad: 0.01, defd: g.defd, shells: 40, sway: 0.0003 });
+    }
+    if (!RM) e.points(rgb.map(v => v*0.4), 90);
+  }
+}
+
+/* ============================================================ commerce */
+const P = CATALOG.products, byId = Object.fromEntries(P.map(p => [p.sku, p]));
+const RATES = { USD: 1, AED: 3.6725, GBP: 0.78, EUR: 0.92 };
+let cur = store.get('xaro_cur', 'USD'); if (!RATES[cur]) cur = 'USD';
+const fmt = (usd) => { if (cur === 'USD') return '$' + (usd % 1 ? usd.toFixed(2) : usd.toLocaleString('en-US')); const v = usd*RATES[cur]; try { return '≈ ' + new Intl.NumberFormat('en', { style: 'currency', currency: cur, maximumFractionDigits: 0 }).format(v); } catch (e) { return cur + ' ' + Math.round(v); } };
+let cart = store.get('xaro_cart', []).filter(i => byId[i.sku]);
+const saveCart = () => store.set('xaro_cart', cart);
+let toastT; const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400); };
+const designNames = { logo: 'XARO Logo', crown: 'Street Crown', waves: 'Neon Waves', dune: 'Desert Dune', pixel: 'Pixel Pad', mono: 'Crown X' };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const unitPrice = i => byId[i.sku].price*(i.dep ? 0.5 : 1);
+
+function addToCart(sku, o = {}) {
+  const p = byId[sku], key = [sku, o.design || '', o.note || '', o.file || ''].join('|'), ex = cart.find(i => i.key === key);
+  if (ex) ex.qty++; else cart.push({ key, sku, design: o.design || '', note: o.note || '', file: o.file || '', dep: !!p.deposit, qty: 1 });
+  saveCart(); renderCart(); toast('Added: ' + p.name);
+}
+function renderCart() {
+  const n = cart.reduce((a, i) => a+i.qty, 0); $('#cartN').textContent = n;
+  const box = $('#cartItems'), foot = $('#cartFoot');
+  if (!cart.length) { box.innerHTML = '<div class="empty">Your cart is empty.<br>Pick a piece from the shop.</div>'; foot.innerHTML = ''; return; }
+  box.innerHTML = cart.map((i, ix) => { const p = byId[i.sku]; return `<div class="ci"><img src="${IMG['p_'+i.sku]}" alt="">
+    <div><b>${esc(p.name)}</b><small>${esc(p.size)}${i.design ? ' | ' + esc(designNames[i.design] || i.design) : ''}</small>${i.dep ? `<small>50% deposit | balance on approval</small>` : ''}${i.file ? `<small>Art: ${esc(i.file)}</small>` : ''}
+    <div class="qty"><button data-q="${ix}" data-d="-1" aria-label="Decrease quantity">-</button><span>${i.qty}</span><button data-q="${ix}" data-d="1" aria-label="Increase quantity">+</button></div><button class="rm" data-rm="${ix}">Remove</button></div>
+    <div class="price">${fmt(unitPrice(i)*i.qty)}</div></div>`; }).join('');
+  const sub = cart.reduce((a, i) => a+unitPrice(i)*i.qty, 0), bal = cart.reduce((a, i) => a+(i.dep ? byId[i.sku].price*0.5*i.qty : 0), 0);
+  foot.innerHTML = `<div class="r"><span>Subtotal</span><span>${fmt(sub)}</span></div><div class="r"><span>Shipping</span><span>Free</span></div>${bal ? `<div class="r"><span>Balance due on art approval</span><span>${fmt(bal)}</span></div>` : ''}
+    <div class="r t"><span>Due today</span><span>${fmt(sub)}</span></div><button class="btn" id="goCheckout">Checkout</button><div class="note">Preview store: no payment is taken.</div>`;
+}
+$('#cartItems').addEventListener('click', e => {
+  const q = e.target.closest('[data-q]'), r = e.target.closest('[data-rm]');
+  if (q) { const i = cart[+q.dataset.q]; i.qty += +q.dataset.d; if (i.qty < 1) cart.splice(+q.dataset.q, 1); saveCart(); renderCart(); }
+  if (r) { cart.splice(+r.dataset.rm, 1); saveCart(); renderCart(); }
+});
+$('#cartFoot').addEventListener('click', e => { if (e.target.id === 'goCheckout') { closeCart(); openCheckout(); } });
+function openCart() { $('#cart').classList.add('on'); $('#cart').setAttribute('aria-hidden', 'false'); $('#scrim').classList.add('on'); setTimeout(() => $('#closeCart').focus(), 50); }
+function closeCart() { $('#cart').classList.remove('on'); $('#cart').setAttribute('aria-hidden', 'true'); if (!$('.modal.on')) $('#scrim').classList.remove('on'); }
+$('#openCart').onclick = openCart; $('#closeCart').onclick = closeCart;
+$('#scrim').onclick = () => { closeCart(); closeModals(); };
+addEventListener('keydown', e => { if (e.key === 'Escape') { closeCart(); closeModals(); } });
+const cs = $('#cur'); cs.value = cur; cs.onchange = () => { cur = cs.value; store.set('xaro_cur', cur); renderShop(); renderCart(); renderSoon(); quote(); if (curProd) renderPv(); };
+
+/* shop grid */
+const FILT = [['all', 'All'], ['desk', 'Desk setup'], ['wall', 'Wall art'], ['home', 'Floor rugs'], ['custom', 'Custom']]; let filt = 'all'; const sel = {};
+$('#filters').innerHTML = FILT.map(f => `<button class="fbtn" data-f="${f[0]}" aria-pressed="${f[0] === filt}">${f[1]}</button>`).join('');
+$('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; filt = b.dataset.f; $$('#filters .fbtn').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === filt)); renderShop(); });
+$$('[data-filter-go]').forEach(a => a.addEventListener('click', () => { filt = a.dataset.filterGo; $$('#filters .fbtn').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === filt)); renderShop(); }));
+function renderShop() {
+  const list = P.filter(p => filt === 'all' || p.cat === filt);
+  $('#grid').innerHTML = list.map(p => { const d = sel[p.sku] || p.designs[0] || '';
+    return `<article class="card" data-sku="${p.sku}"><button class="ph" data-view="${p.sku}" aria-label="View ${esc(p.name)} in 3D"><img src="${IMG['p_'+p.sku]}" alt="${esc(p.name)}" loading="lazy">${p.kind === 'custom' ? '<span class="badge">Custom</span>' : (p.sku === 'XS' ? '<span class="badge">Drop 001</span>' : '')}<span class="view">View in 3D</span></button>
+    <div class="body"><h3>${esc(p.name)}</h3><div class="sz">${esc(p.size)}${p.weight ? ' | ' + esc(p.weight) : ''}</div><p>${esc(p.desc)}</p>
+    ${p.designs.length ? `<div class="swatches" role="group" aria-label="Design">${p.designs.map(x => `<button class="sw" data-sw="${p.sku}|${x}" aria-pressed="${x === d}">${esc(designNames[x.toLowerCase().replace(/ /g, '')] || x)}</button>`).join('')}</div>` : ''}
+    <div class="row"><div class="price">${fmt(p.price)}<small>${p.deposit ? '50% deposit today' : p.lead}</small></div>${p.kind === 'custom' ? `<button class="btn sm" data-build="${p.sku}">Build yours</button>` : `<button class="btn sm" data-add="${p.sku}">Add to cart</button>`}</div></div></article>`; }).join('');
+}
+const DKEY = { 'XARO Logo': 'logo', 'Street Crown': 'crown', 'Neon Waves': 'waves', 'Pixel Pad': 'pixel' };
+$('#grid').addEventListener('click', e => {
+  const sw = e.target.closest('[data-sw]'), add = e.target.closest('[data-add]'), view = e.target.closest('[data-view]'), build = e.target.closest('[data-build]');
+  if (sw) { const [s, d] = sw.dataset.sw.split('|'); sel[s] = d; $$(`[data-sw^="${s}|"]`).forEach(b => b.setAttribute('aria-pressed', b === sw)); }
+  if (add) { const p = byId[add.dataset.add]; addToCart(p.sku, { design: p.designs.length ? DKEY[sel[p.sku] || p.designs[0]] : '' }); }
+  if (view) openPv(view.dataset.view);
+  if (build) { bProd.value = build.dataset.build; bChange(); location.hash = '#custom'; $('#custom').scrollIntoView(); }
+});
+function renderSoon() { $('#soon').innerHTML = CATALOG.coming.map(c => `<div class="soon"><div><b>${esc(c.name)}</b><br><span>${esc(c.phase)}</span></div><span>from ${fmt(c.price)}</span></div>`).join(''); }
+
+/* modals */
+function closeModals() { $$('.modal.on').forEach(m => m.classList.remove('on')); if (!$('#cart').classList.contains('on')) $('#scrim').classList.remove('on'); }
+function openModal(id) { $('#' + id).classList.add('on'); $('#scrim').classList.add('on'); }
+$('#pvClose').onclick = closeModals; $('#coClose').onclick = closeModals;
+$$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) closeModals(); }));
+let pv = null, curProd = null, pvDesign = '';
+function openPv(sku) {
+  curProd = byId[sku]; pvDesign = curProd.designs.length ? DKEY[sel[sku] || curProd.designs[0]] : ''; openModal('pvModal'); renderPv();
+  $('#pvFb').src = IMG['p_' + sku];
+  if (!pv && glOK) { try { pv = new Viewer($('#pvCanvas')); } catch (e) { glOK = false; document.documentElement.classList.add('nogl'); } }
+  if (pv) pv.set(curProd, pvDesign, curProd.kind === 'custom' ? bImg : null);
+  setTimeout(() => $('#pvClose').focus(), 60);
+}
+function renderPv() {
+  const p = curProd; const dsg = p.designs.map(x => { const k = DKEY[x]; return `<button class="sw" data-pvd="${k}" aria-pressed="${k === pvDesign}">${esc(x)}</button>`; }).join('');
+  $('#pvInfo').innerHTML = `<span class="mono" style="color:var(--neon);font-size:12px">${p.kind === 'custom' ? 'Custom' : 'XARO Original'} | ${esc(p.sku)}</span><h3>${esc(p.name)}</h3><p style="margin:0;color:#c9d1c3">${esc(p.desc)}</p>
+   ${p.designs.length ? `<div><div class="lbl" style="margin-bottom:8px">Design</div><div class="swatches">${dsg}</div></div>` : ''}
+   <dl class="specs"><dt>Size</dt><dd>${esc(p.size)}</dd><dt>Weight</dt><dd>${esc(p.weight || '')}</dd><dt>Dispatch</dt><dd>${esc(p.lead)}</dd><dt>Shipping</dt><dd>Free, tracked express</dd></dl>
+   <div class="price" style="font-size:30px">${fmt(p.price)}<small>${p.deposit ? 'Pay 50% to start. Balance on art approval.' : 'Free shipping included'}</small></div>
+   <div class="btns" style="margin-top:auto">${p.kind === 'custom' ? '<button class="btn" id="pvBuild">Open the builder</button>' : '<button class="btn" id="pvAdd">Add to cart</button>'}<button class="btn ghost" id="pvCart">View cart</button></div>`;
+}
+$('#pvInfo').addEventListener('click', e => {
+  const d = e.target.closest('[data-pvd]');
+  if (d) { pvDesign = d.dataset.pvd; sel[curProd.sku] = Object.keys(DKEY).find(k => DKEY[k] === pvDesign); $$('[data-pvd]').forEach(b => b.setAttribute('aria-pressed', b === d)); pv.set(curProd, pvDesign, null); renderShop(); }
+  if (e.target.id === 'pvAdd') { addToCart(curProd.sku, { design: pvDesign }); closeModals(); openCart(); }
+  if (e.target.id === 'pvCart') { closeModals(); openCart(); }
+  if (e.target.id === 'pvBuild') { closeModals(); bProd.value = curProd.sku; bChange(); $('#custom').scrollIntoView(); }
+});
+
+/* custom builder */
+const bProd = $('#bProd'); bProd.innerHTML = P.filter(p => p.kind === 'custom').map(p => `<option value="${p.sku}">${esc(p.name)} (${esc(p.size)})</option>`).join('');
+let bImg = null, bFileName = '', bViewer = null;
+function quote() {
+  const p = byId[bProd.value]; $('#qName').textContent = p.name; $('#qPrice').textContent = fmt(p.price); $('#qDep').textContent = fmt(p.price*0.5); $('#qBal').textContent = fmt(p.price*0.5); $('#qLead').textContent = 'Dispatch ' + p.lead.toLowerCase() + '. Free tracked shipping.';
+}
+function bChange() { quote(); if (bViewer) bViewer.set(byId[bProd.value], '', bImg); }
+bProd.onchange = bChange;
+function loadFile(f) {
+  const err = $('#bErr'); err.textContent = '';
+  if (!f) return; if (!/^image\/(png|jpe?g|webp)$/.test(f.type)) { err.textContent = 'Use a PNG, JPG or WebP image.'; return; }
+  if (f.size > 6*1024*1024) { err.textContent = 'That file is over 6 MB. Export a smaller version.'; return; }
+  const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { im.__id = Date.now(); bImg = im; bFileName = f.name; $('#dropTxt').textContent = 'Using ' + f.name + ' (click to replace)'; $('#drop').classList.add('on'); if (bViewer) bViewer.set(byId[bProd.value], '', bImg); }; im.onerror = () => { err.textContent = 'That image could not be read.'; }; im.src = r.result; }; r.readAsDataURL(f);
+}
+$('#bFile').onchange = e => loadFile(e.target.files[0]);
+const dz = $('#drop'); ['dragover', 'dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('on'); }));
+dz.addEventListener('dragleave', () => { if (!bImg) dz.classList.remove('on'); }); dz.addEventListener('drop', e => { e.preventDefault(); loadFile(e.dataTransfer.files[0]); });
+$('#bAdd').onclick = () => { const err = $('#bErr'); if (!bImg) { err.textContent = 'Upload your artwork first so we can quote it.'; return; } err.textContent = ''; addToCart(bProd.value, { note: $('#bNote').value.trim().slice(0, 300), file: bFileName }); openCart(); };
+
+/* waitlist + tracking + checkout */
+const emailOK = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+$('#waitForm').addEventListener('submit', e => { e.preventDefault(); const v = $('#waitEmail').value.trim(), er = $('#waitErr'); if (!emailOK(v)) { er.textContent = 'Enter a valid email address.'; return; } const l = store.get('xaro_wait', []); if (!l.includes(v)) l.push(v); store.set('xaro_wait', l); er.textContent = ''; $('#waitEmail').value = ''; toast('You are on the waitlist'); });
+const STAGES = [['Order received', 'We confirm your order and start your piece.'], ['In production', 'Hand-tufted, then sheared and bevel-carved.'], ['Quality check and packing', 'Checked against the QC list, photographed, rolled into the black tube.'], ['Dispatched', 'Handed to the express courier. Tracking number sent by email.'], ['Delivered', 'Report any damage within 14 days.']];
+function renderTrack(o) {
+  $('#tResult').innerHTML = `<div class="panel"><div class="mono" style="color:var(--neon);font-size:12px">${esc(o.id)} | ${o.items.reduce((a, i) => a+i.qty, 0)} item(s) | ${esc(o.country)}</div>
+  <ol class="steps">${STAGES.map((s, i) => `<li class="${i < o.stage ? 'done' : i === o.stage ? 'now' : ''}"><span class="dot">${i < o.stage ? '✓' : i+1}</span><div><b>${s[0]}</b><span>${s[1]}</span></div></li>`).join('')}</ol>
+  ${o.stage < 4 ? `<button class="btn ghost sm" id="advance" data-id="${esc(o.id)}">Preview next stage (demo)</button>` : ''}</div>`;
+}
+$('#trackForm').addEventListener('submit', e => { e.preventDefault(); const n = $('#tNum').value.trim().toUpperCase(), m = $('#tMail').value.trim().toLowerCase(), er = $('#tErr'), o = store.get('xaro_orders', []).find(x => x.id === n && x.email.toLowerCase() === m);
+  if (!n || !emailOK(m)) { er.textContent = 'Enter your order number and the email used at checkout.'; $('#tResult').innerHTML = ''; return; }
+  if (!o) { er.textContent = 'No order matches in this browser. Preview orders are saved only on the device that placed them.'; $('#tResult').innerHTML = ''; return; }
+  er.textContent = ''; renderTrack(o); });
+$('#tResult').addEventListener('click', e => { if (e.target.id === 'advance') { const l = store.get('xaro_orders', []), o = l.find(x => x.id === e.target.dataset.id); if (o && o.stage < 4) { o.stage++; store.set('xaro_orders', l); renderTrack(o); } } });
+const SHIP_OK = { US: 'United States', AE: 'United Arab Emirates' }, SHIP_NO = { GB: 'United Kingdom', AU: 'Australia', OT: 'Another country' };
+function openCheckout() {
+  if (!cart.length) { toast('Your cart is empty'); return; }
+  const sub = cart.reduce((a, i) => a+unitPrice(i)*i.qty, 0);
+  $('#coBody').innerHTML = `<h3>Checkout</h3><div class="banner">Preview store. No payment is taken and nothing ships from this page.</div>
+  <form id="coForm" novalidate><div class="f2"><div class="field"><label for="coName">Full name</label><input class="inp" id="coName" autocomplete="name"></div><div class="field"><label for="coMail">Email</label><input class="inp" id="coMail" type="email" autocomplete="email"></div></div>
+  <div class="field"><label for="coCountry">Ship to</label><select class="inp" id="coCountry">${Object.entries(SHIP_OK).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}${Object.entries(SHIP_NO).map(([k, v]) => `<option value="${k}">${v} (not shipping yet)</option>`).join('')}</select></div>
+  <div class="field"><label for="coAddr">Street address</label><input class="inp" id="coAddr" autocomplete="street-address"></div>
+  <div class="f2"><div class="field"><label for="coCity">City</label><input class="inp" id="coCity" autocomplete="address-level2"></div><div class="field"><label for="coZip">Postcode (optional in UAE)</label><input class="inp" id="coZip" autocomplete="postal-code"></div></div>
+  <div class="quote"><div class="r"><span>${cart.reduce((a, i) => a+i.qty, 0)} item(s)</span><span>${fmt(sub)}</span></div><div class="r"><span>Shipping and duties</span><span>Included</span></div><div class="r t"><span>Due today</span><span>${fmt(sub)}</span></div></div>
+  <div class="err" id="coErr" role="alert"></div><button class="btn" type="submit" id="coPlace">Place preview order</button></form>`;
+  openModal('coModal'); setTimeout(() => $('#coName').focus(), 60);
+  const sync = () => { const no = SHIP_NO[$('#coCountry').value]; $('#coErr').textContent = no ? 'We do not ship to this country yet. Join the waitlist and we will tell you when it opens.' : ''; $('#coPlace').disabled = !!no; };
+  $('#coCountry').onchange = sync;
+  $('#coForm').addEventListener('submit', e => {
+    e.preventDefault(); const er = $('#coErr'), v = id => $('#' + id).value.trim(), cc = $('#coCountry').value;
+    if (SHIP_NO[cc]) { sync(); return; }
+    if (v('coName').length < 2) { er.textContent = 'Enter your full name.'; return $('#coName').focus(); }
+    if (!emailOK(v('coMail'))) { er.textContent = 'Enter a valid email address.'; return $('#coMail').focus(); }
+    if (v('coAddr').length < 5 || v('coCity').length < 2) { er.textContent = 'Enter a street address and city.'; return $('#coAddr').focus(); }
+    if (cc === 'US' && !/^\d{5}(-\d{4})?$/.test(v('coZip'))) { er.textContent = 'Enter a 5-digit US ZIP code.'; return $('#coZip').focus(); }
+    const id = 'XARO-' + (10000 + Math.floor(Math.random()*89999)), o = { id, email: v('coMail'), country: SHIP_OK[cc], total: sub, stage: 0, at: new Date().toISOString(), items: cart.map(i => ({ sku: i.sku, qty: i.qty, design: i.design, dep: i.dep })) };
+    const l = store.get('xaro_orders', []); l.push(o); store.set('xaro_orders', l); cart = []; saveCart(); renderCart();
+    $('#coBody').innerHTML = `<h3>Order <span class="neon">placed</span></h3><p style="margin:0 0 12px">Your preview order number is <b class="mono" style="color:var(--neon)">${id}</b>.</p><p class="note">On the live store you would now receive an email confirmation. Use the Track order section with this number and your email to see the status timeline.</p>
+    <div class="btns"><a class="btn" href="#track" id="goTrack">Track this order</a><button class="btn ghost" id="coDone" type="button">Keep shopping</button></div>`;
+    $('#goTrack').onclick = () => { closeModals(); $('#tNum').value = id; $('#tMail').value = o.email; }; $('#coDone').onclick = closeModals;
+  });
+}
+
+/* init */
+renderShop(); renderSoon(); renderCart(); quote();
+(async () => {
+  try { await Promise.race([document.fonts.load('400 100px Anton'), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
+  await initHero();
+  const lg = new Image(); await new Promise(r => { lg.onload = r; lg.onerror = r; lg.src = IMG.logoWord; }); DESIGNS.logo.img = lg;
+  if (glOK) { try { bViewer = new Viewer($('#bCanvas')); bViewer.set(byId[bProd.value], '', null); } catch (e) { glOK = false; document.documentElement.classList.add('nogl'); } }
+  window.__xaro = { ready: true };
+})();
+})();
+</script>
