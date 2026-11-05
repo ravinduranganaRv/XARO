@@ -41,7 +41,7 @@
    "name": "Mouse Coaster Rug (add-on)",
    "cat": "desk",
    "kind": "common",
-   "price": 19,
+   "price": 17,
    "size": "12 cm round",
    "desc": "Matching coaster for your mouse. Ships in the same tube as your keyboard rug.",
    "lead": "Ships with keyboard rug",
@@ -208,44 +208,37 @@
   {
    "sku": "XT",
    "name": "Heavyweight Tee (DTF)",
-   "phase": "Phase 2",
-   "price": 39
+   "phase": "Phase 2"
   },
   {
    "sku": "XP",
    "name": "Aluminum Sublimation Print, 30 x 45 cm",
-   "phase": "Phase 2",
-   "price": 89
+   "phase": "Phase 2"
   },
   {
    "sku": "XH",
    "name": "French Terry Hoodie",
-   "phase": "Phase 3",
-   "price": 79
+   "phase": "Phase 3"
   },
   {
    "sku": "XC",
    "name": "Trucker Cap, patch front",
-   "phase": "Phase 4",
-   "price": 34
+   "phase": "Phase 4"
   },
   {
    "sku": "XB",
    "name": "Ribbed Beanie",
-   "phase": "Phase 4",
-   "price": 29
+   "phase": "Phase 4"
   },
   {
    "sku": "XU",
    "name": "Bucket Hat",
-   "phase": "Phase 4",
-   "price": 34
+   "phase": "Phase 4"
   },
   {
    "sku": "XN",
    "name": "Acrylic LED Neon Sign (from)",
-   "phase": "Phase 5",
-   "price": 129
+   "phase": "Phase 5"
   }
  ]
 }

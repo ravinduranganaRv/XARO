@@ -654,7 +654,7 @@ const CATALOG = {
    "name": "Mouse Coaster Rug (add-on)",
    "cat": "desk",
    "kind": "common",
-   "price": 19,
+   "price": 17,
    "size": "12 cm round",
    "desc": "Matching coaster for your mouse. Ships in the same tube as your keyboard rug.",
    "lead": "Ships with keyboard rug",
@@ -821,44 +821,37 @@ const CATALOG = {
   {
    "sku": "XT",
    "name": "Heavyweight Tee (DTF)",
-   "phase": "Phase 2",
-   "price": 39
+   "phase": "Phase 2"
   },
   {
    "sku": "XP",
    "name": "Aluminum Sublimation Print, 30 x 45 cm",
-   "phase": "Phase 2",
-   "price": 89
+   "phase": "Phase 2"
   },
   {
    "sku": "XH",
    "name": "French Terry Hoodie",
-   "phase": "Phase 3",
-   "price": 79
+   "phase": "Phase 3"
   },
   {
    "sku": "XC",
    "name": "Trucker Cap, patch front",
-   "phase": "Phase 4",
-   "price": 34
+   "phase": "Phase 4"
   },
   {
    "sku": "XB",
    "name": "Ribbed Beanie",
-   "phase": "Phase 4",
-   "price": 29
+   "phase": "Phase 4"
   },
   {
    "sku": "XU",
    "name": "Bucket Hat",
-   "phase": "Phase 4",
-   "price": 34
+   "phase": "Phase 4"
   },
   {
    "sku": "XN",
    "name": "Acrylic LED Neon Sign (from)",
-   "phase": "Phase 5",
-   "price": 129
+   "phase": "Phase 5"
   }
  ]
 };
@@ -888,11 +881,19 @@ const COUNTRIES_DEFAULT = [
 ];
 // starter local prices (editable in Admin): US$ / LKR / AED / GBP / AUD
 const SEED_PRICES = {
-  'XK-C': { LK: 3500, AE: 365, GB: 79, AU: 149 }, 'XK-S': { LK: 4500, AE: 400, GB: 85, AU: 165 }, 'XM': { LK: 900, AE: 70, GB: 15, AU: 29 },
-  'XS': { LK: 5000, AE: 435, GB: 95, AU: 179 }, 'XF': { LK: 12500, AE: 1025, GB: 219, AU: 419 }, 'XW-M': { LK: 6500, AE: 545, GB: 119, AU: 225 },
-  'XW-S': { LK: 28000, AE: 2385, GB: 509, AU: 979 }, 'XW-L': { LK: 38000, AE: 3300, GB: 705, AU: 1355 }, 'CK': { LK: 5500, AE: 510, GB: 109, AU: 209 },
-  'CS': { LK: 6900, AE: 585, GB: 125, AU: 239 }, 'CF': { LK: 14500, AE: 1280, GB: 275, AU: 525 }, 'CL': { LK: 17500, AE: 1465, GB: 313, AU: 599 },
-  'CW': { LK: 34000, AE: 2935, GB: 625, AU: 1199 }
+  'XK-C': { LK: 3800, AE: 365, GB: 79, AU: 154 },
+  'XK-S': { LK: 4500, AE: 400, GB: 89, AU: 169 },
+  'XM': { LK: 1000, AE: 60, GB: 14, AU: 27 },
+  'XS': { LK: 5200, AE: 435, GB: 94, AU: 184 },
+  'XF': { LK: 12500, AE: 1025, GB: 224, AU: 434 },
+  'XW-M': { LK: 7500, AE: 545, GB: 119, AU: 234 },
+  'XW-S': { LK: 28000, AE: 2385, GB: 519, AU: 1014 },
+  'XW-L': { LK: 38000, AE: 3300, GB: 719, AU: 1404 },
+  'CK': { LK: 5000, AE: 510, GB: 109, AU: 219 },
+  'CS': { LK: 6500, AE: 585, GB: 129, AU: 249 },
+  'CF': { LK: 14500, AE: 1280, GB: 279, AU: 544 },
+  'CL': { LK: 17500, AE: 1465, GB: 319, AU: 624 },
+  'CW': { LK: 34000, AE: 2935, GB: 639, AU: 1249 }
 };
 const SETTINGS_DEFAULT = { requireLogin: true, storeName: 'XARO Industries (Pvt) Ltd', whatsapp: '', email: '', syncUrl: '', botOn: true, botName: 'Zaro', announce: '' };
 
@@ -933,6 +934,7 @@ function seedProducts() {
 }
 let _prod = null;
 const products = () => { if (!_prod) { const sv = g('products', null); _prod = sv && sv.length ? sv : seedProducts(); if (!sv) s('products', _prod); } return _prod; };
+function applyStarterPrices() { const l = products(); let n = 0; seedProducts().forEach(sp => { const p = l.find(x => x.sku === sp.sku); if (p) { p.prices = Object.assign({}, p.prices, sp.prices); p.price = sp.price; n++; } }); saveProducts(l); return n; }
 const saveProducts = l => { _prod = l; return s('products', l); };
 const resetProducts = () => { _prod = null; try { localStorage.removeItem(K + 'products'); } catch (e) {} delete mem.products; return products(); };
 function priceFor(p, code) {
@@ -1016,7 +1018,7 @@ function importAll(o) { if (!o || o.app !== 'xaro') throw new Error('This is not
 function resetAll() { KEYS.concat(['me', 'region']).forEach(k => { try { localStorage.removeItem(K + k); } catch (e) {} delete mem[k]; }); _prod = null; }
 
 return { g, s, uid, esc, clone, CURRENCIES, FX_DEFAULT, ALL_PERMS, DEFAULT_KB, settings, setSettings, fxTable, setFx, countries, setCountries, country, money, convert, fmtMoney,
-  region, setRegion, guessCountry, products, saveProducts, resetProducts, priceFor, customers, saveCustomers, upsertCustomer, me, setMe, orders, saveOrders, addOrder, newOrderId,
+  region, setRegion, guessCountry, products, saveProducts, resetProducts, applyStarterPrices, priceFor, customers, saveCustomers, upsertCustomer, me, setMe, orders, saveOrders, addOrder, newOrderId,
   sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll };
 })();
 
@@ -1596,7 +1598,7 @@ $('#grid').addEventListener('click', e => {
   if (view) openPv(view.dataset.view);
   if (build) { bProd.value = build.dataset.build; bChange(); location.hash = '#custom'; $('#custom').scrollIntoView(); }
 });
-function renderSoon() { $('#soon').innerHTML = CATALOG.coming.map(c => `<div class="soon"><div><b>${esc(c.name)}</b><br><span>${esc(c.phase)}</span></div><span>from ${fmtUSD(c.price)}</span></div>`).join(''); }
+function renderSoon() { $('#soon').innerHTML = CATALOG.coming.map(c => `<div class="soon"><div><b>${esc(c.name)}</b><br><span>${esc(c.phase)}</span></div><span>Waitlist</span></div>`).join(''); }
 
 /* modals */
 function closeModals() { $$('.modal.on').forEach(m => m.classList.remove('on')); if (!$('#cart').classList.contains('on')) $('#scrim').classList.remove('on'); }
@@ -2069,7 +2071,7 @@ A.reg('pricing', 'Prices', '$', 'pricing', box => {
     const ps = XD.products(), fx = XD.fxTable();
     box.innerHTML = `<div class="note2">Each country has its own price list in its own currency, so Sri Lanka can have LKR prices that are not a conversion of the dollar price. Change any cell, then press <b>Save all prices</b>. Customers see the new prices immediately after they reload or switch country.</div>
     <div class="tools"><button class="b2 pri" id="xSave">Save all prices</button><select class="inp" id="xC" aria-label="Country for bulk change">${cs.map(c => `<option value="${c.code}">${esc(c.name)} (${c.cur})</option>`).join('')}</select><label class="sr" for="xP">Percent change</label><input class="inp" id="xP" inputmode="decimal" placeholder="% change e.g. 10 or -5" style="min-width:150px">
-    <select class="inp" id="xR" aria-label="Round to"><option value="1">round to 1</option><option value="5">to 5</option><option value="10">to 10</option><option value="50" selected>to 50</option><option value="100">to 100</option></select><button class="b2" id="xApply">Apply % to column</button><button class="b2" id="xFill">Fill blanks from US$ x rate</button></div>
+    <select class="inp" id="xR" aria-label="Round to"><option value="1">round to 1</option><option value="5">to 5</option><option value="10">to 10</option><option value="50" selected>to 50</option><option value="100">to 100</option></select><button class="b2" id="xApply">Apply % to column</button><button class="b2" id="xFill">Fill blanks from US$ x rate</button><button class="b2" id="xStart">Load researched starter prices</button></div>
     <div class="tw"><table class="t pxt"><thead><tr><th>Product</th>${cs.map(c => `<th class="num">${esc(c.name)}<br>${c.cur}</th>`).join('')}</tr></thead><tbody>
     ${ps.map(p => `<tr data-sku="${esc(p.sku)}"><td><b>${esc(p.name)}</b><br><small style="color:var(--mute)">${esc(p.sku)}${p.active === false ? ' | hidden' : ''}</small></td>${cs.map(c => `<td><input class="inp" data-c="${c.code}" inputmode="decimal" value="${p.prices && p.prices[c.code] != null ? p.prices[c.code] : ''}" aria-label="${esc(p.name)} price in ${c.cur}"><div class="mgc"></div></td>`).join('')}</tr>`).join('')}</tbody></table></div>
     <p class="note" style="margin-top:12px">Exchange rates used for blanks and for display conversion (edit in Settings): ${Object.entries(fx).filter(([k]) => k !== 'USD').map(([k, v]) => '1 USD = ' + v + ' ' + k).join(' | ')}</p>`;
@@ -2081,6 +2083,7 @@ A.reg('pricing', 'Prices', '$', 'pricing', box => {
       if (bad) { toast(bad + ' cell(s) are not valid numbers', true); return; } XD.saveProducts(l); XARO.refresh(); toast('Prices saved'); draw();
     };
     $('#xApply').onclick = () => { const pct = parseFloat($('#xP').value); if (!isFinite(pct)) { toast('Enter a percent such as 10 or -5', true); return; } const c = $('#xC').value, step = +$('#xR').value; $$('input[data-c="' + c + '"]', box).forEach(i => { const n = cleanNum(i.value); if (n != null) i.value = Math.max(step, Math.round(n * (1 + pct / 100) / step) * step); }); margins(); toast('Applied to the column. Press Save to keep it.'); };
+    $('#xStart').onclick = () => { if (!confirm('Replace the prices of the 13 built-in products, for every country, with the researched starter list? Prices you typed for those products are overwritten. Products you added yourself are not touched.')) return; const n = XD.applyStarterPrices(); XARO.refresh(); toast(n + ' products updated'); draw(); };
     $('#xFill').onclick = () => { $$('tr[data-sku]', box).forEach(tr => { const us = cleanNum($('input[data-c="US"]', tr).value); if (!us) return; $$('input[data-c]', tr).forEach(i => { if (i.value.trim() === '') { const c = XD.country(i.dataset.c), v = XD.convert(us, 'USD', c.cur); i.value = c.cur === 'LKR' ? Math.round(v / 50) * 50 : Math.round(v); } }); }); margins(); toast('Blanks filled. Press Save to keep them.'); };
   };
   draw();

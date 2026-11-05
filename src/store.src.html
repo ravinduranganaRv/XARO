@@ -935,7 +935,7 @@ $('#grid').addEventListener('click', e => {
   if (view) openPv(view.dataset.view);
   if (build) { bProd.value = build.dataset.build; bChange(); location.hash = '#custom'; $('#custom').scrollIntoView(); }
 });
-function renderSoon() { $('#soon').innerHTML = CATALOG.coming.map(c => `<div class="soon"><div><b>${esc(c.name)}</b><br><span>${esc(c.phase)}</span></div><span>from ${fmtUSD(c.price)}</span></div>`).join(''); }
+function renderSoon() { $('#soon').innerHTML = CATALOG.coming.map(c => `<div class="soon"><div><b>${esc(c.name)}</b><br><span>${esc(c.phase)}</span></div><span>Waitlist</span></div>`).join(''); }
 
 /* modals */
 function closeModals() { $$('.modal.on').forEach(m => m.classList.remove('on')); if (!$('#cart').classList.contains('on')) $('#scrim').classList.remove('on'); }

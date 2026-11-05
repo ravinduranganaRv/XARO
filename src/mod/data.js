@@ -22,11 +22,19 @@ const COUNTRIES_DEFAULT = [
 ];
 // starter local prices (editable in Admin): US$ / LKR / AED / GBP / AUD
 const SEED_PRICES = {
-  'XK-C': { LK: 3500, AE: 365, GB: 79, AU: 149 }, 'XK-S': { LK: 4500, AE: 400, GB: 85, AU: 165 }, 'XM': { LK: 900, AE: 70, GB: 15, AU: 29 },
-  'XS': { LK: 5000, AE: 435, GB: 95, AU: 179 }, 'XF': { LK: 12500, AE: 1025, GB: 219, AU: 419 }, 'XW-M': { LK: 6500, AE: 545, GB: 119, AU: 225 },
-  'XW-S': { LK: 28000, AE: 2385, GB: 509, AU: 979 }, 'XW-L': { LK: 38000, AE: 3300, GB: 705, AU: 1355 }, 'CK': { LK: 5500, AE: 510, GB: 109, AU: 209 },
-  'CS': { LK: 6900, AE: 585, GB: 125, AU: 239 }, 'CF': { LK: 14500, AE: 1280, GB: 275, AU: 525 }, 'CL': { LK: 17500, AE: 1465, GB: 313, AU: 599 },
-  'CW': { LK: 34000, AE: 2935, GB: 625, AU: 1199 }
+  'XK-C': { LK: 3800, AE: 365, GB: 79, AU: 154 },
+  'XK-S': { LK: 4500, AE: 400, GB: 89, AU: 169 },
+  'XM': { LK: 1000, AE: 60, GB: 14, AU: 27 },
+  'XS': { LK: 5200, AE: 435, GB: 94, AU: 184 },
+  'XF': { LK: 12500, AE: 1025, GB: 224, AU: 434 },
+  'XW-M': { LK: 7500, AE: 545, GB: 119, AU: 234 },
+  'XW-S': { LK: 28000, AE: 2385, GB: 519, AU: 1014 },
+  'XW-L': { LK: 38000, AE: 3300, GB: 719, AU: 1404 },
+  'CK': { LK: 5000, AE: 510, GB: 109, AU: 219 },
+  'CS': { LK: 6500, AE: 585, GB: 129, AU: 249 },
+  'CF': { LK: 14500, AE: 1280, GB: 279, AU: 544 },
+  'CL': { LK: 17500, AE: 1465, GB: 319, AU: 624 },
+  'CW': { LK: 34000, AE: 2935, GB: 639, AU: 1249 }
 };
 const SETTINGS_DEFAULT = { requireLogin: true, storeName: 'XARO Industries (Pvt) Ltd', whatsapp: '', email: '', syncUrl: '', botOn: true, botName: 'Zaro', announce: '' };
 
@@ -67,6 +75,7 @@ function seedProducts() {
 }
 let _prod = null;
 const products = () => { if (!_prod) { const sv = g('products', null); _prod = sv && sv.length ? sv : seedProducts(); if (!sv) s('products', _prod); } return _prod; };
+function applyStarterPrices() { const l = products(); let n = 0; seedProducts().forEach(sp => { const p = l.find(x => x.sku === sp.sku); if (p) { p.prices = Object.assign({}, p.prices, sp.prices); p.price = sp.price; n++; } }); saveProducts(l); return n; }
 const saveProducts = l => { _prod = l; return s('products', l); };
 const resetProducts = () => { _prod = null; try { localStorage.removeItem(K + 'products'); } catch (e) {} delete mem.products; return products(); };
 function priceFor(p, code) {
@@ -150,6 +159,6 @@ function importAll(o) { if (!o || o.app !== 'xaro') throw new Error('This is not
 function resetAll() { KEYS.concat(['me', 'region']).forEach(k => { try { localStorage.removeItem(K + k); } catch (e) {} delete mem[k]; }); _prod = null; }
 
 return { g, s, uid, esc, clone, CURRENCIES, FX_DEFAULT, ALL_PERMS, DEFAULT_KB, settings, setSettings, fxTable, setFx, countries, setCountries, country, money, convert, fmtMoney,
-  region, setRegion, guessCountry, products, saveProducts, resetProducts, priceFor, customers, saveCustomers, upsertCustomer, me, setMe, orders, saveOrders, addOrder, newOrderId,
+  region, setRegion, guessCountry, products, saveProducts, resetProducts, applyStarterPrices, priceFor, customers, saveCustomers, upsertCustomer, me, setMe, orders, saveOrders, addOrder, newOrderId,
   sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll };
 })();
