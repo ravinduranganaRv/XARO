@@ -207,6 +207,7 @@ footer small{color:var(--mute)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--neon);color:var(--neon-ink);font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:12px 20px;opacity:0;pointer-events:none;transition:.25s;z-index:120;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/*%MOD_CSS%*/
 </style>
 
 <canvas id="stage" aria-hidden="true"></canvas>
@@ -217,7 +218,7 @@ footer small{color:var(--mute)}
     <nav class="nav" aria-label="Main">
       <a class="lnk" href="#shop">Shop</a><a class="lnk" href="#custom">Custom</a><a class="lnk" href="#lookbook">Lookbook</a><a class="lnk" href="#track">Track</a>
       <label class="sr" for="cur">Currency</label>
-      <select class="sel" id="cur"><option>USD</option><option>AED</option><option>GBP</option><option>EUR</option></select>
+      <label class="sr" for="ctry">Country</label><select class="sel" id="ctry"></select><select class="sel" id="cur"></select>
       <button class="cartbtn" id="openCart" aria-label="Open cart">Cart <b id="cartN">0</b></button>
     </nav>
   </div>
@@ -254,10 +255,10 @@ footer small{color:var(--mute)}
   </section>
 
   <section id="shop" class="solid"><div class="wrap">
-    <div class="sec-head"><h2 class="disp">The <span class="neon">shop</span></h2><p>Drop 001 pieces are made to order in small batches. Free shipping, duties handled by us on US and UAE orders. Open any piece in 3D.</p></div>
+    <div class="sec-head"><h2 class="disp">The <span class="neon">shop</span></h2><p id="shopIntro">Drop 001 pieces are made to order in small batches. Open any piece in 3D.</p></div>
     <div class="filters" role="group" aria-label="Filter products" id="filters"></div>
     <div class="grid" id="grid"></div>
-    <p class="note" style="margin-top:18px">Prices in US dollars. Other currencies are indicative display values only; checkout is charged in USD.</p>
+    <p class="note" style="margin-top:18px" id="priceNote"></p>
     <div style="margin-top:56px"><h3 class="disp" style="font-size:44px;margin:0 0 6px">Coming <span class="neon">later</span></h3>
       <p class="note" style="margin:0 0 14px">Apparel, headwear and laser pieces unlock after Drop 001 proves demand. Indicative launch prices, subject to change. Join the waitlist to hear first.</p>
       <div class="soonlist" id="soon"></div>
@@ -319,8 +320,8 @@ footer small{color:var(--mute)}
     <div id="faq">
       <h2 class="disp" style="font-size:clamp(44px,7vw,84px);margin:0 0 18px">Good <span class="neon">to know</span></h2>
       <details open><summary>How long does an order take?</summary><p>Drop 001 sets dispatch in 10 to 14 business days. Wall art takes 4 to 6 weeks. Custom pieces add design approval time. Carrier time is extra and varies by destination.</p></details>
-      <details><summary>Where do you ship?</summary><p>We launch with the United States and the United Arab Emirates, tracked by express courier. More countries open as duty and VAT rules are confirmed. Join the waitlist for your region.</p></details>
-      <details><summary>Are duties and taxes included?</summary><p>On US and UAE orders the price you see is the price you pay. We handle customs entry so nothing is collected at your door.</p></details>
+      <details><summary>Where do you ship?</summary><p id="faqShip"></p></details>
+      <details><summary>Are duties and taxes included?</summary><p id="faqDuty"></p></details>
       <details><summary>Returns and damage</summary><p>Custom pieces cannot be returned for change of mind. If anything arrives damaged, defective or wrong, tell us within 14 days of delivery and we will repair or replace it. Standard pieces can be exchanged within 14 days.</p></details>
       <details><summary>How do I care for my rug?</summary><p>Vacuum gently on low suction, spot clean with a damp cloth, keep away from heat. Never machine wash.</p></details>
     </div>
@@ -329,7 +330,7 @@ footer small{color:var(--mute)}
 
 <footer><div class="wrap cols">
   <div><img data-img="logoBlock" alt="XARO Industries (Pvt) Ltd"><div><b>XARO Industries (Pvt) Ltd</b><br><small>Made in Sri Lanka. Shipped worldwide.</small></div></div>
-  <div><div class="lbl" style="margin-bottom:10px">Shop</div><div><a href="#shop">All products</a><br><a href="#custom">Custom builder</a><br><a href="#track">Track order</a></div></div>
+  <div><div class="lbl" style="margin-bottom:10px">Shop</div><div><a href="#shop">All products</a><br><a href="#custom">Custom builder</a><br><a href="#track">Track order</a><br><a href="#admin" id="staffLink">Staff login</a></div></div>
   <div><div class="lbl" style="margin-bottom:10px">Preview store</div><small>This page is a working front-end preview. No payment is taken and nothing is shipped from it. Orders and the waitlist are saved only in this browser.</small></div>
 </div></footer>
 
@@ -355,6 +356,9 @@ footer small{color:var(--mute)}
 <script>
 const IMG = /*%IMG%*/;
 const CATALOG = /*%CATALOG%*/;
+</script>
+<script>
+/*%DATA_JS%*/
 </script>
 <script>
 (() => {
@@ -730,7 +734,7 @@ function camAt(s, asp, time) {
 }
 function heroFrame(ms) {
   requestAnimationFrame(heroFrame);
-  if (!hero || document.hidden) return;
+  if (!hero || document.hidden || document.body.classList.contains('admin-open')) return;
   const shopTop = $('#shop').getBoundingClientRect().top; if (shopTop <= 0) return;
   const T = hero.T, time = ms/1000, e = hero.eng; hero.ptrS[0] += (hero.ptr[0]-hero.ptrS[0])*0.05; hero.ptrS[1] += (hero.ptr[1]-hero.ptrS[1])*0.05;
   const asp = e.resize(), s = stageProgress(), cam = camAt(s, asp, time);
@@ -747,8 +751,8 @@ function heroFrame(ms) {
   e.solid(e.plane, M.chain(M.T(0, 0, 0), M.Rx(-Math.PI/2), M.S(140, 40, 1)), { tex: T.desk, color: [1.0, 1.0, 1.0], lit: 0.9, spec: 0.1 });
   e.solid(e.plane, M.chain(M.T(0, 5, -5.8), M.S(140, 16, 1)), { tex: T.wall, color: [1.2, 1.2, 1.2], lit: 0.5 });
   // wall neon logo + halo
-  e.solid(e.plane, M.chain(M.T(0, 2.45, -5.74), M.S(7.2, 7.2, 1)), { tex: T.glow, color: [0.05, 0.28, 0.04], lit: 0, additive: true });
-  e.solid(e.plane, M.chain(M.T(0, 2.4, -5.7), M.S(4.3, 3.59, 1)), { tex: T.logo, color: [1.08, 1.08, 1.08], lit: 0, emis: [0.02, 0.02, 0.02] });
+  e.solid(e.plane, M.chain(M.T(0, 2.3, -5.74), M.S(7.2, 7.2, 1)), { tex: T.glow, color: [0.05, 0.28, 0.04], lit: 0, additive: true });
+  e.solid(e.plane, M.chain(M.T(0, 2.3, -5.7), M.S(3.7, 3.7, 1)), { tex: T.logo, color: [1.08, 1.08, 1.08], lit: 0, emis: [0.02, 0.02, 0.02] });
   // floor neon strip
   e.solid(e.cube, M.chain(M.T(0, 0.04, -5.6), M.S(30, 0.05, 0.08)), { color: [0.2, 1, 0.1], lit: 0, emis: [0.2, 0.9, 0.1] });
   e.solid(e.plane, M.chain(M.T(0, 0.35, -5.55), M.S(30, 1.4, 1)), { tex: T.glow, color: [0.0, 0.2, 0.0], lit: 0, additive: true });
@@ -781,6 +785,12 @@ function heroFrame(ms) {
 }
 
 /* ============================================================ product viewer */
+function geoFor(p) {
+  if (GEO[p.sku]) return GEO[p.sku];
+  const sh = p.shape || (p.cat === 'wall' ? 'wall' : 'rug'), ar = (p.w > 0 && p.h > 0) ? p.w/p.h : (sh === 'wall' ? 0.67 : 2.75), m = sh === 'wall' ? 4 : 4.4;
+  let w, h; if (ar >= 1) { w = m; h = m/ar; } else { h = m; w = m*ar; } if (sh === 'round') { w = h = 2.2; }
+  return { k: sh === 'wall' ? 'wall' : 'rug', w: +w.toFixed(2), h: +h.toFixed(2), dens: sh === 'wall' ? 46 : 52, pile: sh === 'wall' ? .17 : .08, rad: .16, circle: sh === 'round' };
+}
 const GEO = {
   'XK-C': { k: 'rug', w: 3.2, h: 1.2, dens: 64, pile: .07, rad: .16 }, 'XK-S': { k: 'rug', w: 4.4, h: 1.6, dens: 60, pile: .075, rad: .2 },
   'XM': { k: 'rug', w: 1.8, h: 1.8, dens: 64, pile: .07, circle: true, defd: 'mono' }, 'XS': { k: 'set' },
@@ -804,7 +814,7 @@ class Viewer {
     this.loop = this.loop.bind(this); requestAnimationFrame(this.loop);
   }
   set(prod, design, img) {
-    this.prod = prod; this.design = design; this.img = img; const g = GEO[prod.sku]; this.g = g;
+    this.prod = prod; this.design = design; this.img = img; const g = geoFor(prod); this.g = g;
     this.tilt = g.k === 'wall' ? -0.08 : -0.85; this.yaw = 0; this.dist = g.k === 'wall' ? 9 : (g.k === 'set' ? 10.4 : 8.4); this.idle = 0;
   }
   art(w, h, defd) {
@@ -841,38 +851,48 @@ class Viewer {
 }
 
 /* ============================================================ commerce */
-const P = CATALOG.products, byId = Object.fromEntries(P.map(p => [p.sku, p]));
-const RATES = { USD: 1, AED: 3.6725, GBP: 0.78, EUR: 0.92 };
-let cur = store.get('xaro_cur', 'USD'); if (!RATES[cur]) cur = 'USD';
-const fmt = (usd) => { if (cur === 'USD') return '$' + (usd % 1 ? usd.toFixed(2) : usd.toLocaleString('en-US')); const v = usd*RATES[cur]; try { return '≈ ' + new Intl.NumberFormat('en', { style: 'currency', currency: cur, maximumFractionDigits: 0 }).format(v); } catch (e) { return cur + ' ' + Math.round(v); } };
+let P = [], byId = {};
+function loadProducts() { P = XD.products().filter(p => p.active !== false); byId = Object.fromEntries(P.map(p => [p.sku, p])); }
+loadProducts();
+let region = XD.region();
+const ctryObj = () => XD.country(region.country);
+const priceOf = p => XD.priceFor(p, region.country).amount;                 // amount in the selected country's currency
+const fmt = amt => XD.fmtMoney(amt, ctryObj().cur, region.cur);              // shown in the display currency
+const fmtUSD = usd => XD.fmtMoney(usd, 'USD', region.cur);
+const pimg = p => p.img || IMG['p_' + p.sku] || IMG.logoBlock;
 let cart = store.get('xaro_cart', []).filter(i => byId[i.sku]);
 const saveCart = () => store.set('xaro_cart', cart);
 let toastT; const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400); };
 const designNames = { logo: 'XARO Logo', crown: 'Street Crown', waves: 'Neon Waves', dune: 'Desert Dune', pixel: 'Pixel Pad', mono: 'Crown X' };
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const unitPrice = i => byId[i.sku].price*(i.dep ? 0.5 : 1);
+const esc = XD.esc;
+const unitPrice = i => priceOf(byId[i.sku])*(i.dep ? 0.5 : 1);
+const shipFee = () => +ctryObj().ship || 0;
+const emit = (type, d, track = true) => { if (track && type !== 'section') XD.track(type, d); dispatchEvent(new CustomEvent('xaro', { detail: Object.assign({ type }, d || {}) })); };
+const soldOut = p => p.stock != null && p.stock <= 0;
 
 function addToCart(sku, o = {}) {
-  const p = byId[sku], key = [sku, o.design || '', o.note || '', o.file || ''].join('|'), ex = cart.find(i => i.key === key);
+  const p = byId[sku]; if (!p) return; if (soldOut(p)) { toast('Sold out'); emit('oops', { why: 'soldout' }, false); return; }
+  const  key = [sku, o.design || '', o.note || '', o.file || ''].join('|'), ex = cart.find(i => i.key === key);
   if (ex) ex.qty++; else cart.push({ key, sku, design: o.design || '', note: o.note || '', file: o.file || '', dep: !!p.deposit, qty: 1 });
-  saveCart(); renderCart(); toast('Added: ' + p.name);
+  saveCart(); renderCart(); toast('Added: ' + p.name); emit('add', { sku, name: p.name });
 }
 function renderCart() {
+  cart = cart.filter(i => byId[i.sku]);
   const n = cart.reduce((a, i) => a+i.qty, 0); $('#cartN').textContent = n;
   const box = $('#cartItems'), foot = $('#cartFoot');
   if (!cart.length) { box.innerHTML = '<div class="empty">Your cart is empty.<br>Pick a piece from the shop.</div>'; foot.innerHTML = ''; return; }
-  box.innerHTML = cart.map((i, ix) => { const p = byId[i.sku]; return `<div class="ci"><img src="${IMG['p_'+i.sku]}" alt="">
+  box.innerHTML = cart.map((i, ix) => { const p = byId[i.sku]; return `<div class="ci"><img src="${pimg(p)}" alt="">
     <div><b>${esc(p.name)}</b><small>${esc(p.size)}${i.design ? ' | ' + esc(designNames[i.design] || i.design) : ''}</small>${i.dep ? `<small>50% deposit | balance on approval</small>` : ''}${i.file ? `<small>Art: ${esc(i.file)}</small>` : ''}
     <div class="qty"><button data-q="${ix}" data-d="-1" aria-label="Decrease quantity">-</button><span>${i.qty}</span><button data-q="${ix}" data-d="1" aria-label="Increase quantity">+</button></div><button class="rm" data-rm="${ix}">Remove</button></div>
     <div class="price">${fmt(unitPrice(i)*i.qty)}</div></div>`; }).join('');
-  const sub = cart.reduce((a, i) => a+unitPrice(i)*i.qty, 0), bal = cart.reduce((a, i) => a+(i.dep ? byId[i.sku].price*0.5*i.qty : 0), 0);
-  foot.innerHTML = `<div class="r"><span>Subtotal</span><span>${fmt(sub)}</span></div><div class="r"><span>Shipping</span><span>Free</span></div>${bal ? `<div class="r"><span>Balance due on art approval</span><span>${fmt(bal)}</span></div>` : ''}
-    <div class="r t"><span>Due today</span><span>${fmt(sub)}</span></div><button class="btn" id="goCheckout">Checkout</button><div class="note">Preview store: no payment is taken.</div>`;
+  const sub = cart.reduce((a, i) => a+unitPrice(i)*i.qty, 0), bal = cart.reduce((a, i) => a+(i.dep ? priceOf(byId[i.sku])*0.5*i.qty : 0), 0), sf = shipFee();
+  foot.innerHTML = `<div class="r"><span>Subtotal</span><span>${fmt(sub)}</span></div><div class="r"><span>Shipping</span><span>${sf ? fmt(sf) : 'Free'}</span></div>${bal ? `<div class="r"><span>Balance due on art approval</span><span>${fmt(bal)}</span></div>` : ''}
+    <div class="r t"><span>Due today</span><span>${fmt(sub+sf)}</span></div><button class="btn" id="goCheckout">Checkout</button><div class="note">Preview store: no payment is taken.</div>`;
 }
 $('#cartItems').addEventListener('click', e => {
   const q = e.target.closest('[data-q]'), r = e.target.closest('[data-rm]');
-  if (q) { const i = cart[+q.dataset.q]; i.qty += +q.dataset.d; if (i.qty < 1) cart.splice(+q.dataset.q, 1); saveCart(); renderCart(); }
-  if (r) { cart.splice(+r.dataset.rm, 1); saveCart(); renderCart(); }
+  if (q) { const i = cart[+q.dataset.q]; i.qty += +q.dataset.d; if (i.qty < 1) { cart.splice(+q.dataset.q, 1); emit('remove', { sku: i.sku }); } saveCart(); renderCart(); }
+  if (r) { const gone = cart.splice(+r.dataset.rm, 1)[0]; saveCart(); renderCart(); emit('remove', { sku: gone && gone.sku }); }
 });
 $('#cartFoot').addEventListener('click', e => { if (e.target.id === 'goCheckout') { closeCart(); openCheckout(); } });
 function openCart() { $('#cart').classList.add('on'); $('#cart').setAttribute('aria-hidden', 'false'); $('#scrim').classList.add('on'); setTimeout(() => $('#closeCart').focus(), 50); }
@@ -880,30 +900,42 @@ function closeCart() { $('#cart').classList.remove('on'); $('#cart').setAttribut
 $('#openCart').onclick = openCart; $('#closeCart').onclick = closeCart;
 $('#scrim').onclick = () => { closeCart(); closeModals(); };
 addEventListener('keydown', e => { if (e.key === 'Escape') { closeCart(); closeModals(); } });
-const cs = $('#cur'); cs.value = cur; cs.onchange = () => { cur = cs.value; store.set('xaro_cur', cur); renderShop(); renderCart(); renderSoon(); quote(); if (curProd) renderPv(); };
+const ctrySel = $('#ctry'), curSel = $('#cur');
+function fillRegionSelects() { ctrySel.innerHTML = XD.countries().map(c => `<option value="${c.code}">${esc(c.name)}</option>`).join(''); curSel.innerHTML = XD.CURRENCIES.map(c => `<option>${c}</option>`).join(''); ctrySel.value = region.country; curSel.value = region.cur; }
+function applyRegion(p, quiet) { region = XD.setRegion(p); fillRegionSelects(); rerender(); if (!quiet) emit('region', { country: region.country, cur: region.cur }); }
+function rerender() { renderShop(); renderCart(); renderSoon(); renderNotes(); quote(); if (curProd && $('#pvModal').classList.contains('on')) renderPv(); }
+ctrySel.onchange = () => applyRegion({ country: ctrySel.value }); curSel.onchange = () => applyRegion({ cur: curSel.value });
+function renderNotes() {
+  const c = ctryObj(), en = XD.countries().filter(x => x.enabled && x.code !== 'OT');
+  $('#shopIntro').textContent = (c.enabled ? 'Prices shown for ' + c.name + ' in ' + c.cur + '. ' + (c.ship ? '' : 'Shipping is included. ') : 'We are not shipping to ' + c.name + ' yet; browse and join the waitlist. ') + 'Open any piece in 3D.';
+  $('#priceNote').textContent = region.cur === c.cur ? 'Prices are in ' + c.cur + ' for ' + c.name + ' and are what you pay.' : 'Prices are set for ' + c.name + ' in ' + c.cur + '. Amounts in ' + region.cur + ' are indicative display values; you are charged in ' + c.cur + '.';
+  $('#faqShip').textContent = 'We currently ship to ' + (en.map(x => x.name).join(', ') || 'no countries') + '. Express or island-wide courier with tracking. More countries open as duty and VAT rules are confirmed; join the waitlist for your region.';
+  $('#faqDuty').textContent = c.code === 'LK' ? 'Orders inside Sri Lanka have no customs. The price you see is the price you pay, plus any courier fee shown at checkout.' : 'On orders to enabled countries the price you see is the price you pay. We handle customs entry so nothing is collected at your door.';
+}
 
 /* shop grid */
-const FILT = [['all', 'All'], ['desk', 'Desk setup'], ['wall', 'Wall art'], ['home', 'Floor rugs'], ['custom', 'Custom']]; let filt = 'all'; const sel = {};
-$('#filters').innerHTML = FILT.map(f => `<button class="fbtn" data-f="${f[0]}" aria-pressed="${f[0] === filt}">${f[1]}</button>`).join('');
-$('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; filt = b.dataset.f; $$('#filters .fbtn').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === filt)); renderShop(); });
+const FILT_ALL = [['all', 'All'], ['desk', 'Desk setup'], ['wall', 'Wall art'], ['home', 'Floor rugs'], ['custom', 'Custom'], ['apparel', 'Apparel'], ['other', 'More']]; let filt = 'all'; const sel = {};
+function renderFilters() { const cats = new Set(P.map(p => p.cat)); if (filt !== 'all' && !cats.has(filt)) filt = 'all'; $('#filters').innerHTML = FILT_ALL.filter(f => f[0] === 'all' || cats.has(f[0])).map(f => `<button class="fbtn" data-f="${f[0]}" aria-pressed="${f[0] === filt}">${f[1]}</button>`).join(''); }
+$('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; filt = b.dataset.f; $$('#filters .fbtn').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === filt)); renderShop(); emit('filter', { f: filt }, false); });
 $$('[data-filter-go]').forEach(a => a.addEventListener('click', () => { filt = a.dataset.filterGo; $$('#filters .fbtn').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === filt)); renderShop(); }));
 function renderShop() {
+  renderFilters();
   const list = P.filter(p => filt === 'all' || p.cat === filt);
   $('#grid').innerHTML = list.map(p => { const d = sel[p.sku] || p.designs[0] || '';
-    return `<article class="card" data-sku="${p.sku}"><button class="ph" data-view="${p.sku}" aria-label="View ${esc(p.name)} in 3D"><img src="${IMG['p_'+p.sku]}" alt="${esc(p.name)}" loading="lazy">${p.kind === 'custom' ? '<span class="badge">Custom</span>' : (p.sku === 'XS' ? '<span class="badge">Drop 001</span>' : '')}<span class="view">View in 3D</span></button>
+    return `<article class="card" data-sku="${p.sku}"><button class="ph" data-view="${p.sku}" aria-label="View ${esc(p.name)} in 3D"><img src="${pimg(p)}" alt="${esc(p.name)}" loading="lazy">${soldOut(p) ? '<span class="badge" style="background:#ff5c5c">Sold out</span>' : p.kind === 'custom' ? '<span class="badge">Custom</span>' : (p.sku === 'XS' ? '<span class="badge">Drop 001</span>' : '')}<span class="view">View in 3D</span></button>
     <div class="body"><h3>${esc(p.name)}</h3><div class="sz">${esc(p.size)}${p.weight ? ' | ' + esc(p.weight) : ''}</div><p>${esc(p.desc)}</p>
     ${p.designs.length ? `<div class="swatches" role="group" aria-label="Design">${p.designs.map(x => `<button class="sw" data-sw="${p.sku}|${x}" aria-pressed="${x === d}">${esc(designNames[x.toLowerCase().replace(/ /g, '')] || x)}</button>`).join('')}</div>` : ''}
-    <div class="row"><div class="price">${fmt(p.price)}<small>${p.deposit ? '50% deposit today' : p.lead}</small></div>${p.kind === 'custom' ? `<button class="btn sm" data-build="${p.sku}">Build yours</button>` : `<button class="btn sm" data-add="${p.sku}">Add to cart</button>`}</div></div></article>`; }).join('');
+    <div class="row"><div class="price">${fmt(priceOf(p))}<small>${soldOut(p) ? 'Sold out' : p.stock != null && p.stock <= 5 ? 'Only ' + p.stock + ' left' : p.deposit ? '50% deposit today' : esc(p.lead)}</small></div>${p.kind === 'custom' ? `<button class="btn sm" data-build="${p.sku}">Build yours</button>` : `<button class="btn sm" data-add="${p.sku}" ${soldOut(p) ? 'disabled' : ''}>${soldOut(p) ? 'Sold out' : 'Add to cart'}</button>`}</div></div></article>`; }).join('');
 }
 const DKEY = { 'XARO Logo': 'logo', 'Street Crown': 'crown', 'Neon Waves': 'waves', 'Pixel Pad': 'pixel' };
 $('#grid').addEventListener('click', e => {
   const sw = e.target.closest('[data-sw]'), add = e.target.closest('[data-add]'), view = e.target.closest('[data-view]'), build = e.target.closest('[data-build]');
   if (sw) { const [s, d] = sw.dataset.sw.split('|'); sel[s] = d; $$(`[data-sw^="${s}|"]`).forEach(b => b.setAttribute('aria-pressed', b === sw)); }
-  if (add) { const p = byId[add.dataset.add]; addToCart(p.sku, { design: p.designs.length ? DKEY[sel[p.sku] || p.designs[0]] : '' }); }
+  if (add) { const p = byId[add.dataset.add]; addToCart(p.sku, { design: p.designs.length ? (DKEY[sel[p.sku] || p.designs[0]] || '') : '' }); }
   if (view) openPv(view.dataset.view);
   if (build) { bProd.value = build.dataset.build; bChange(); location.hash = '#custom'; $('#custom').scrollIntoView(); }
 });
-function renderSoon() { $('#soon').innerHTML = CATALOG.coming.map(c => `<div class="soon"><div><b>${esc(c.name)}</b><br><span>${esc(c.phase)}</span></div><span>from ${fmt(c.price)}</span></div>`).join(''); }
+function renderSoon() { $('#soon').innerHTML = CATALOG.coming.map(c => `<div class="soon"><div><b>${esc(c.name)}</b><br><span>${esc(c.phase)}</span></div><span>from ${fmtUSD(c.price)}</span></div>`).join(''); }
 
 /* modals */
 function closeModals() { $$('.modal.on').forEach(m => m.classList.remove('on')); if (!$('#cart').classList.contains('on')) $('#scrim').classList.remove('on'); }
@@ -912,19 +944,19 @@ $('#pvClose').onclick = closeModals; $('#coClose').onclick = closeModals;
 $$('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) closeModals(); }));
 let pv = null, curProd = null, pvDesign = '';
 function openPv(sku) {
-  curProd = byId[sku]; pvDesign = curProd.designs.length ? DKEY[sel[sku] || curProd.designs[0]] : ''; openModal('pvModal'); renderPv();
-  $('#pvFb').src = IMG['p_' + sku];
+  curProd = byId[sku]; pvDesign = curProd.designs.length ? (DKEY[sel[sku] || curProd.designs[0]] || '') : ''; openModal('pvModal'); renderPv(); emit('view', { sku, name: curProd.name });
+  $('#pvFb').src = pimg(curProd);
   if (!pv && glOK) { try { pv = new Viewer($('#pvCanvas')); } catch (e) { glOK = false; document.documentElement.classList.add('nogl'); } }
   if (pv) pv.set(curProd, pvDesign, curProd.kind === 'custom' ? bImg : null);
   setTimeout(() => $('#pvClose').focus(), 60);
 }
 function renderPv() {
-  const p = curProd; const dsg = p.designs.map(x => { const k = DKEY[x]; return `<button class="sw" data-pvd="${k}" aria-pressed="${k === pvDesign}">${esc(x)}</button>`; }).join('');
+  const p = curProd; const dsg = p.designs.filter(x => DKEY[x]).map(x => { const k = DKEY[x]; return `<button class="sw" data-pvd="${k}" aria-pressed="${k === pvDesign}">${esc(x)}</button>`; }).join('');
   $('#pvInfo').innerHTML = `<span class="mono" style="color:var(--neon);font-size:12px">${p.kind === 'custom' ? 'Custom' : 'XARO Original'} | ${esc(p.sku)}</span><h3>${esc(p.name)}</h3><p style="margin:0;color:#c9d1c3">${esc(p.desc)}</p>
    ${p.designs.length ? `<div><div class="lbl" style="margin-bottom:8px">Design</div><div class="swatches">${dsg}</div></div>` : ''}
-   <dl class="specs"><dt>Size</dt><dd>${esc(p.size)}</dd><dt>Weight</dt><dd>${esc(p.weight || '')}</dd><dt>Dispatch</dt><dd>${esc(p.lead)}</dd><dt>Shipping</dt><dd>Free, tracked express</dd></dl>
-   <div class="price" style="font-size:30px">${fmt(p.price)}<small>${p.deposit ? 'Pay 50% to start. Balance on art approval.' : 'Free shipping included'}</small></div>
-   <div class="btns" style="margin-top:auto">${p.kind === 'custom' ? '<button class="btn" id="pvBuild">Open the builder</button>' : '<button class="btn" id="pvAdd">Add to cart</button>'}<button class="btn ghost" id="pvCart">View cart</button></div>`;
+   <dl class="specs"><dt>Size</dt><dd>${esc(p.size)}</dd><dt>Weight</dt><dd>${esc(p.weight || '')}</dd><dt>Dispatch</dt><dd>${esc(p.lead)}</dd><dt>Shipping</dt><dd>${shipFee() ? fmt(shipFee()) + ', tracked' : 'Free, tracked'} | ${esc(ctryObj().name)}</dd></dl>
+   <div class="price" style="font-size:30px">${fmt(priceOf(p))}<small>${p.deposit ? 'Pay 50% to start. Balance on art approval.' : 'Shipping included'}</small></div>
+   <div class="btns" style="margin-top:auto">${p.kind === 'custom' ? '<button class="btn" id="pvBuild">Open the builder</button>' : soldOut(p) ? '<button class="btn" disabled>Sold out</button>' : '<button class="btn" id="pvAdd">Add to cart</button>'}<button class="btn ghost" id="pvCart">View cart</button></div>`;
 }
 $('#pvInfo').addEventListener('click', e => {
   const d = e.target.closest('[data-pvd]');
@@ -935,69 +967,78 @@ $('#pvInfo').addEventListener('click', e => {
 });
 
 /* custom builder */
-const bProd = $('#bProd'); bProd.innerHTML = P.filter(p => p.kind === 'custom').map(p => `<option value="${p.sku}">${esc(p.name)} (${esc(p.size)})</option>`).join('');
+const bProd = $('#bProd'); function fillBuilder() { const keep = bProd.value; bProd.innerHTML = P.filter(p => p.kind === 'custom').map(p => `<option value="${p.sku}">${esc(p.name)} (${esc(p.size)})</option>`).join(''); if (keep && byId[keep]) bProd.value = keep; } fillBuilder();
 let bImg = null, bFileName = '', bViewer = null;
 function quote() {
-  const p = byId[bProd.value]; $('#qName').textContent = p.name; $('#qPrice').textContent = fmt(p.price); $('#qDep').textContent = fmt(p.price*0.5); $('#qBal').textContent = fmt(p.price*0.5); $('#qLead').textContent = 'Dispatch ' + p.lead.toLowerCase() + '. Free tracked shipping.';
+  const p = byId[bProd.value]; if (!p) return; const a = priceOf(p); $('#qName').textContent = p.name; $('#qPrice').textContent = fmt(a); $('#qDep').textContent = fmt(a*0.5); $('#qBal').textContent = fmt(a*0.5); $('#qLead').textContent = 'Dispatch ' + String(p.lead).toLowerCase() + '. ' + (shipFee() ? 'Courier ' + fmt(shipFee()) + '.' : 'Shipping included.');
 }
-function bChange() { quote(); if (bViewer) bViewer.set(byId[bProd.value], '', bImg); }
+function bChange() { quote(); if (bViewer && byId[bProd.value]) bViewer.set(byId[bProd.value], '', bImg); }
 bProd.onchange = bChange;
 function loadFile(f) {
   const err = $('#bErr'); err.textContent = '';
-  if (!f) return; if (!/^image\/(png|jpe?g|webp)$/.test(f.type)) { err.textContent = 'Use a PNG, JPG or WebP image.'; return; }
+  if (!f) return; if (!/^image\/(png|jpe?g|webp)$/.test(f.type)) { err.textContent = 'Use a PNG, JPG or WebP image.'; emit('oops', { why: 'file' }, false); return; }
   if (f.size > 6*1024*1024) { err.textContent = 'That file is over 6 MB. Export a smaller version.'; return; }
-  const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { im.__id = Date.now(); bImg = im; bFileName = f.name; $('#dropTxt').textContent = 'Using ' + f.name + ' (click to replace)'; $('#drop').classList.add('on'); if (bViewer) bViewer.set(byId[bProd.value], '', bImg); }; im.onerror = () => { err.textContent = 'That image could not be read.'; }; im.src = r.result; }; r.readAsDataURL(f);
+  const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { im.__id = Date.now(); bImg = im; emit('upload', {}, false); bFileName = f.name; $('#dropTxt').textContent = 'Using ' + f.name + ' (click to replace)'; $('#drop').classList.add('on'); if (bViewer) bViewer.set(byId[bProd.value], '', bImg); }; im.onerror = () => { err.textContent = 'That image could not be read.'; }; im.src = r.result; }; r.readAsDataURL(f);
 }
 $('#bFile').onchange = e => loadFile(e.target.files[0]);
 const dz = $('#drop'); ['dragover', 'dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('on'); }));
 dz.addEventListener('dragleave', () => { if (!bImg) dz.classList.remove('on'); }); dz.addEventListener('drop', e => { e.preventDefault(); loadFile(e.dataTransfer.files[0]); });
-$('#bAdd').onclick = () => { const err = $('#bErr'); if (!bImg) { err.textContent = 'Upload your artwork first so we can quote it.'; return; } err.textContent = ''; addToCart(bProd.value, { note: $('#bNote').value.trim().slice(0, 300), file: bFileName }); openCart(); };
+$('#bAdd').onclick = () => { const err = $('#bErr'); if (!byId[bProd.value]) { err.textContent = 'No custom products are available right now.'; return; } if (!bImg) { err.textContent = 'Upload your artwork first so we can quote it.'; emit('oops', { why: 'noart' }, false); return; } err.textContent = ''; addToCart(bProd.value, { note: $('#bNote').value.trim().slice(0, 300), file: bFileName }); openCart(); };
 
 /* waitlist + tracking + checkout */
 const emailOK = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
-$('#waitForm').addEventListener('submit', e => { e.preventDefault(); const v = $('#waitEmail').value.trim(), er = $('#waitErr'); if (!emailOK(v)) { er.textContent = 'Enter a valid email address.'; return; } const l = store.get('xaro_wait', []); if (!l.includes(v)) l.push(v); store.set('xaro_wait', l); er.textContent = ''; $('#waitEmail').value = ''; toast('You are on the waitlist'); });
+$('#waitForm').addEventListener('submit', e => { e.preventDefault(); const v = $('#waitEmail').value.trim(), er = $('#waitErr'); if (!emailOK(v)) { er.textContent = 'Enter a valid email address.'; emit('oops', { why: 'email' }, false); return; } XD.upsertCustomer({ email: v, source: 'waitlist', country: region.country, cur: region.cur }); XD.sync('lead', { email: v, country: region.country, src: 'waitlist' }); XD.track('lead'); er.textContent = ''; $('#waitEmail').value = ''; toast('You are on the waitlist'); emit('lead', {}, false); });
 const STAGES = [['Order received', 'We confirm your order and start your piece.'], ['In production', 'Hand-tufted, then sheared and bevel-carved.'], ['Quality check and packing', 'Checked against the QC list, photographed, rolled into the black tube.'], ['Dispatched', 'Handed to the express courier. Tracking number sent by email.'], ['Delivered', 'Report any damage within 14 days.']];
 function renderTrack(o) {
-  $('#tResult').innerHTML = `<div class="panel"><div class="mono" style="color:var(--neon);font-size:12px">${esc(o.id)} | ${o.items.reduce((a, i) => a+i.qty, 0)} item(s) | ${esc(o.country)}</div>
-  <ol class="steps">${STAGES.map((s, i) => `<li class="${i < o.stage ? 'done' : i === o.stage ? 'now' : ''}"><span class="dot">${i < o.stage ? '✓' : i+1}</span><div><b>${s[0]}</b><span>${s[1]}</span></div></li>`).join('')}</ol>
-  ${o.stage < 4 ? `<button class="btn ghost sm" id="advance" data-id="${esc(o.id)}">Preview next stage (demo)</button>` : ''}</div>`;
+  const st = o.cancelled ? -1 : o.stage;
+  $('#tResult').innerHTML = `<div class="panel"><div class="mono" style="color:var(--neon);font-size:12px">${esc(o.id)} | ${o.items.reduce((a, i) => a+i.qty, 0)} item(s) | ${esc(XD.country(o.country).name)}</div>
+  ${o.cancelled ? '<p style="color:var(--bad)">This order was cancelled. Contact us if this is a surprise.</p>' : `<ol class="steps">${STAGES.map((s, i) => `<li class="${i < st ? 'done' : i === st ? 'now' : ''}"><span class="dot">${i < st ? '\u2713' : i+1}</span><div><b>${s[0]}</b><span>${s[1]}</span></div></li>`).join('')}</ol>`}
+  ${o.tracking ? `<p class="mono" style="font-size:12px">Courier tracking: <b>${esc(o.tracking)}</b></p>` : ''}</div>`;
 }
-$('#trackForm').addEventListener('submit', e => { e.preventDefault(); const n = $('#tNum').value.trim().toUpperCase(), m = $('#tMail').value.trim().toLowerCase(), er = $('#tErr'), o = store.get('xaro_orders', []).find(x => x.id === n && x.email.toLowerCase() === m);
+$('#trackForm').addEventListener('submit', e => { e.preventDefault(); const n = $('#tNum').value.trim().toUpperCase(), m = $('#tMail').value.trim().toLowerCase(), er = $('#tErr'), o = XD.orders().find(x => x.id === n && String(x.email).toLowerCase() === m);
   if (!n || !emailOK(m)) { er.textContent = 'Enter your order number and the email used at checkout.'; $('#tResult').innerHTML = ''; return; }
-  if (!o) { er.textContent = 'No order matches in this browser. Preview orders are saved only on the device that placed them.'; $('#tResult').innerHTML = ''; return; }
+  if (!o) { er.textContent = 'No order matches in this browser. Preview orders are saved only on the device that placed them.'; $('#tResult').innerHTML = ''; emit('oops', { why: 'track' }, false); return; }
   er.textContent = ''; renderTrack(o); });
-$('#tResult').addEventListener('click', e => { if (e.target.id === 'advance') { const l = store.get('xaro_orders', []), o = l.find(x => x.id === e.target.dataset.id); if (o && o.stage < 4) { o.stage++; store.set('xaro_orders', l); renderTrack(o); } } });
-const SHIP_OK = { US: 'United States', AE: 'United Arab Emirates' }, SHIP_NO = { GB: 'United Kingdom', AU: 'Australia', OT: 'Another country' };
 function openCheckout() {
   if (!cart.length) { toast('Your cart is empty'); return; }
-  const sub = cart.reduce((a, i) => a+unitPrice(i)*i.qty, 0);
-  $('#coBody').innerHTML = `<h3>Checkout</h3><div class="banner">Preview store. No payment is taken and nothing ships from this page.</div>
-  <form id="coForm" novalidate><div class="f2"><div class="field"><label for="coName">Full name</label><input class="inp" id="coName" autocomplete="name"></div><div class="field"><label for="coMail">Email</label><input class="inp" id="coMail" type="email" autocomplete="email"></div></div>
-  <div class="field"><label for="coCountry">Ship to</label><select class="inp" id="coCountry">${Object.entries(SHIP_OK).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}${Object.entries(SHIP_NO).map(([k, v]) => `<option value="${k}">${v} (not shipping yet)</option>`).join('')}</select></div>
+  const c = ctryObj(), sf = shipFee(), sub = cart.reduce((a, i) => a+unitPrice(i)*i.qty, 0), total = sub+sf, who = XD.me() || {};
+  emit('checkout', { total });
+  $('#coBody').innerHTML = `<h3>Checkout</h3><div class="banner">Preview store. No payment is taken and nothing ships from this page. ${c.pay ? 'Planned payment: ' + esc(c.pay) + '.' : ''}</div>
+  <form id="coForm" novalidate><div class="f2"><div class="field"><label for="coName">Full name</label><input class="inp" id="coName" autocomplete="name" value="${esc(who.name || '')}"></div><div class="field"><label for="coMail">Email</label><input class="inp" id="coMail" type="email" autocomplete="email" value="${esc(who.email || '')}"></div></div>
+  <div class="f2"><div class="field"><label for="coPhone">Phone (for the courier)</label><input class="inp" id="coPhone" type="tel" autocomplete="tel" value="${esc(who.phone || '')}"></div>
+  <div class="field"><label for="coCountry">Ship to</label><select class="inp" id="coCountry">${XD.countries().map(x => `<option value="${x.code}" ${x.code === c.code ? 'selected' : ''}>${esc(x.name)}${x.enabled ? '' : ' (not shipping yet)'}</option>`).join('')}</select></div></div>
   <div class="field"><label for="coAddr">Street address</label><input class="inp" id="coAddr" autocomplete="street-address"></div>
-  <div class="f2"><div class="field"><label for="coCity">City</label><input class="inp" id="coCity" autocomplete="address-level2"></div><div class="field"><label for="coZip">Postcode (optional in UAE)</label><input class="inp" id="coZip" autocomplete="postal-code"></div></div>
-  <div class="quote"><div class="r"><span>${cart.reduce((a, i) => a+i.qty, 0)} item(s)</span><span>${fmt(sub)}</span></div><div class="r"><span>Shipping and duties</span><span>Included</span></div><div class="r t"><span>Due today</span><span>${fmt(sub)}</span></div></div>
-  <div class="err" id="coErr" role="alert"></div><button class="btn" type="submit" id="coPlace">Place preview order</button></form>`;
+  <div class="f2"><div class="field"><label for="coCity">City</label><input class="inp" id="coCity" autocomplete="address-level2"></div><div class="field"><label for="coZip">Postcode ${c.code === 'US' ? '' : '(optional)'}</label><input class="inp" id="coZip" autocomplete="postal-code"></div></div>
+  <div class="quote"><div class="r"><span>${cart.reduce((a, i) => a+i.qty, 0)} item(s)</span><span>${fmt(sub)}</span></div><div class="r"><span>Shipping${c.code === 'LK' ? '' : ' and duties'}</span><span>${sf ? fmt(sf) : 'Included'}</span></div><div class="r t"><span>Due today</span><span>${fmt(total)}</span></div>${region.cur !== c.cur ? `<div class="note">You are charged in ${c.cur}. ${region.cur} amounts are indicative.</div>` : ''}</div>
+  <div class="err" id="coErr" role="alert">${c.enabled ? '' : 'We do not ship to this country yet. Join the waitlist and we will tell you when it opens.'}</div><button class="btn" type="submit" id="coPlace" ${c.enabled ? '' : 'disabled'}>Place preview order</button></form>`;
   openModal('coModal'); setTimeout(() => $('#coName').focus(), 60);
-  const sync = () => { const no = SHIP_NO[$('#coCountry').value]; $('#coErr').textContent = no ? 'We do not ship to this country yet. Join the waitlist and we will tell you when it opens.' : ''; $('#coPlace').disabled = !!no; };
-  $('#coCountry').onchange = sync;
+  $('#coCountry').onchange = () => { const nv = $('#coCountry').value; applyRegion({ country: nv }); openCheckout(); };
   $('#coForm').addEventListener('submit', e => {
-    e.preventDefault(); const er = $('#coErr'), v = id => $('#' + id).value.trim(), cc = $('#coCountry').value;
-    if (SHIP_NO[cc]) { sync(); return; }
-    if (v('coName').length < 2) { er.textContent = 'Enter your full name.'; return $('#coName').focus(); }
-    if (!emailOK(v('coMail'))) { er.textContent = 'Enter a valid email address.'; return $('#coMail').focus(); }
-    if (v('coAddr').length < 5 || v('coCity').length < 2) { er.textContent = 'Enter a street address and city.'; return $('#coAddr').focus(); }
-    if (cc === 'US' && !/^\d{5}(-\d{4})?$/.test(v('coZip'))) { er.textContent = 'Enter a 5-digit US ZIP code.'; return $('#coZip').focus(); }
-    const id = 'XARO-' + (10000 + Math.floor(Math.random()*89999)), o = { id, email: v('coMail'), country: SHIP_OK[cc], total: sub, stage: 0, at: new Date().toISOString(), items: cart.map(i => ({ sku: i.sku, qty: i.qty, design: i.design, dep: i.dep })) };
-    const l = store.get('xaro_orders', []); l.push(o); store.set('xaro_orders', l); cart = []; saveCart(); renderCart();
-    $('#coBody').innerHTML = `<h3>Order <span class="neon">placed</span></h3><p style="margin:0 0 12px">Your preview order number is <b class="mono" style="color:var(--neon)">${id}</b>.</p><p class="note">On the live store you would now receive an email confirmation. Use the Track order section with this number and your email to see the status timeline.</p>
+    e.preventDefault(); const er = $('#coErr'), v = id => $('#' + id).value.trim(), bad = (m, id) => { er.textContent = m; emit('oops', { why: 'form' }, false); $('#' + id).focus(); };
+    if (!c.enabled) return;
+    if (v('coName').length < 2) return bad('Enter your full name.', 'coName');
+    if (!emailOK(v('coMail'))) return bad('Enter a valid email address.', 'coMail');
+    if (v('coPhone').replace(/\D/g, '').length < 7) return bad('Enter a phone number the courier can call.', 'coPhone');
+    if (v('coAddr').length < 5 || v('coCity').length < 2) return bad('Enter a street address and city.', 'coAddr');
+    if (c.code === 'US' && !/^\d{5}(-\d{4})?$/.test(v('coZip'))) return bad('Enter a 5-digit US ZIP code.', 'coZip');
+    const cu = XD.upsertCustomer({ name: v('coName'), email: v('coMail'), phone: v('coPhone'), country: c.code, cur: c.cur, source: who.id ? who.source : 'order' });
+    const o = XD.addOrder({ cid: cu.id, name: v('coName'), email: v('coMail').toLowerCase(), phone: v('coPhone'), country: c.code, cur: c.cur, ship: sf, total, due: total, pay: c.pay || 'Preview',
+      address: { line: v('coAddr'), city: v('coCity'), zip: v('coZip') },
+      items: cart.map(i => { const p = byId[i.sku]; return { sku: i.sku, name: p.name, qty: i.qty, unit: priceOf(p), dep: i.dep, design: i.design, file: i.file, note: i.note }; }) });
+    XD.sync('order', { id: o.id, name: o.name, email: o.email, phone: o.phone, country: o.country, total: o.total, cur: o.cur, items: o.items, address: o.address });
+    emit('order', { id: o.id, total }); loadProducts(); cart = []; saveCart(); renderCart(); renderShop();
+    $('#coBody').innerHTML = `<h3>Order <span class="neon">placed</span></h3><p style="margin:0 0 12px">Your preview order number is <b class="mono" style="color:var(--neon)">${o.id}</b>.</p><p class="note">On the live store you would now receive an email confirmation. Use the Track order section with this number and your email to see the status timeline.</p>
     <div class="btns"><a class="btn" href="#track" id="goTrack">Track this order</a><button class="btn ghost" id="coDone" type="button">Keep shopping</button></div>`;
-    $('#goTrack').onclick = () => { closeModals(); $('#tNum').value = id; $('#tMail').value = o.email; }; $('#coDone').onclick = closeModals;
+    $('#goTrack').onclick = () => { closeModals(); $('#tNum').value = o.id; $('#tMail').value = o.email; }; $('#coDone').onclick = closeModals;
   });
 }
 
+/* section visibility -> assistant tips */
+if ('IntersectionObserver' in window) { const seen = new Set(); const io = new IntersectionObserver(en => en.forEach(x => { if (x.isIntersecting && !seen.has(x.target.id)) { seen.add(x.target.id); emit('section', { id: x.target.id }, false); } }), { threshold: 0.35 }); ['craft', 'wall', 'shop', 'custom', 'lookbook', 'track'].forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); }); }
+
 /* init */
-renderShop(); renderSoon(); renderCart(); quote();
+fillRegionSelects(); renderShop(); renderSoon(); renderCart(); renderNotes(); quote(); XD.track('visit');
+window.XARO = { refresh() { loadProducts(); fillBuilder(); rerender(); }, applyRegion, products: () => P, priceOf, fmt, fmtUSD, addToCart, openCart, openPv, openCheckout, toast, region: () => region, emit, pimg, closeModals, byId: () => byId, fillRegionSelects, soldOut, designNames, shipFee, ctry: ctryObj };
 (async () => {
   try { await Promise.race([document.fonts.load('400 100px Anton'), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
   await initHero();
@@ -1006,4 +1047,7 @@ renderShop(); renderSoon(); renderCart(); quote();
   window.__xaro = { ready: true };
 })();
 })();
+</script>
+<script>
+/*%MOD_JS%*/
 </script>

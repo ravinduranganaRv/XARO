@@ -1,0 +1,110 @@
+/* ---------- Zaro, the XARO assistant ---------- */
+#zaro{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:85;font-family:var(--body);--zh:118px}
+#zaro[hidden]{display:none}
+body.admin-open #zaro{display:none}
+#zaro *{box-sizing:border-box}
+.zr{position:relative;width:var(--zh);height:calc(var(--zh)*1.17);display:block;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.zr:focus-visible{outline:3px solid var(--neon);outline-offset:4px;border-radius:24px}
+.zfloat{position:absolute;inset:0;animation:zfloat 3.4s ease-in-out infinite}
+.zr svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 14px rgba(57,255,20,.28))}
+@keyframes zfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.zsh{animation:zshadow 3.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes zshadow{0%,100%{transform:scaleX(1);opacity:.45}50%{transform:scaleX(.82);opacity:.28}}
+.zbody,.zhead{transform-box:fill-box;transform-origin:50% 100%}
+.zarm{transform-origin:0 0;transition:transform .28s cubic-bezier(.3,1.5,.5,1)}
+.zaL{transform:rotate(4deg)}.zaR{transform:rotate(-4deg)}
+.zbulb{animation:zbulb 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes zbulb{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
+.zant{transform-box:fill-box;transform-origin:50% 100%;animation:zant 3.4s ease-in-out infinite}
+@keyframes zant{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.zlook{transition:transform .12s ease-out}
+/* faces */
+.zr .e,.zr .m,.zr .ck,.zr .zz,.zr .dots{display:none}
+.zr[data-e=n] .e-n,.zr[data-e=h] .e-h,.zr[data-e=l] .e-l,.zr[data-e=s] .e-s,.zr[data-e=o] .e-o,.zr[data-e=w] .e-w,.zr[data-e=z] .e-z{display:inline}
+.zr[data-m=smile] .m-smile,.zr[data-m=big] .m-big,.zr[data-m=o] .m-o,.zr[data-m=sad] .m-sad,.zr[data-m=talk] .m-talk,.zr[data-m=flat] .m-flat{display:inline}
+.zr[data-ck="1"] .ck{display:inline}
+.zr[data-mood=sleep] .zz{display:inline}
+.zr[data-mood=think] .dots{display:inline}
+.eb{transform-box:fill-box;transform-origin:center;animation:zblink 4.6s infinite}
+@keyframes zblink{0%,93%,100%{transform:scaleY(1)}95.5%{transform:scaleY(.08)}}
+.zr[data-mood=excited] .eb{transform:scale(1.18)}
+.m-talk{transform-box:fill-box;transform-origin:center;animation:ztalk .26s ease-in-out infinite alternate}
+@keyframes ztalk{from{transform:scaleY(.35)}to{transform:scaleY(1.15)}}
+.tear{animation:ztear 1.6s ease-in infinite}
+@keyframes ztear{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(14px);opacity:0}}
+.zz text{font-family:var(--mono);font-weight:800;fill:#9fe;animation:zzz 2.4s ease-in-out infinite}
+.zz text:nth-child(2){animation-delay:.8s}.zz text:nth-child(3){animation-delay:1.6s}
+@keyframes zzz{0%{opacity:0;transform:translate(0,6px)}30%{opacity:1}100%{opacity:0;transform:translate(8px,-12px)}}
+.dots circle{animation:zdot 1.1s infinite ease-in-out}.dots circle:nth-child(2){animation-delay:.18s}.dots circle:nth-child(3){animation-delay:.36s}
+@keyframes zdot{0%,100%{opacity:.25}50%{opacity:1}}
+/* actions */
+.zr[data-act=hop] .zbody{animation:zhop .5s ease-out 2}
+.zr[data-act=cheer] .zbody{animation:zhop .46s ease-out 3}
+.zr[data-act=cheer] .zaL{transform:rotate(142deg)}.zr[data-act=cheer] .zaR{transform:rotate(-142deg)}
+.zr[data-act=dance] .zbody{animation:zdance .6s ease-in-out infinite alternate}
+.zr[data-act=dance] .zaL{animation:zarmL .3s ease-in-out infinite alternate}.zr[data-act=dance] .zaR{animation:zarmR .3s ease-in-out infinite alternate}
+.zr[data-act=wave] .zaR{animation:zwave .42s ease-in-out infinite alternate;transform:rotate(-128deg)}
+.zr[data-act=shake] .zhead{animation:zshake .35s ease-in-out 3}
+.zr[data-act=slump] .zhead{transform:translateY(4px) rotate(-5deg)}
+.zr[data-act=slump] .zaL{transform:rotate(16deg)}.zr[data-act=slump] .zaR{transform:rotate(-16deg)}
+.zr[data-act=slump] .zfloat{animation-duration:6s}
+.zr[data-act=tilt] .zhead{transform:rotate(7deg)}
+.zr[data-act=tilt] .zaR{transform:rotate(-40deg)}
+.zr[data-act=jump] .zbody{animation:zjump .5s cubic-bezier(.2,.8,.3,1) 1}
+.zr[data-mood=sleep] .zhead{transform:translateY(5px) rotate(4deg)}
+.zr[data-mood=sleep] .zfloat{animation-duration:6.5s}
+.zr[data-mood=sleep] .zant{animation:none}
+@keyframes zhop{0%,100%{transform:translateY(0) scale(1,1)}20%{transform:translateY(0) scale(1.06,.92)}55%{transform:translateY(-16px) scale(.96,1.05)}}
+@keyframes zjump{0%{transform:translateY(0)}35%{transform:translateY(-22px) scale(.95,1.06)}100%{transform:translateY(0)}}
+@keyframes zdance{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+@keyframes zarmL{from{transform:rotate(120deg)}to{transform:rotate(165deg)}}
+@keyframes zarmR{from{transform:rotate(-165deg)}to{transform:rotate(-120deg)}}
+@keyframes zwave{from{transform:rotate(-112deg)}to{transform:rotate(-150deg)}}
+@keyframes zshake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+/* bubble */
+.zbub{position:absolute;right:calc(var(--zh) - 18px);bottom:calc(var(--zh)*.8);width:max-content;max-width:min(250px,calc(100vw - var(--zh) - 30px));background:#f3f6f0;color:#0a0d09;border-radius:16px 16px 4px 16px;padding:10px 13px;font-size:13.5px;line-height:1.35;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(8px) scale(.94);transform-origin:100% 100%;pointer-events:none;transition:opacity .22s,transform .22s}
+.zbub.on{opacity:1;transform:none;pointer-events:auto;cursor:pointer}
+.zbub b{color:#0a7a00}
+.zdot{position:absolute;right:6px;top:6px;width:16px;height:16px;border-radius:50%;background:#ff5d8f;border:2px solid var(--ink);animation:zping 1.8s infinite;display:none}
+.zdot.on{display:block}
+@keyframes zping{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+/* particles */
+.zp{position:absolute;left:50%;top:30%;pointer-events:none;z-index:2;font-size:18px;line-height:1;animation:zp 1.4s ease-out forwards}
+@keyframes zp{0%{transform:translate(-50%,0) scale(.3) rotate(0);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),var(--dy)) scale(1) rotate(var(--rot));opacity:0}}
+.zp.c{width:8px;height:12px;font-size:0;border-radius:2px}
+.zp.h{color:#ff5d8f;text-shadow:0 0 8px rgba(255,93,143,.7)}
+/* chat panel */
+.zpan{position:absolute;right:0;bottom:calc(var(--zh)*1.17 + 6px);width:min(380px,calc(100vw - 24px));height:min(540px,calc(100vh - var(--zh)*1.17 - 30px));background:var(--panel);border:2px solid var(--neon);border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.65),0 0 40px rgba(57,255,20,.12);display:none;flex-direction:column;overflow:hidden}
+.zpan.on{display:flex;animation:zpop .22s ease-out}
+@keyframes zpop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.zhd{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:#0b0e0b}
+.zhd b{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;line-height:1}
+.zhd small{display:block;color:var(--mute);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.zhd i{width:9px;height:9px;border-radius:50%;background:var(--neon);box-shadow:0 0 10px var(--neon);flex:none}
+.zhd .zx{margin-left:auto;background:none;border:1px solid var(--line);color:var(--fg);width:34px;height:34px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer}
+.zhd .zx:hover{border-color:var(--neon);color:var(--neon)}
+.zms{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.zm{max-width:88%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap}
+.zm.b{background:#1a211a;border:1px solid #2a3327;border-bottom-left-radius:4px;align-self:flex-start}
+.zm.u{background:var(--neon);color:var(--neon-ink);font-weight:600;border-bottom-right-radius:4px;align-self:flex-end}
+.zm.ty{display:flex;gap:4px;padding:12px 14px}
+.zm.ty span{width:7px;height:7px;border-radius:50%;background:var(--neon);animation:zdot 1s infinite}.zm.ty span:nth-child(2){animation-delay:.15s}.zm.ty span:nth-child(3){animation-delay:.3s}
+.zcard{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-self:stretch;background:#0e120e;border:1px solid #2a3327;border-radius:12px;padding:8px}
+.zcard img{width:64px;height:64px;object-fit:cover;border-radius:8px;background:#000}
+.zcard b{display:block;font-size:13.5px;line-height:1.25}
+.zcard .zpr{font-family:var(--mono);color:var(--neon);font-size:13px;font-weight:700;margin:2px 0 6px}
+.zcard .zpr small{color:var(--mute);font-weight:400}
+.zcard .zb{display:flex;gap:6px;flex-wrap:wrap}
+.zbt{background:#141914;border:1px solid #384234;color:var(--fg);border-radius:999px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--body)}
+.zbt:hover{border-color:var(--neon);color:var(--neon)}
+.zbt.pri{background:var(--neon);color:var(--neon-ink);border-color:var(--neon)}
+.zbt.pri:hover{color:var(--neon-ink);box-shadow:0 0 14px rgba(57,255,20,.4)}
+.zbt[disabled]{opacity:.5;cursor:default}
+.zch{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}
+.zft{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:#0b0e0b}
+.zft input{flex:1;min-width:0;background:#141914;border:1px solid #2f382c;border-radius:999px;padding:10px 14px;color:var(--fg);font-size:16px;font-family:var(--body)}
+.zft input:focus{outline:none;border-color:var(--neon)}
+.zft button{background:var(--neon);color:var(--neon-ink);border:0;border-radius:999px;padding:0 16px;font-weight:800;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.06em}
+.zno{padding:6px 14px 10px;color:var(--mute);font-size:11px;line-height:1.35;background:#0b0e0b}
+@media (max-width:600px){#zaro{--zh:84px}.zbub{font-size:13px}}
+@media (prefers-reduced-motion:reduce){.zfloat,.zsh,.zant,.zbulb,.eb,.tear,.zz text{animation:none!important}.zr[data-act] .zbody,.zr[data-act] .zhead,.zr[data-act] .zarm{animation:none!important}}
