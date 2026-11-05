@@ -24,6 +24,6 @@ No public AUD or GBP price list for custom tufted rugs was found (the UK and Aus
 * **Sri Lanka**: set by hand. Keyboard rugs sit at the top of your Rs 2,000-5,000 range (compact 3,800, standard 4,500, custom 5,000). Floor and wall pieces are unchanged except the mini frame (Rs 7,500) because I found no local tufted wall-art prices, only imported rugs.
 
 ## Cost warning
-With the cost model used in the project plan (materials + packaging + labour at US$2.50 per hour, estimates), the Sri Lankan keyboard-rug price of Rs 3,800-5,000 does not cover the cost of Rs 5,000-6,000 per unit, and larger pieces are further below cost. Weigh a real sample (hours, yarn, backing) and enter the real unit cost in Admin > Products; the admin shows the margin per country. FX rates are editable in Admin > Settings.
+With the cost model used in the project plan (materials + packaging + labour at US$2.50 per hour, estimates), the Sri Lankan keyboard-rug price of Rs 3,800-5,000 is below the model cost of about Rs 5,100 (compact) and Rs 5,800 (standard) per unit, and larger pieces are further below cost. Weigh a real sample (hours, yarn, backing) and enter the real unit cost in Admin > Products; the admin shows the margin per country. FX rates are editable in Admin > Settings.
 
 Coming-soon items (tees, hoodies, caps and the rest) no longer show prices on the site.
