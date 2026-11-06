@@ -3,7 +3,7 @@
 'use strict';
 const L = window.XSTUDIO_LIB, esc = XD.esc, $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
 const IN = 2.54, RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let root, doc = L.newDoc(), imgs = {}, sel = '', hist = [], hi = -1, unit = 'cm', view = '', ltab = 'art', target = 'fill', viewer = null, dirty = false, an = null, seq = 0, t3 = 0, tA = 0, prevCv = null, prevRatio = 1, filt = { cat: '', q: '', tcat: '' }, drag = null, savedName = '';
+let root, doc = L.newDoc(), imgs = {}, sel = '', hist = [], hi = -1, unit = 'cm', view = '', ltab = 'art', target = 'fill', viewer = null, dirty = false, an = null, seq = 0, t3 = 0, tA = 0, prevCv = null, prevRatio = 1, filt = { cat: '', q: '', tcat: '' }, drag = null, savedName = '', cloudId = '';
 const cv2 = () => $('#stC', root), ov = () => $('#stO', root);
 
 /* ---------------------------------------------------------------- tiny helpers */
@@ -18,7 +18,7 @@ function commit() { hist = hist.slice(0, hi + 1); hist.push(snap()); if (hist.le
 function restore(i) { hi = i; doc = JSON.parse(hist[i]); if (sel && !layer(sel)) sel = ''; changed(true); }
 function changed(full) { draw2D(); schedule(); if (full !== 'live') { panelL(); panelR(); } undoBtns(); }
 function undoBtns() { const u = $('#stUndo', root), r = $('#stRedo', root); if (u) { u.disabled = hi <= 0; r.disabled = hi >= hist.length - 1; } }
-function newDoc(d) { doc = d; sel = ''; hist = []; hi = -1; hist.push(snap()); hi = 0; dirty = false; savedName = ''; changed(true); camPreset('angle'); }
+function newDoc(d) { doc = d; sel = ''; hist = []; hi = -1; hist.push(snap()); hi = 0; dirty = false; savedName = ''; cloudId = ''; changed(true); camPreset('angle'); }
 
 /* ---------------------------------------------------------------- 2D canvas */
 function draw2D() {
@@ -225,12 +225,14 @@ function sheet(title, body, actions, wide) {
   root.appendChild(m); const close = () => m.remove(); $('.x', m).onclick = close; m.addEventListener('mousedown', e => { if (e.target === m) close(); });
   (actions || []).forEach(a => { const b = document.createElement('button'); b.type = 'button'; b.className = 'sb ' + (a.cls || ''); b.textContent = a.label; b.onclick = () => a.run(close, m); $('#mAct', m).appendChild(b); }); const f = $('input,textarea,select', m); if (f) setTimeout(() => f.focus(), 40); return { m, close };
 }
+const cloudOn = () => !!(window.XSB && XSB.signedIn() && window.XACCT);
 function saveDesign() {
-  const s = sheet('Save design', `<div class="fld"><label for="sdN">Design name</label><input type="text" id="sdN" maxlength="40" value="${esc(savedName || 'My rug')}"></div><div class="err" id="sdE" role="alert"></div><p class="note">Saved in this browser. Sign in on the same device to find it again.</p>`, [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: close => {
+  const s = sheet('Save design', `<div class="fld"><label for="sdN">Design name</label><input type="text" id="sdN" maxlength="40" value="${esc(savedName || 'My rug')}"></div><div class="err" id="sdE" role="alert"></div><p class="note">${cloudOn() ? 'Saved to your XARO account (private) and to this browser.' : 'Saved in this browser only. Sign in (top bar) to keep designs in your account on any device.'}</p>`, [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: close => {
     const name = $('#sdN', s.m).value.trim() || 'My rug', usedImgs = {}; doc.layers.forEach(l => { if (l.type === 'image' && imgs[l.img]) usedImgs[l.img] = { name: imgs[l.img].name, data: imgs[l.img].data, w: imgs[l.img].w, h: imgs[l.img].h }; });
     const list = XD.designs().filter(d => d.name !== name); list.unshift({ id: L.uid(), name, at: new Date().toISOString(), doc: JSON.parse(snap()), images: usedImgs, thumb: thumb(200, 0.7) });
-    if (!XD.saveDesigns(list.slice(0, 20))) { $('#sdE', s.m).textContent = 'Browser storage is full. Delete an old design first.'; return; }
-    savedName = name; dirty = false; toast('Design saved'); close();
+    const localOk = XD.saveDesigns(list.slice(0, 20)); if (!localOk && !cloudOn()) { $('#sdE', s.m).textContent = 'Browser storage is full. Delete an old design first.'; return; }
+    savedName = name; dirty = false; close();
+    if (cloudOn()) { toast('Saving to your account...'); XACCT.save({ name, doc: JSON.parse(snap()), imgs, thumb: thumb(200, 0.7), cloudId }).then(id => { cloudId = id; toast('Saved to your account'); }).catch(e => toast((localOk ? 'Saved on this device only. ' : 'Not saved. ') + (e.message || ''), true)); } else toast('Design saved');
   } }]);
 }
 function myDesigns() {
@@ -238,6 +240,16 @@ function myDesigns() {
     $$('[data-open]', s.m).forEach(b => b.onclick = async () => { const d = XD.designs().find(x => x.id === b.dataset.open); if (!d) return; imgs = {}; for (const [id, v] of Object.entries(d.images || {})) { const el = await L.imageFromData(v.data); if (el) imgs[id] = { el, data: v.data, name: v.name, w: v.w, h: v.h }; } newDoc(JSON.parse(JSON.stringify(d.doc))); savedName = d.name; s.close(); toast('Opened ' + d.name); });
     $$('[data-rm]', s.m).forEach(b => b.onclick = () => { if (confirm('Delete this saved design?')) { XD.saveDesigns(XD.designs().filter(x => x.id !== b.dataset.rm)); draw(); } }); };
   const s = sheet('My designs', '', [{ label: 'Close', run: c => c() }]); draw();
+  if (cloudOn()) cloudList(s);
+}
+async function cloudList(s) {
+  const box = document.createElement('div'); box.innerHTML = '<h4 style="margin:14px 0 6px">In your account</h4><div class="cl"><p class="note">Loading...</p></div>'; $('.mb', s.m).appendChild(box); const cl = $('.cl', box);
+  const draw = async () => { let rows; try { rows = await XACCT.list(); } catch (e) { cl.innerHTML = '<p class="note">' + esc(e.message) + '</p>'; return; }
+    cl.innerHTML = rows.length ? rows.map(d => `<div class="ly" style="grid-template-columns:70px minmax(0,1fr) auto;cursor:default">${d._thumb ? `<img src="${esc(d._thumb)}" alt="" style="width:70px;border-radius:5px">` : '<span></span>'}<span><b>${esc(d.name)}</b>${d.status === 'archived' ? ' <small>(archived)</small>' : ''}<br><small>${esc(new Date(d.updated_at).toLocaleDateString('en-GB'))}${d.business_id ? ' | shared with your team' : ''}</small></span><div class="chips"><button class="sb sm pri" data-co="${esc(d.id)}">Open</button><button class="sb sm" data-cd="${esc(d.id)}">Duplicate</button><button class="sb sm bad" data-cr="${esc(d.id)}">Delete</button></div></div>`).join('') : '<p class="note">Nothing saved to your account yet.</p>';
+    $$('[data-co]', cl).forEach(b => b.onclick = async () => { try { const o = await XACCT.open(b.dataset.co); imgs = {}; for (const [id, v] of Object.entries(o.images)) { const el = await L.imageFromData(v.data); if (el) imgs[id] = { el, data: v.data, name: v.name, w: v.w, h: v.h }; } newDoc(o.doc); savedName = o.name; cloudId = o.id; s.close(); toast('Opened ' + o.name); } catch (e) { toast(e.message, true); } });
+    $$('[data-cd]', cl).forEach(b => b.onclick = async () => { try { await XACCT.duplicate(b.dataset.cd); toast('Duplicated'); draw(); } catch (e) { toast(e.message, true); } });
+    $$('[data-cr]', cl).forEach(b => b.onclick = async () => { if (!confirm('Delete this design from your account? This cannot be undone.')) return; try { await XACCT.remove(b.dataset.cr); draw(); } catch (e) { toast(e.message, true); } }); };
+  draw();
 }
 function preview() {
   ensureViewer(); const snapUrl = viewer ? $('#st3', root).toDataURL('image/png') : '', flat = thumb(700, 0.9), e = estimate();
@@ -272,7 +284,7 @@ function toCart() {
 function build() {
   root = document.createElement('div'); root.id = 'studio'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'XARO 3D Custom Studio');
   root.innerHTML = `<div class="sh"><img src="${IMG.logoBlock}" alt=""><h2>Custom <span class="neon">Studio</span></h2><span class="sp"></span>
-    <button class="sb sm" id="stUnit" aria-label="Switch units">cm</button>
+    <button class="sb sm" id="stAcct" aria-label="Account">Sign in</button><button class="sb sm" id="stUnit" aria-label="Switch units">cm</button>
     <button class="sb sm" data-v="vboth" aria-pressed="true">Both</button><button class="sb sm" data-v="v2d" aria-pressed="false">Design</button><button class="sb sm" data-v="v3d" aria-pressed="false">3D</button>
     <button class="sb" id="stClose" aria-label="Close studio">Close</button></div>
   <div class="main"><aside class="pn"><div class="tabs" role="tablist" aria-label="Design tools"></div><div class="pb" id="stL"></div></aside>
@@ -338,6 +350,7 @@ function build() {
   $('#stUnit', root).onclick = () => { unit = unit === 'cm' ? 'in' : 'cm'; $('#stUnit', root).textContent = unit; panelL(); };
   $('#stClose', root).onclick = closeStudio; $('#stUndo', root).onclick = () => hi > 0 && restore(hi - 1); $('#stRedo', root).onclick = () => hi < hist.length - 1 && restore(hi + 1);
   $('#stReset', root).onclick = () => { if (confirm('Clear the whole design and start again?')) { imgs = {}; newDoc(L.newDoc()); } };
+  if (window.XACCT) XACCT.mount({ $: q => $(q, root), sheet, toast, toPng: async im => { const c = document.createElement('canvas'); c.width = im.w; c.height = im.h; c.getContext('2d').drawImage(im.el, 0, 0, im.w, im.h); return c.toDataURL('image/png'); }, blobToDataUrl: b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); }) });
   $('#stSave', root).onclick = saveDesign; $('#stMine', root).onclick = myDesigns; $('#stPrev', root).onclick = preview; $('#stDl', root).onclick = downloadDesign; $('#stQuote', root).onclick = quote; $('#stCart', root).onclick = toCart;
   addEventListener('keydown', e => {
     if (!root.classList.contains('on')) return; const tag = (e.target.tagName || '').toLowerCase(); if (e.key === 'Escape') { if ($('.mod', root)) { $$('.mod', root).pop().remove(); } else closeStudio(); return; }
