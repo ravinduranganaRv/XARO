@@ -10,3 +10,8 @@ Status labels: COMPLETE AND TESTED | IMPLEMENTED BUT NOT FULLY TESTED | REQUIRES
 - One small entry control added inside the existing Custom builder panel: "Open the full 3D Studio".
 - GitHub: push access confirmed (admin on the repo). `gh auth status` reports the injected token as invalid, but git push and the API work through the session proxy.
 - Supabase: BLOCKED / REQUIRES EXTERNAL CONNECTION. The session network policy denies supabase.com and api.supabase.com, and the Supabase connector is not installed. Needed: install the Supabase connector in claude.ai (see chat).
+
+## Phase 6a - colour reduction and yarn mapping engine (2026-11-06)
+- `src/mod/colour.js` (pure functions): CIELAB + CIEDE2000, palette extraction (near colours grouped, transparency ignored, coverage %), reduction to N colours by weighted agglomerative merging, locked colours, manual merge/replace, pixel remap, nearest-yarn mapping with out-of-stock skipping and a closeness label.
+- `tests/colour.test.js`: 8 tests pass, including four published CIEDE2000 reference values.
+- Status: engine COMPLETE AND TESTED (unit level). The Studio screens for it (palette view, count selector, before/after, merge/lock UI) are NOT IMPLEMENTED yet.

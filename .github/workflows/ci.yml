@@ -34,7 +34,7 @@ jobs:
           print('inline scripts ok')
           PY
       - name: Costing engine tests
-        run: node --test tests/costing.test.js
+        run: node --test tests/costing.test.js tests/colour.test.js
       - name: index.html is up to date with src/
         run: |
           python3 build.py
