@@ -66,7 +66,7 @@ begin
   return null;
 end $$;
 create trigger snapshot_design after insert or update on public.custom_designs for each row execute function private.snapshot_design();
-create or replace function private.touch_updated() returns trigger language plpgsql as $$ begin new.updated_at := now(); return new; end $$;
+create or replace function private.touch_updated() returns trigger language plpgsql set search_path = public as $$ begin new.updated_at := now(); return new; end $$;
 create trigger touch_design before update on public.custom_designs for each row execute function private.touch_updated();
 
 -- original uploads and exports: the file itself lives in private storage, this table records it
@@ -249,7 +249,7 @@ create policy mem_owner_delete on public.business_members for delete using (priv
 
 -- designs, folders and assets: members of a business share them; a personal item belongs to one user.
 -- owner_id/business_id are fixed at creation (trigger), so nobody can move an item into another tenant.
-create or replace function private.immutable_owner() returns trigger language plpgsql as $$
+create or replace function private.immutable_owner() returns trigger language plpgsql set search_path = public as $$
 begin new.owner_id := old.owner_id; new.business_id := old.business_id; return new; end $$;
 drop policy design_own on public.custom_designs; drop policy design_staff on public.custom_designs;
 drop policy asset_own on public.design_assets; drop policy asset_staff on public.design_assets;

@@ -16,8 +16,16 @@ Status labels: COMPLETE AND TESTED | IMPLEMENTED BUT NOT FULLY TESTED | REQUIRES
 - `tests/colour.test.js`: 8 tests pass, including four published CIEDE2000 reference values.
 - Status: engine COMPLETE AND TESTED (unit level). The Studio screens for it (palette view, count selector, before/after, merge/lock UI) are NOT IMPLEMENTED yet.
 
-## Phase 6b: Supabase schema v2 (multi-tenant) - in progress
-- Supabase access verified (project XARO-STUDIO, Singapore). Migrations 0001-0003 applied to the remote project.
-- 0004_tenancy (rug maker businesses, RLS, yarn movements, audit) and 0005_storage (private buckets) are written and pass locally (rls_test 51 checks, tenancy_test 63 checks) but are NOT yet applied remotely: the connector is waiting for the owner to approve a migration containing destructive statements (drop policy / drop constraint on objects created minutes earlier).
-- Next: apply 0004/0005, run tenancy_test remotely, review advisors, then front-end integration.
-- Status: IMPLEMENTED BUT NOT FULLY TESTED (remote verification pending; browser-to-Supabase E2E cannot be run from the build sandbox).
+## Phase 6b: Supabase schema v2 (multi-tenant) - applied to the real project
+Project XARO-STUDIO (Singapore). All six migrations are applied remotely and mirrored in supabase/migrations.
+- 0001 store schema, 0002 RLS + private helper schema, 0003 seed roles/permissions: applied.
+- 0004 tenancy (businesses, members, designs/folders/versions, yarn library + movements, quotations, orders, production sheets, rates, audit): applied.
+  Its four DROP statements only replaced my own earlier policies/constraints on the empty project (approved by the owner).
+- 0005 private storage: 3 private buckets (design-originals 8 MB, design-exports 20 MB, business-assets 2 MB), path-based policies.
+- 0006 advisor fixes: 38 foreign-key indexes, auth.uid() cached per statement, overlapping policies merged, storage policies merged to 4.
+- Verification on the REAL project: tenancy isolation test TENANCY_TESTS_PASSED 63 (run twice: before and after 0006; rolled back, no leftover rows).
+  Local Postgres: rls_test 51 checks + tenancy 63 checks pass with all six migrations (also run in CI).
+- Advisors: security = 3 WARN, intentional (create_business, become_rugmaker, add_business_member are callable by signed-in users and check identity inside).
+  Performance = only INFO "unused index" (expected on an empty database).
+- Not yet done: set business_settings 'owner_email' (needs the owner's email), edge functions adapted to the schema, front-end Supabase client.
+- Status: schema and database security COMPLETE AND TESTED (database level). Browser-to-Supabase auth/upload flows: not yet built, and cannot be exercised live from the build sandbox.
