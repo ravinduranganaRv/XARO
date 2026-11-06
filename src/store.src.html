@@ -53,6 +53,7 @@ main{position:relative;z-index:1}
 .copy.panelled{background:rgba(6,8,6,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:28px 28px 30px;border-left:3px solid var(--neon)}
 .copy .kick{color:var(--neon);font-size:12px;margin-bottom:14px;display:block}
 .copy h1,.copy h2{font-size:clamp(64px,13vw,168px);margin:0 0 18px}
+#hero .copy h1{font-size:clamp(46px,7.6vw,118px);max-width:11ch}
 .copy h2{font-size:clamp(46px,8vw,104px)}
 .copy p{color:#dfe5da;font-size:17px;max-width:46ch;text-shadow:0 2px 18px #000}
 .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
@@ -216,7 +217,7 @@ footer small{color:var(--mute)}
   <div class="wrap">
     <a class="brand" href="#hero" aria-label="XARO Industries home"><img data-img="logoBlock" alt="XARO Industries (Pvt) Ltd logo" width="50" height="42"></a>
     <nav class="nav" aria-label="Main">
-      <a class="lnk" href="#shop">Shop</a><a class="lnk" href="#custom">Custom</a><a class="lnk" href="#lookbook">Lookbook</a><a class="lnk" href="#track">Track</a>
+      <a class="lnk" href="#shop">Shop</a><a class="lnk" href="#studio" data-open-studio>Custom Studio</a><a class="lnk" href="#lookbook">Gallery</a><a class="lnk" href="#craft">Process</a><a class="lnk" href="#track">Track</a>
       <label class="sr" for="cur">Currency</label>
       <label class="sr" for="ctry">Country</label><select class="sel" id="ctry"></select><select class="sel" id="cur"></select>
       <button class="cartbtn" id="openCart" aria-label="Open cart">Cart <b id="cartN">0</b></button>
@@ -228,10 +229,10 @@ footer small{color:var(--mute)}
   <section id="hero" class="stage-sec" style="--fallback:url(#)">
     <div class="wrap"><div class="copy">
       <span class="kick mono">Hand-tufted in Sri Lanka | Shipped worldwide</span>
-      <h1 class="disp">Drop <span class="neon">001</span></h1>
-      <p>Keyboard rugs and 3D contour wall art, tufted by hand and carved to a bevel. Twenty-five pieces. Then the next drop.</p>
-      <div class="hero-meta"><span class="chip"><i></i>25 pieces worldwide</span><span class="chip">Free shipping</span><span class="chip" id="dropDate">Launch date to waitlist first</span></div>
-      <div class="btns"><a class="btn" href="#shop">Shop Drop 001</a><a class="btn ghost" href="#custom">Build a custom rug</a></div>
+      <h1 class="disp">Turn your art into <span class="neon">something real.</span></h1>
+      <p>Design a custom tufted rug in 3D, see the price as you build, and have it made by hand in Sri Lanka. Drop 001 keyboard rugs and contour wall art are ready to order now.</p>
+      <div class="hero-meta"><span class="chip"><i></i>25 pieces worldwide</span><span class="chip">Delivery quoted at checkout</span><span class="chip" id="dropDate">Launch date to waitlist first</span></div>
+      <div class="btns"><a class="btn" href="#studio" data-open-studio>Create your rug</a><a class="btn ghost" href="#shop">Shop Drop 001</a></div>
     </div></div>
     <div class="scrollhint mono">Scroll to move through the studio</div>
   </section>
@@ -272,7 +273,7 @@ footer small{color:var(--mute)}
   </div></section>
 
   <section id="custom" class="solid"><div class="wrap">
-    <div class="sec-head"><h2 class="disp">Custom <span class="neon">rug builder</span></h2><p>Upload your art, pick a product and watch it become a tufted pile in 3D. Pay 50% to start; the balance is due when you approve the design mockup.</p></div>
+    <div class="sec-head"><h2 class="disp">Custom <span class="neon">rug builder</span></h2><p><a class="btn" href="#studio" data-open-studio style="margin-bottom:12px">Open the full 3D Custom Studio</a><br>Quick version: upload your art, pick a product and watch it become a tufted pile in 3D. Pay 50% to start; the balance is due when you approve the design mockup.</p></div>
     <div class="builder">
       <div class="viewbox" id="bView"><canvas id="bCanvas" aria-label="Interactive 3D preview of your custom rug"></canvas><div class="fb"><img data-img="p_CK" alt="Custom keyboard rug preview"></div><span class="hint mono">Drag to rotate | scroll to zoom</span></div>
       <div class="panel">
@@ -330,7 +331,7 @@ footer small{color:var(--mute)}
 
 <footer><div class="wrap cols">
   <div><img data-img="logoBlock" alt="XARO Industries (Pvt) Ltd"><div><b>XARO Industries (Pvt) Ltd</b><br><small>Made in Sri Lanka. Shipped worldwide.</small></div></div>
-  <div><div class="lbl" style="margin-bottom:10px">Shop</div><div><a href="#shop">All products</a><br><a href="#custom">Custom builder</a><br><a href="#track">Track order</a><br><a href="#admin" id="staffLink">Staff login</a></div></div>
+  <div><div class="lbl" style="margin-bottom:10px">Shop</div><div><a href="#shop">All products</a><br><a href="#studio" data-open-studio>Custom Studio</a><br><a href="#track">Track order</a><br><a href="#admin" id="staffLink">Staff login</a></div></div>
   <div><div class="lbl" style="margin-bottom:10px">Preview store</div><small>This page is a working front-end preview. No payment is taken and nothing is shipped from it. Orders and the waitlist are saved only in this browser.</small></div>
 </div></footer>
 
@@ -470,7 +471,7 @@ void main(){float d=length(gl_PointCoord-0.5);if(d>0.5)discard;gl_FragColor=vec4
 /* ============================================================ engine */
 class Engine {
   constructor(canvas) {
-    const gl = canvas.getContext('webgl', { antialias: true, alpha: false, powerPreference: 'high-performance' }) || canvas.getContext('experimental-webgl');
+    const gl = canvas.getContext('webgl', { antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: canvas.hasAttribute('data-keep') }) || canvas.getContext('experimental-webgl');
     if (!gl) throw new Error('WebGL unavailable');
     this.gl = gl; this.canvas = canvas; this.cache = new Map(); this.meshes = {}; this.shellGeo = {};
     this.pSolid = this.prog(VS_SOLID, FS_SOLID);
@@ -607,7 +608,7 @@ function sphereData(nx, ny) {
 }
 
 /* ============================================================ art textures (canvas) */
-const mkc = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const mkc = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; try { c.getContext('2d', { willReadFrequently: true }); } catch (e) {} return c; };
 const GREEN = '#39FF14';
 function plus(ctx, w, h, col = '#1b1b1b') { ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); for (let y = 14; y < h; y += 26) for (let x = 14; x < w; x += 26) { ctx.moveTo(x-4, y); ctx.lineTo(x+4, y); ctx.moveTo(x, y-4); ctx.lineTo(x, y+4); } ctx.stroke(); }
 function crownPath(ctx, x, y, s) { ctx.beginPath(); ctx.moveTo(x, y+40*s); ctx.lineTo(x+8*s, y+6*s); ctx.lineTo(x+26*s, y+26*s); ctx.lineTo(x+40*s, y); ctx.lineTo(x+54*s, y+26*s); ctx.lineTo(x+72*s, y+6*s); ctx.lineTo(x+80*s, y+40*s); ctx.closePath(); }
@@ -833,7 +834,7 @@ class Viewer {
     e.begin(S);
     e.solid(e.plane, M.chain(M.T(0, 0.3, -3.5), M.S(16, 12, 1)), { tex: this.tglow, color: [0.03, 0.13, 0.03], lit: 0, additive: true });
     const base = M.chain(M.Rx(this.tilt), M.Ry(this.yaw)), lod = 0.0;
-    const rug = (m, w, h, o) => { const A = this.art(w, h, o.defd); e.pile(M.mul(base, M.mul(m, M.S(w, h, 1))), Object.assign({ col: A.col, hgt: A.hgt, size: [w, h], shells: 34, lod: lod, carve: .8, rad: g.rad || .15 }, o)); };
+    const rug = (m, w, h, o) => { const A = this.art(w, h, o.defd); e.pile(M.mul(base, M.mul(m, M.S(w, h, 1))), Object.assign({ col: A.col, hgt: A.hgt, size: [w, h], shells: 34, lod: lod, carve: g.carveK || .8, rad: g.rad || .15 }, o)); };
     if (g.k === 'set') {
       const aw = this.img ? 4.4 : 4.4; rug(M.T(-0.7, 0.45, 0), 4.0, 1.46, { dens: 60, pile: .075, rad: .18 });
       const Ac = this.art(1.5, 1.5, 'mono'), cm = M.mul(base, M.mul(M.T(2.15, -0.95, 0.1), M.S(1.5, 1.5, 1)));
@@ -1038,7 +1039,7 @@ if ('IntersectionObserver' in window) { const seen = new Set(); const io = new I
 
 /* init */
 fillRegionSelects(); renderShop(); renderSoon(); renderCart(); renderNotes(); quote(); XD.track('visit');
-window.XARO = { refresh() { loadProducts(); fillBuilder(); rerender(); }, applyRegion, products: () => P, priceOf, fmt, fmtUSD, addToCart, openCart, openPv, openCheckout, toast, region: () => region, emit, pimg, closeModals, byId: () => byId, fillRegionSelects, soldOut, designNames, shipFee, ctry: ctryObj };
+window.XARO = { refresh() { loadProducts(); fillBuilder(); rerender(); }, applyRegion, products: () => P, priceOf, fmt, fmtUSD, addToCart, openCart, openPv, openCheckout, toast, region: () => region, emit, pimg, closeModals, byId: () => byId, fillRegionSelects, soldOut, designNames, shipFee, ctry: ctryObj , newViewer: c => new Viewer(c), dropArt(v, img, ratio) { try { const key = 'placeholder|' + ratio.toFixed(2) + '|u' + img.__id, r = artCache.get(key); if (!r) return; [r.color, r.hgt].forEach(cv => { const t = v.eng.cache.get(cv); if (t) { v.eng.gl.deleteTexture(t); v.eng.cache.delete(cv); } }); artCache.delete(key); } catch (e) {} }};
 (async () => {
   try { await Promise.race([document.fonts.load('400 100px Anton'), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
   await initHero();

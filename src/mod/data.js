@@ -129,6 +129,25 @@ function admins() {
 }
 const saveAdmins = l => s('admins', l);
 
+
+/* ---------------------------------------------------------------- yarn library, saved designs, quotes, costing rates */
+const YARN_DEFAULT = [
+  ['Jet Black', '#0B0B0B'], ['Charcoal', '#2A2D2A'], ['Graphite Grey', '#5A5F5A'], ['Silver Grey', '#A5ABA5'], ['Off White', '#EDEDE6'], ['Pure White', '#FFFFFF'],
+  ['Neon Lime', '#39FF14'], ['Lime', '#A4D62B'], ['Forest Green', '#1F6B35'], ['Mint', '#7DE3B0'], ['Teal', '#0FA3A3'], ['Sky Blue', '#4DA3FF'], ['Royal Blue', '#2547D0'],
+  ['Navy', '#101C4A'], ['Violet', '#7A3CFF'], ['Magenta', '#E0359A'], ['Hot Pink', '#FF5D8F'], ['Red', '#E02B2B'], ['Burgundy', '#6E1530'], ['Orange', '#FF7A1A'],
+  ['Amber', '#FFB020'], ['Yellow', '#FFE53B'], ['Beige', '#D9C3A0'], ['Brown', '#6B4423'], ['Gold', '#C9A227'], ['Blush', '#F4C6C6']
+].map((c, i) => ({ id: 'XY-' + String(i + 1).padStart(3, '0'), name: c[0], hex: c[1], material: 'Acrylic', supplier: '', availability: 'unknown', stock: null, cost: null, active: true }));
+const hex2rgb = h => { h = String(h).replace('#', ''); if (h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const yarns = () => { const v = g('yarns', null); return v && v.length ? v : clone(YARN_DEFAULT); };
+const saveYarns = l => s('yarns', l);
+const designs = () => g('designs', []);
+const saveDesigns = l => s('designs', l);
+const quotes = () => g('quotes', []);
+const saveQuotes = l => s('quotes', l);
+function addQuote(q) { const l = quotes(); const o = Object.assign({ id: 'Q-' + Math.floor(10000 + Math.random() * 89999), at: new Date().toISOString(), status: 'New', confirmed: null, notes: '' }, q); l.unshift(o); if (!saveQuotes(l)) { l.forEach(x => { if (x.thumb && x !== o) x.thumb = ''; }); saveQuotes(l); } return o; }
+const costRates = () => g('costing', null);
+const setCostRates = o => s('costing', o);
+
 /* ---------------------------------------------------------------- assistant knowledge + logs */
 const DEFAULT_KB = [
   { id: 'k_drop', name: 'Drop 001', keys: ['drop', '001', 'limited', 'launch', 'release', 'how many pieces', '25 pieces'], a: 'Drop 001 is our first limited run of hand-tufted keyboard rugs and 3D wall art, 25 pieces worldwide. Each one is made to order in Sri Lanka. Join the waitlist and you hear about the launch first.' },
@@ -153,12 +172,12 @@ function addUnanswered(q) { const l = unanswered(); if (!l.find(x => x.q === q))
 const saveUnanswered = l => s('unans', l);
 
 /* ---------------------------------------------------------------- backup */
-const KEYS = ['settings', 'fx', 'countries', 'products', 'customers', 'orders', 'events', 'admins', 'kb', 'chat', 'unans'];
+const KEYS = ['settings', 'fx', 'countries', 'products', 'customers', 'orders', 'events', 'admins', 'kb', 'chat', 'unans', 'yarns', 'designs', 'quotes', 'costing'];
 const exportAll = () => { const o = { app: 'xaro', v: 2, at: new Date().toISOString() }; KEYS.forEach(k => { o[k] = g(k, null); }); return o; };
 function importAll(o) { if (!o || o.app !== 'xaro') throw new Error('This is not a XARO backup file.'); KEYS.forEach(k => { if (o[k] != null) s(k, o[k]); }); _prod = null; }
 function resetAll() { KEYS.concat(['me', 'region']).forEach(k => { try { localStorage.removeItem(K + k); } catch (e) {} delete mem[k]; }); _prod = null; }
 
 return { g, s, uid, esc, clone, CURRENCIES, FX_DEFAULT, ALL_PERMS, DEFAULT_KB, settings, setSettings, fxTable, setFx, countries, setCountries, country, money, convert, fmtMoney,
   region, setRegion, guessCountry, products, saveProducts, resetProducts, applyStarterPrices, priceFor, customers, saveCustomers, upsertCustomer, me, setMe, orders, saveOrders, addOrder, newOrderId,
-  sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll };
+  yarns, saveYarns, YARN_DEFAULT, hex2rgb, designs, saveDesigns, quotes, saveQuotes, addQuote, costRates, setCostRates, sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll };
 })();

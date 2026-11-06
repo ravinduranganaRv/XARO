@@ -3,11 +3,12 @@ Edit src/store.src.html (page), src/mod/*.js|css (data layer, sign-in gate, admi
 import pathlib
 R = pathlib.Path(__file__).parent
 rd = lambda p: (R / p).read_text() if (R / p).exists() else ''
-MODS = ['gate', 'admin', 'admin_cat', 'admin_sys', 'bot']
+CSS_MODS = ['gate', 'admin', 'admin_cat', 'admin_sys', 'bot', 'studio']
+JS_MODS = ['costing', 'studio_lib', 'gate', 'admin', 'admin_cat', 'admin_sys', 'admin_ops', 'bot', 'studio']
 data = rd('src/mod/data.js').replace('/*%SEED_ADMIN%*/', rd('src/mod/seed_admin.json'))
 art = (rd('src/store.src.html').replace('/*%IMG%*/', rd('src/img.json')).replace('/*%CATALOG%*/', rd('src/catalog_public.json'))
-       .replace('/*%DATA_JS%*/', data).replace('/*%MOD_CSS%*/', '\n'.join(rd(f'src/mod/{m}.css') for m in MODS))
-       .replace('/*%MOD_JS%*/', '\n'.join(rd(f'src/mod/{m}.js') for m in MODS)))
+       .replace('/*%DATA_JS%*/', data).replace('/*%MOD_CSS%*/', '\n'.join(rd(f'src/mod/{m}.css') for m in CSS_MODS))
+       .replace('/*%MOD_JS%*/', '\n'.join(rd(f'src/mod/{m}.js') for m in JS_MODS)))
 cur = rd('index.html')
 head = cur[:cur.index('<style>html,body')] + '<style>html,body{margin:0;background:#070807}</style>\n</head>\n<body>\n'
 art = art.replace('<title>XARO Industries Store</title>\n', '').replace('<meta name="claude:viewport-fit-sides" content="cover">\n', '')

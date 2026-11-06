@@ -18,3 +18,9 @@ Hand-tufted keyboard rugs and 3D wall art (Sri Lanka, shipped worldwide). Real-t
 
 ## Owner login
 Username `Ravindu20007`. Change the password straight away: `python3 tools/make_seed.py "a long new passphrase"`, then `python3 build.py`, commit and push. The login is checked in the browser, so it is a convenience lock, not real security (see `docs/BACKEND.md`).
+
+## Studio, costing and database (latest)
+- Custom Studio: open from the nav, hero button or `#studio`. Code in `src/mod/studio*.js`.
+- Costing engine: `src/mod/costing.js` (pure functions, `node --test tests/costing.test.js`). Rates are editable in Admin > Costing and are placeholders.
+- Database: `supabase/migrations` + `supabase/tests/run.sh` (needs a throwaway Postgres 15+). Edge function skeletons in `supabase/functions`. Copy `.env.example`; never commit keys.
+- Rebuild the page after editing `src/`: `python3 build.py`. CI fails if `index.html` is stale.

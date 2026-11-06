@@ -1,0 +1,36 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions: { contents: read }
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env: { PGHOST: localhost, PGPORT: "5432", PGUSER: postgres, PGPASSWORD: postgres }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: JavaScript syntax check
+        run: for f in src/mod/*.js; do node --check "$f" || exit 1; done
+      - name: Costing engine tests
+        run: node --test tests/costing.test.js
+      - name: index.html is up to date with src/
+        run: |
+          python3 build.py
+          git diff --exit-code -- index.html || (echo "index.html is stale: run python3 build.py and commit" && exit 1)
+      - name: Database schema and row-level-security tests
+        run: bash supabase/tests/run.sh
+      - name: No secrets committed
+        run: |
+          if grep -rEn --exclude-dir=.git --exclude-dir=node_modules --exclude=ci.yml 'sk_live_[0-9A-Za-z]{10,}|sk-ant-[0-9A-Za-z_-]{20,}|whsec_[0-9A-Za-z]{10,}|eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}' . ; then echo "Possible secret found"; exit 1; fi
+          test ! -f .env && test ! -f .env.local || (echo ".env files must not be committed" && exit 1)
