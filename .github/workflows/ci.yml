@@ -21,7 +21,18 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: JavaScript syntax check
-        run: for f in src/mod/*.js; do node --check "$f" || exit 1; done
+        run: |
+          # data.js holds a build placeholder, so it is checked as part of the built page below
+          for f in src/mod/*.js; do [ "$f" = src/mod/data.js ] && continue; node --check "$f" || exit 1; done
+          python3 build.py
+          python3 - <<'PY'
+          import re, subprocess, pathlib
+          html = pathlib.Path('index.html').read_text()
+          for i, m in enumerate(re.findall(r'<script(?![^>]*type="application/ld\+json")[^>]*>(.*?)</script>', html, re.S)):
+              pathlib.Path(f'/tmp/inline{i}.js').write_text(m)
+              subprocess.run(['node', '--check', f'/tmp/inline{i}.js'], check=True)
+          print('inline scripts ok')
+          PY
       - name: Costing engine tests
         run: node --test tests/costing.test.js
       - name: index.html is up to date with src/
