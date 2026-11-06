@@ -73,7 +73,6 @@ main{position:relative;z-index:1}
 .copy.panelled{background:rgba(6,8,6,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:28px 28px 30px;border-left:3px solid var(--neon)}
 .copy .kick{color:var(--neon);font-size:12px;margin-bottom:14px;display:block}
 .copy h1,.copy h2{font-size:clamp(64px,13vw,168px);margin:0 0 18px}
-#hero .copy h1{font-size:clamp(46px,7.6vw,118px);max-width:11ch}
 .copy h2{font-size:clamp(46px,8vw,104px)}
 .copy p{color:#dfe5da;font-size:17px;max-width:46ch;text-shadow:0 2px 18px #000}
 .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
@@ -578,7 +577,7 @@ body.studio-open{overflow:hidden}
   <div class="wrap">
     <a class="brand" href="#hero" aria-label="XARO Industries home"><img data-img="logoBlock" alt="XARO Industries (Pvt) Ltd logo" width="50" height="42"></a>
     <nav class="nav" aria-label="Main">
-      <a class="lnk" href="#shop">Shop</a><a class="lnk" href="#studio" data-open-studio>Custom Studio</a><a class="lnk" href="#lookbook">Gallery</a><a class="lnk" href="#craft">Process</a><a class="lnk" href="#track">Track</a>
+      <a class="lnk" href="#shop">Shop</a><a class="lnk" href="#custom">Custom</a><a class="lnk" href="#lookbook">Lookbook</a><a class="lnk" href="#track">Track</a>
       <label class="sr" for="cur">Currency</label>
       <label class="sr" for="ctry">Country</label><select class="sel" id="ctry"></select><select class="sel" id="cur"></select>
       <button class="cartbtn" id="openCart" aria-label="Open cart">Cart <b id="cartN">0</b></button>
@@ -590,10 +589,10 @@ body.studio-open{overflow:hidden}
   <section id="hero" class="stage-sec" style="--fallback:url(#)">
     <div class="wrap"><div class="copy">
       <span class="kick mono">Hand-tufted in Sri Lanka | Shipped worldwide</span>
-      <h1 class="disp">Turn your art into <span class="neon">something real.</span></h1>
-      <p>Design a custom tufted rug in 3D, see the price as you build, and have it made by hand in Sri Lanka. Drop 001 keyboard rugs and contour wall art are ready to order now.</p>
-      <div class="hero-meta"><span class="chip"><i></i>25 pieces worldwide</span><span class="chip">Delivery quoted at checkout</span><span class="chip" id="dropDate">Launch date to waitlist first</span></div>
-      <div class="btns"><a class="btn" href="#studio" data-open-studio>Create your rug</a><a class="btn ghost" href="#shop">Shop Drop 001</a></div>
+      <h1 class="disp">Drop <span class="neon">001</span></h1>
+      <p>Keyboard rugs and 3D contour wall art, tufted by hand and carved to a bevel. Twenty-five pieces. Then the next drop.</p>
+      <div class="hero-meta"><span class="chip"><i></i>25 pieces worldwide</span><span class="chip">Free shipping</span><span class="chip" id="dropDate">Launch date to waitlist first</span></div>
+      <div class="btns"><a class="btn" href="#shop">Shop Drop 001</a><a class="btn ghost" href="#custom">Build a custom rug</a></div>
     </div></div>
     <div class="scrollhint mono">Scroll to move through the studio</div>
   </section>
@@ -634,10 +633,11 @@ body.studio-open{overflow:hidden}
   </div></section>
 
   <section id="custom" class="solid"><div class="wrap">
-    <div class="sec-head"><h2 class="disp">Custom <span class="neon">rug builder</span></h2><p><a class="btn" href="#studio" data-open-studio style="margin-bottom:12px">Open the full 3D Custom Studio</a><br>Quick version: upload your art, pick a product and watch it become a tufted pile in 3D. Pay 50% to start; the balance is due when you approve the design mockup.</p></div>
+    <div class="sec-head"><h2 class="disp">Custom <span class="neon">rug builder</span></h2><p>Upload your art, pick a product and watch it become a tufted pile in 3D. Pay 50% to start; the balance is due when you approve the design mockup.</p></div>
     <div class="builder">
       <div class="viewbox" id="bView"><canvas id="bCanvas" aria-label="Interactive 3D preview of your custom rug"></canvas><div class="fb"><img data-img="p_CK" alt="Custom keyboard rug preview"></div><span class="hint mono">Drag to rotate | scroll to zoom</span></div>
       <div class="panel">
+        <div class="field"><a class="btn" href="#studio" data-open-studio style="display:block;text-align:center">Open the full 3D Studio</a></div>
         <div class="field"><label for="bProd">Product</label><select class="inp" id="bProd"></select></div>
         <div class="field"><span class="lbl" id="dropLbl">Your artwork</span>
           <label class="drop" id="drop" for="bFile" aria-describedby="dropLbl"><span id="dropTxt">Click to upload or drop a PNG or JPG (max 6 MB)</span></label>
@@ -692,7 +692,7 @@ body.studio-open{overflow:hidden}
 
 <footer><div class="wrap cols">
   <div><img data-img="logoBlock" alt="XARO Industries (Pvt) Ltd"><div><b>XARO Industries (Pvt) Ltd</b><br><small>Made in Sri Lanka. Shipped worldwide.</small></div></div>
-  <div><div class="lbl" style="margin-bottom:10px">Shop</div><div><a href="#shop">All products</a><br><a href="#studio" data-open-studio>Custom Studio</a><br><a href="#track">Track order</a><br><a href="#admin" id="staffLink">Staff login</a></div></div>
+  <div><div class="lbl" style="margin-bottom:10px">Shop</div><div><a href="#shop">All products</a><br><a href="#custom">Custom builder</a><br><a href="#track">Track order</a><br><a href="#admin" id="staffLink">Staff login</a></div></div>
   <div><div class="lbl" style="margin-bottom:10px">Preview store</div><small>This page is a working front-end preview. No payment is taken and nothing is shipped from it. Orders and the waitlist are saved only in this browser.</small></div>
 </div></footer>
 
