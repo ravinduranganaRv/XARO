@@ -31,6 +31,6 @@ Project XARO-STUDIO (Singapore). All six migrations are applied remotely and mir
 - Status: schema and database security COMPLETE AND TESTED (database level). Browser-to-Supabase auth/upload flows: not yet built, and cannot be exercised live from the build sandbox.
 
 ## Owner account
-- business_settings 'owner_email' is configured in the Supabase database (not stored in the repository). Verified with a rolled-back test against the real project:
-  unverified sign-up with that email stays customer; after email verification it becomes owner (case-insensitive); another account with metadata role=owner stays customer; a second claim is refused (owners = 1).
-- Action for the owner: register with that email in the Studio and click the confirmation link. Also keep "Confirm email" enabled in Supabase Auth (Authentication > Providers > Email), otherwise the verification guarantee does not hold.
+- Owner claim is currently DISABLED: no business_settings row 'owner_email' exists and no account holds the owner role (owner confirmed this is still pending).
+- The mechanism is verified (real project, rolled-back test): once an 'owner_email' setting exists, only an account with that VERIFIED email, while no owner exists, becomes owner; metadata cannot grant roles; a second claim is refused.
+- To enable: the owner gives the address; a single insert into business_settings ('owner_email'). Keep "Confirm email" enabled in Supabase Auth (Authentication > Providers > Email).
