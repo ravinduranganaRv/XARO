@@ -1,38 +1,32 @@
-// SKELETON, not run against Stripe yet. Receives Stripe events, verifies the signature, and updates the order idempotently.
-// Deploy: supabase functions deploy stripe-webhook --no-verify-jwt   (Stripe cannot send a Supabase JWT; the signature is the auth)
-// Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
-import Stripe from "https://esm.sh/stripe@16.12.0?target=denonext";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+// stripe-webhook: verifies Stripe's signature over the raw body, then applies the event idempotently. UNIT TESTED WITH MOCKS ONLY (see ../README.md).
+// Secrets: STRIPE_WEBHOOK_SECRET. Deploy with JWT verification OFF for this function (Stripe has no Supabase token); the signature is the authentication.
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { readTextCapped } from '../_shared/http.mjs';
+import { LIMITS } from '../_shared/validate.mjs';
+import { verifyStripeSignature } from '../_shared/stripe.mjs';
+import { processStripeEvent } from '../_shared/webhook.mjs';
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2024-06-20" });
-const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
+const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+const reply = (b: unknown, s: number) => new Response(JSON.stringify(b), { status: s, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+
+const adapter = {
+  async getOrder(id: string) { const { data, error } = await db.from('orders').select('id,ref,customer_id,currency,stage,payment_status,notes,subtotal,shipping,total').eq('id', id).maybeSingle(); if (error) throw new Error('db'); return data; },
+  async getOrderItems(orderId: string) { const { data, error } = await db.from('order_items').select('qty,unit_price,meta').eq('order_id', orderId); if (error) throw new Error('db'); return data ?? []; },
+  async findPaymentByRef(ref: string) { const { data, error } = await db.from('payments').select('order_id,currency').eq('provider', 'stripe').eq('provider_ref', ref).maybeSingle(); if (error) throw new Error('db'); return data; },
+  async insertPayment(row: Record<string, unknown>) { const { error } = await db.from('payments').insert(row); if (!error) return 'ok'; if (error.code === '23505') return 'duplicate'; throw new Error('db'); },
+  async updateOrder(id: string, patch: Record<string, unknown>) { const { error } = await db.from('orders').update(patch).eq('id', id); if (error) throw new Error('db'); },
+  async notify(row: Record<string, unknown>) { await db.from('notifications').insert(row); }, // a failed notification must not make Stripe retry a paid order
+};
 
 Deno.serve(async (req) => {
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
-  const sig = req.headers.get("stripe-signature");
-  if (!sig) return new Response("Missing signature", { status: 400 });
-  const raw = await req.text(); // the exact bytes Stripe signed
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(raw, sig, Deno.env.get("STRIPE_WEBHOOK_SECRET")!);
-  } catch (_e) {
-    return new Response("Invalid signature", { status: 400 });
-  }
-
-  if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded" || event.type === "payment_intent.payment_failed") {
-    const obj = event.data.object as Stripe.Checkout.Session & Stripe.PaymentIntent;
-    const orderRef = (obj.metadata?.order_ref ?? "") as string;
-    const ok = event.type !== "payment_intent.payment_failed";
-    const { data: order } = await db.from("orders").select("id,total,currency").eq("ref", orderRef).maybeSingle();
-    if (!order) return new Response("Unknown order", { status: 200 }); // ack so Stripe stops retrying; investigate via logs
-    const paid = (obj.amount_total ?? obj.amount ?? 0) / 100;
-    // unique (provider, provider_ref) makes a replayed event a no-op
-    const ins = await db.from("payments").insert({ order_id: order.id, provider: "stripe", provider_ref: event.id, amount: paid, currency: String(obj.currency ?? order.currency).toUpperCase(), status: ok ? "succeeded" : "failed", raw: event });
-    if (ins.error && ins.error.code !== "23505") return new Response("DB error", { status: 500 }); // let Stripe retry
-    if (ok && !ins.error) {
-      const full = paid + 0.005 >= Number(order.total);
-      await db.from("orders").update({ payment_status: full ? "paid" : "deposit_paid", stage: 3 }).eq("id", order.id).eq("payment_status", "unpaid");
-    }
-  }
-  return new Response("ok", { status: 200 });
+  if (req.method !== 'POST') return reply({ error: 'method' }, 405);
+  const secret = Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? '';
+  if (!secret) return reply({ error: 'webhook not configured' }, 503);
+  let raw = '';
+  try { raw = await readTextCapped(req, LIMITS.WEBHOOK_BODY_BYTES); } catch { return reply({ error: 'payload too large' }, 413); }
+  const v = await verifyStripeSignature({ payload: raw, header: req.headers.get('stripe-signature') ?? '', secret });
+  if (!v.ok) { console.warn('stripe-webhook bad signature:', v.reason); return reply({ error: 'bad signature' }, 400); }
+  let event; try { event = JSON.parse(raw); } catch { return reply({ error: 'bad json' }, 400); }
+  try { const r = await processStripeEvent(event, adapter); return reply({ received: true, result: r.result }, r.status); }
+  catch (e) { console.error('stripe-webhook', (e as Error)?.message); return reply({ error: 'temporary failure' }, 500); } // 5xx => Stripe retries
 });
