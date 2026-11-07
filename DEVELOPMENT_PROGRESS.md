@@ -29,3 +29,8 @@ Project XARO-STUDIO (Singapore). All six migrations are applied remotely and mir
   Performance = only INFO "unused index" (expected on an empty database).
 - Not yet done: set business_settings 'owner_email' (needs the owner's email), edge functions adapted to the schema, front-end Supabase client.
 - Status: schema and database security COMPLETE AND TESTED (database level). Browser-to-Supabase auth/upload flows: not yet built, and cannot be exercised live from the build sandbox.
+
+## Owner account
+- business_settings 'owner_email' is configured in the Supabase database (not stored in the repository). Verified with a rolled-back test against the real project:
+  unverified sign-up with that email stays customer; after email verification it becomes owner (case-insensitive); another account with metadata role=owner stays customer; a second claim is refused (owners = 1).
+- Action for the owner: register with that email in the Studio and click the confirmation link. Also keep "Confirm email" enabled in Supabase Auth (Authentication > Providers > Email), otherwise the verification guarantee does not hold.
