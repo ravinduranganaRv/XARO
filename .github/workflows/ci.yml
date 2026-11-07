@@ -33,8 +33,10 @@ jobs:
               subprocess.run(['node', '--check', f'/tmp/inline{i}.js'], check=True)
           print('inline scripts ok')
           PY
+      - name: PDF/PNG decoders for the export tests
+        run: sudo apt-get install -y qpdf >/dev/null && pip install --quiet pillow pypdf
       - name: Costing engine tests
-        run: node --test tests/costing.test.js tests/colour.test.js tests/sb.test.js tests/acct.test.js tests/vectorize.test.js tests/edge.test.mjs
+        run: node --test tests/costing.test.js tests/colour.test.js tests/sb.test.js tests/acct.test.js tests/vectorize.test.js tests/export.test.js tests/edge.test.mjs
       - name: index.html is up to date with src/
         run: |
           python3 build.py

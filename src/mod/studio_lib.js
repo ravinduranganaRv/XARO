@@ -31,7 +31,7 @@ L.POLY = {
 /* ---------------------------------------------------------------- document */
 L.newDoc = o => Object.assign({ v: 1, shape: 'rect', widthCm: 44, heightCm: 16, radius: 8, borderCm: 0, borderYarn: 'XY-001', bg: 'XY-002', pile: 'standard', backing: 'felt', borderType: 'none', frame: false, sepOn: false, maxColours: 8, layers: [], notes: '' }, o || {});
 L.layer = (type, o) => Object.assign({ id: uid(), type, name: type, cx: 0.5, cy: 0.5, w: 0.3, h: 0.3, rot: 0, flip: false, fill: 'XY-007', stroke: '', sw: 0, vis: true, lock: false }, o || {});
-L.TYPE_NAMES = { rect: 'Rectangle', ellipse: 'Ellipse', poly: 'Shape', text: 'Text', image: 'Artwork', wave: 'Wave', pix: 'Pixel art' };
+L.TYPE_NAMES = { rect: 'Rectangle', ellipse: 'Ellipse', poly: 'Shape', text: 'Text', image: 'Artwork', wave: 'Wave', pix: 'Pixel art', path: 'Vector shape' };
 L.FONTS = [['Anton', 'Anton, Impact, "Arial Narrow", sans-serif'], ['Archivo', 'Archivo, "Helvetica Neue", Arial, sans-serif'], ['Mono', '"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace'], ['Serif', 'Georgia, "Times New Roman", serif'], ['Script', '"Brush Script MT", "Segoe Script", cursive']];
 
 /* ---------------------------------------------------------------- renderer */
@@ -62,6 +62,10 @@ function drawLayer(c, l, W, H, ym, imgs) {
     const R = l.rows || [], rn = R.length, cn = Math.max(...R.map(r => r.length), 1), cw = w / cn, ch = h / rn;
     R.forEach((row, y) => { for (let x = 0; x < row.length; x++) { const k = row[x], yid = (l.pal || {})[k]; if (!yid || !ym[yid]) continue; c.fillStyle = ym[yid].hex; c.fillRect(-w / 2 + x * cw - 0.4, -h / 2 + y * ch - 0.4, cw + 0.8, ch + 0.8); } });
   }
+  else if (l.type === 'path') {
+    /* vector shape: l.d is an SVG path in the unit square (holes by even-odd), l.fill is a yarn id */
+    if (l.d && typeof Path2D !== 'undefined') { c.translate(-w / 2, -h / 2); c.scale(w, h); c.fill(new Path2D(l.d), 'evenodd'); }
+  }
   else if (l.type === 'image') {
     const im = imgs[l.img]; if (im && im.el) { c.beginPath(); c.rect(-w / 2, -h / 2, w, h); c.clip(); const iw = im.el.naturalWidth || im.el.width, ih = im.el.naturalHeight || im.el.height, s = (l.fit === 'contain' ? Math.min : Math.max)(w / iw, h / ih); c.drawImage(im.el, -iw * s / 2, -ih * s / 2, iw * s, ih * s); }
   }
@@ -72,7 +76,7 @@ L.drawLayer = drawLayer;
 L.render = (doc, canvas, imgs, opts) => {
   opts = opts || {}; const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height, ym = yarnMap();
   c.clearRect(0, 0, W, H); c.save(); if (opts.clip !== false) { shapePath(c, doc, W, H); c.clip(); }
-  c.fillStyle = (ym[doc.bg] || { hex: '#2A2D2A' }).hex; c.fillRect(0, 0, W, H);
+  if (!opts.transparent) { c.fillStyle = (ym[doc.bg] || { hex: '#2A2D2A' }).hex; c.fillRect(0, 0, W, H); }
   doc.layers.forEach(l => drawLayer(c, l, W, H, ym, imgs));
   if (doc.borderCm > 0) { const bw = doc.borderCm / Math.max(1, doc.widthCm) * W * 2; shapePath(c, doc, W, H); c.lineWidth = bw; c.strokeStyle = (ym[doc.borderYarn] || { hex: '#0B0B0B' }).hex; c.stroke(); }
   c.restore();

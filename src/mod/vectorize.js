@@ -175,6 +175,10 @@ V.recolour = (res, from, to) => {
 };
 V.mergeColours = (res, from, to) => V.recolour(res, from, to);
 V.removeShape = (res, i) => { if (!(i >= 0 && i < res.shapes.length)) throw new Error('No such shape'); return V.build(res.width, res.height, res.shapes.filter((_, k) => k !== i).map(s => Object.assign({}, s))); };
+/** path in pixel units -> path in the unit square (what the studio's `path` layer stores) */
+V.unitPath = (d, w, h) => { if (!(w > 0 && h > 0)) throw new Error('Bad size'); const f = n => String(Math.round(n * 100000) / 100000); return V.pathToRings(d).map(r => 'M' + r.map(p => f(p[0] / w) + ' ' + f(p[1] / h)).join(' L') + ' Z').join(' '); };
+/** one full-canvas layer spec per colour; the caller assigns the yarn (fill) and adds them to a design */
+V.layerSpecs = res => res.shapes.map((s, i) => ({ type: 'path', name: 'Vector ' + (i + 1), cx: 0.5, cy: 0.5, w: 1, h: 1, hex: s.fill, d: V.unitPath(s.d, res.width, res.height) }));
 V.shapeStats = d => ({ area: r2(areaOf(d)), points: pointsOf(d) });
 
 if (typeof module !== 'undefined' && module.exports) module.exports = V; else root.XVEC = V;
