@@ -21,10 +21,12 @@ A.roleLabel = p => !p ? '' : p.role === 'owner' ? 'Store owner' : p.account_type
 A.passwordHint = pw => { pw = String(pw || ''); let s = 0; if (pw.length >= 8) s++; if (pw.length >= 12) s++; if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++; if (/\d/.test(pw)) s++; if (/[^A-Za-z0-9]/.test(pw)) s++; return ['Too short', 'Weak', 'Fair', 'Good', 'Strong', 'Strong'][pw.length < 8 ? 0 : Math.max(1, s - 1)]; };
 
 /* ---------- data calls ---------- */
+const listeners = []; A.onState = fn => { listeners.push(fn); };
 A.refresh = async () => {
   const SB = SBref(); prof = null; biz = null;
-  if (!SB.signedIn()) return A.state();
-  try { prof = await SB.profile(); if (prof && prof.account_type === 'rugmaker') biz = await SB.myBusiness(); } catch (e) { if (e.status === 401) await SB.signOut(); }
+  try {
+    if (SB.signedIn()) { try { prof = await SB.profile(); if (prof && prof.account_type === 'rugmaker') biz = await SB.myBusiness(); } catch (e) { if (e.status === 401) await SB.signOut(); } }
+  } finally { listeners.forEach(f => { try { f(A.state()); } catch (e) {} }); }
   return A.state();
 };
 A.uploadImages = async (doc, imgs) => {

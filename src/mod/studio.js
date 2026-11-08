@@ -14,7 +14,7 @@ const ym = () => L.yarnMap();
 const yname = id => (ym()[id] || { name: id }).name;
 const layer = id => doc.layers.find(l => l.id === id);
 const snap = () => JSON.stringify(doc);
-function commit() { hist = hist.slice(0, hi + 1); hist.push(snap()); if (hist.length > 80) hist.shift(); hi = hist.length - 1; dirty = true; changed(); }
+function commit() { L.stampYarns(doc); hist = hist.slice(0, hi + 1); hist.push(snap()); if (hist.length > 80) hist.shift(); hi = hist.length - 1; dirty = true; changed(); }
 function restore(i) { hi = i; doc = JSON.parse(hist[i]); if (sel && !layer(sel)) sel = ''; changed(true); }
 function changed(full) { draw2D(); schedule(); if (full !== 'live') { panelL(); panelR(); } undoBtns(); }
 function undoBtns() { const u = $('#stUndo', root), r = $('#stRedo', root); if (u) { u.disabled = hi <= 0; r.disabled = hi >= hist.length - 1; } }
@@ -284,7 +284,7 @@ function toCart() {
 function build() {
   root = document.createElement('div'); root.id = 'studio'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'XARO 3D Custom Studio');
   root.innerHTML = `<div class="sh"><img src="${IMG.logoBlock}" alt=""><h2>Custom <span class="neon">Studio</span></h2><span class="sp"></span>
-    <button class="sb sm" id="stAcct" aria-label="Account">Sign in</button><button class="sb sm" id="stUnit" aria-label="Switch units">cm</button>
+    <button class="sb sm" id="stWork" aria-label="Rug maker workspace" hidden>Workspace</button><button class="sb sm" id="stAcct" aria-label="Account">Sign in</button><button class="sb sm" id="stUnit" aria-label="Switch units">cm</button>
     <button class="sb sm" data-v="vboth" aria-pressed="true">Both</button><button class="sb sm" data-v="v2d" aria-pressed="false">Design</button><button class="sb sm" data-v="v3d" aria-pressed="false">3D</button>
     <button class="sb" id="stClose" aria-label="Close studio">Close</button></div>
   <div class="main"><aside class="pn"><div class="tabs" role="tablist" aria-label="Design tools"></div><div class="pb" id="stL"></div></aside>
@@ -350,6 +350,7 @@ function build() {
   $('#stUnit', root).onclick = () => { unit = unit === 'cm' ? 'in' : 'cm'; $('#stUnit', root).textContent = unit; panelL(); };
   $('#stClose', root).onclick = closeStudio; $('#stUndo', root).onclick = () => hi > 0 && restore(hi - 1); $('#stRedo', root).onclick = () => hi < hist.length - 1 && restore(hi + 1);
   $('#stReset', root).onclick = () => { if (confirm('Clear the whole design and start again?')) { imgs = {}; newDoc(L.newDoc()); } };
+  if (window.XWS) XWS.mount({ studioRoot: root, toast });
   if (window.XACCT) XACCT.mount({ $: q => $(q, root), sheet, toast, toPng: async im => { const c = document.createElement('canvas'); c.width = im.w; c.height = im.h; c.getContext('2d').drawImage(im.el, 0, 0, im.w, im.h); return c.toDataURL('image/png'); }, blobToDataUrl: b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); }) });
   $('#stSave', root).onclick = saveDesign; $('#stMine', root).onclick = myDesigns; $('#stPrev', root).onclick = preview; $('#stDl', root).onclick = downloadDesign; $('#stQuote', root).onclick = quote; $('#stCart', root).onclick = toCart;
   addEventListener('keydown', e => {
@@ -374,7 +375,9 @@ function openStudio(opts) {
   panelL(); panelR(); draw2D(); setTimeout(() => { fit(); update3D(); camPreset('angle'); }, 60); XD.track('studio'); XARO.emit('studio', {}, false); $('#stClose', root).focus();
 }
 function closeStudio() { if (dirty && doc.layers.length && !confirm('Close the studio? Unsaved changes will be lost. Use Save to keep this design.')) return; root.classList.remove('on'); document.body.classList.remove('studio-open'); if (location.hash === '#studio') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; } } }
-window.XSTUDIO = { open: openStudio, close: closeStudio };
+/* hooks used by the rug-maker workspace: load a design into the editor, read the current one */
+function loadDoc(d, o) { o = o || {}; openStudio(); imgs = {}; Object.entries(o.images || {}).forEach(([k, v]) => { if (v && v.el) imgs[k] = v; }); newDoc(JSON.parse(JSON.stringify(d))); savedName = o.name || ''; cloudId = o.cloudId || ''; if (o.view) { view = o.view; $('#stViews', root).className = 'views ' + view; $$('[data-v]', root).forEach(x => x.setAttribute('aria-pressed', x.dataset.v === view)); setTimeout(() => { fit(); update3D(); }, 60); } }
+window.XSTUDIO = { open: openStudio, close: closeStudio, loadDoc, getDoc: () => ({ doc: JSON.parse(JSON.stringify(doc)), imgs, name: savedName, cloudId }), setCloudId: id => { cloudId = id || ''; } };
 document.addEventListener('click', e => { const b = e.target.closest('[data-open-studio]'); if (b) { e.preventDefault(); openStudio(); } });
 addEventListener('hashchange', () => { if (location.hash === '#studio') openStudio(); });
 if (location.hash === '#studio') setTimeout(openStudio, 400);

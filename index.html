@@ -570,6 +570,94 @@ body.studio-open{overflow:hidden}
 }
 @media (max-width:640px){#studio .sh{flex-wrap:wrap;gap:6px;padding:8px 10px}#studio .sh h2{font-size:18px;flex:1}#studio .sh .sp{display:none}#studio .sh .sb{padding:6px 9px;font-size:12px}#studio .tb{padding:6px 8px;flex-wrap:wrap;overflow:visible;gap:5px}#studio .tb .sb{padding:6px 8px;font-size:12px}#studio .tb .sp{display:none}#studio .main{overflow-x:hidden}}
 
+/* ---------- Rug maker workspace (all rules scoped to #xwork so the store pages are untouched) ---------- */
+body.xw-open{overflow:hidden}
+#xwork{position:fixed;inset:0;z-index:130;background:#070908;color:var(--fg);display:none;grid-template-rows:auto minmax(0,1fr);font-size:14px;font-family:var(--body)}
+#xwork.on{display:grid}
+#xwork *{box-sizing:border-box}
+#xwork .xw-top{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(16,20,17,.95)}
+#xwork .xw-top h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:24px;margin:0;line-height:1}
+#xwork .xw-top h1 span{color:var(--neon)}
+#xwork .xw-biz{font-family:var(--mono);font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#xwork .xw-sp{flex:1}
+#xwork .xw-grid{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:0}
+#xwork .xw-nav{display:flex;flex-direction:column;gap:2px;padding:10px 8px;border-right:1px solid rgba(255,255,255,.08);overflow:auto;background:rgba(16,20,17,.7)}
+#xwork .xw-nav button{background:none;border:0;color:var(--mute);text-align:left;padding:9px 12px;border-radius:7px;font-size:13.5px;font-family:var(--body);cursor:pointer;border-left:3px solid transparent}
+#xwork .xw-nav button:hover{color:var(--fg);background:rgba(255,255,255,.04)}
+#xwork .xw-nav button[aria-current=page]{color:var(--neon);border-left-color:var(--neon);background:rgba(57,255,20,.06)}
+#xwork main{overflow:auto;padding:18px 22px 60px;min-width:0;outline:0}
+#xwork .xw-h h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:30px;margin:0 0 4px}
+#xwork .xw-load{color:var(--mute);padding:30px 0}
+#xwork .xw-b{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);color:var(--fg);border-radius:8px;padding:8px 13px;font-family:var(--body);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+#xwork .xw-b:hover:not([disabled]){border-color:var(--neon);color:var(--neon)}
+#xwork .xw-b.pri{background:var(--neon);color:var(--neon-ink);border-color:var(--neon)}
+#xwork .xw-b.pri:hover:not([disabled]){color:var(--neon-ink);box-shadow:0 0 16px rgba(57,255,20,.35)}
+#xwork .xw-b.bad:hover:not([disabled]){border-color:var(--bad);color:var(--bad)}
+#xwork .xw-b.sm{padding:4px 9px;font-size:12px}
+#xwork .xw-b[disabled]{opacity:.4;cursor:not-allowed}
+#xwork .xw-note{font-size:12.5px;color:var(--mute);line-height:1.5;margin:6px 0}
+#xwork .xw-note.warn{color:#ffd27a;border:1px dashed var(--warn);padding:7px 10px}
+#xwork .xw-err{color:var(--bad);font-size:13px;min-height:16px}
+#xwork .xw-sec{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;margin:0 0 16px}
+#xwork .xw-sec h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:0 0 10px;font-weight:500}
+#xwork .xw-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+#xwork .xw-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;text-align:left;color:var(--fg);cursor:pointer;display:flex;flex-direction:column;gap:4px}
+#xwork .xw-card:hover{border-color:var(--neon)}
+#xwork .xw-card b{font-family:var(--display);font-size:34px;font-weight:400;line-height:1;color:var(--neon)}
+#xwork .xw-card span{font-size:12.5px;color:var(--mute)}
+#xwork .xw-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+#xwork .xw-list{list-style:none;margin:0;padding:0}
+#xwork .xw-list li{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a201a;font-size:13px}
+#xwork .xw-list li span{margin-left:auto;color:var(--mute);font-size:12px}
+#xwork .xw-check{list-style:none;margin:0;padding:0}#xwork .xw-check li{padding:4px 0}#xwork .xw-check .done{color:var(--mute)}#xwork .xw-check a{color:var(--neon)}
+#xwork .xw-grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+#xwork .xw-dcard{background:#0e120e;border:1px solid #232a21;border-radius:10px;padding:8px;color:var(--fg);text-align:left;display:flex;flex-direction:column;gap:4px;font-family:var(--body)}
+#xwork button.xw-dcard{cursor:pointer}#xwork .xw-dcard:hover{border-color:var(--neon)}
+#xwork .xw-dcard img,#xwork .xw-ph{width:100%;aspect-ratio:4/3;object-fit:contain;background:#000;border-radius:6px;display:block}
+#xwork .xw-thumb{background:none;border:0;padding:0;cursor:pointer}
+#xwork .xw-dcard small{color:var(--mute);font-size:11.5px}
+#xwork .xw-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+#xwork .xw-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+#xwork .xw-bar input[type=search],#xwork .xw-bar input[type=text],#xwork .xw-bar input[type=email],#xwork .xw-bar input[type=password]{flex:1;min-width:160px}
+#xwork input[type=text],#xwork input[type=search],#xwork input[type=number],#xwork input[type=email],#xwork input[type=password],#xwork input[type=date],#xwork select,#xwork textarea{background:#0e120e;border:1px solid #2f382c;border-radius:6px;padding:8px 10px;color:var(--fg);font-size:14px;font-family:var(--body);min-width:0;width:100%}
+#xwork .xw-bar select,#xwork .xw-bar input{width:auto}
+#xwork input:focus,#xwork select:focus,#xwork textarea:focus,#xwork button:focus-visible{outline:2px solid var(--neon);outline-offset:1px}
+#xwork input[type=range]{width:100%;accent-color:#39FF14}
+#xwork .xw-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px 14px;margin-bottom:10px}
+#xwork .xw-f label{display:block;font-size:12px;color:var(--mute);margin-bottom:4px}
+#xwork .xw-f small{display:block;font-size:11.5px;color:var(--mute);margin-top:3px}
+#xwork .xw-t{width:100%;border-collapse:collapse;font-size:13px}
+#xwork .xw-t th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);text-align:left;padding:6px 8px;border-bottom:1px solid #2a3327;font-weight:500;white-space:nowrap}
+#xwork .xw-t td{padding:7px 8px;border-bottom:1px solid #1a201a;vertical-align:middle}
+#xwork .xw-t td.num,#xwork .xw-t th.num{text-align:right;font-variant-numeric:tabular-nums}
+#xwork .xw-t tr.low td{background:rgba(255,100,60,.07)}
+#xwork .xw-tw{overflow:auto;max-width:100%}
+#xwork .xw-sw{display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.25);vertical-align:middle;flex:none}
+#xwork .xw-badge{display:inline-block;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.08);color:var(--fg)}
+#xwork .xw-badge.good{background:rgba(57,255,20,.15);color:var(--neon)}#xwork .xw-badge.bad{background:rgba(255,90,70,.15);color:var(--bad)}#xwork .xw-badge.warn{background:rgba(255,210,122,.15);color:#ffd27a}
+#xwork .xw-empty{border:1px dashed #2f382c;border-radius:12px;padding:28px;text-align:center;color:var(--mute)}
+#xwork .xw-mod{position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.74);display:flex;justify-content:center;align-items:flex-start;padding:max(14px,4vh) 12px;overflow:auto}
+#xwork .xw-sheet{position:relative;margin:auto;width:min(640px,100%);background:#10140f;border:1px solid var(--neon);border-radius:14px;padding:20px}
+#xwork .xw-sheet h3{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:26px;margin:0 36px 12px 0}
+#xwork .xw-sheet .x{position:absolute;right:10px;top:10px}
+#xwork .xw-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+#xwork .xw-tt{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);background:#10140f;border:1px solid var(--neon);color:var(--fg);padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s;max-width:90vw;z-index:20}
+#xwork .xw-tt.on{opacity:1;transform:translate(-50%,0)}#xwork .xw-tt.bad{border-color:var(--bad)}
+#xwork .xw-split{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr);gap:16px;align-items:start}
+#xwork .xw-view{background:repeating-conic-gradient(#0d100d 0 25%,#0a0c0a 0 50%) 0 0/18px 18px;border:1px solid #232a21;border-radius:10px;position:relative;overflow:hidden;min-height:200px}
+#xwork .xw-view canvas,#xwork .xw-view svg,#xwork .xw-view img{display:block;width:100%;height:auto}
+#xwork .xw-ba{position:relative}#xwork .xw-ba .after{position:absolute;inset:0}
+#xwork .xw-ba input[type=range]{position:absolute;left:0;right:0;bottom:6px;width:calc(100% - 20px);margin:0 10px}
+#xwork .xw-ba .bar{position:absolute;top:0;bottom:0;width:2px;background:var(--neon);pointer-events:none}
+#xwork .xw-pal{display:grid;gap:6px}
+#xwork .xw-prow{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #1d251b;border-radius:7px;font-size:12.5px;background:#0e120e}
+#xwork .xw-prow small{color:var(--mute);display:block}
+#xwork .xw-drop{display:block;border:2px dashed #3a4536;border-radius:10px;padding:22px 12px;text-align:center;color:var(--mute);cursor:pointer}
+#xwork .xw-drop:hover,#xwork .xw-drop.on{border-color:var(--neon);color:var(--neon)}
+#xwork .xw-total{font-family:var(--display);font-size:30px;color:var(--neon)}
+@media(max-width:820px){#xwork .xw-grid{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}#xwork .xw-nav{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid rgba(255,255,255,.08);padding:6px}#xwork .xw-nav button{white-space:nowrap;border-left:0;border-bottom:3px solid transparent}#xwork .xw-nav button[aria-current=page]{border-bottom-color:var(--neon)}#xwork main{padding:14px 12px 60px}#xwork .xw-split{grid-template-columns:1fr}#xwork .xw-top h1{font-size:19px}#xwork .xw-biz{display:none}}
+@media(prefers-reduced-motion:reduce){#xwork .xw-tt{transition:none}}
+
 </style>
 
 <canvas id="stage" aria-hidden="true"></canvas>
@@ -2371,8 +2459,16 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 L.uid = uid;
 
 /* ---------------------------------------------------------------- yarn helpers */
-const yarnList = () => XD.yarns().filter(y => y.active !== false);
-const yarnMap = () => { const m = {}; XD.yarns().forEach(y => { m[y.id] = y; }); return m; };
+/* a rug maker can switch the studio to their own yarn library (L.useYarns(fn)); a design keeps a small snapshot of the yarns it uses (doc._yarns)
+   so it still renders with the right colours on a device that does not have that library */
+let ySrc = null; L.useYarns = fn => { ySrc = typeof fn === 'function' ? fn : null; };
+const allYarns = () => (ySrc ? ySrc() : XD.yarns());
+const yarnList = () => allYarns().filter(y => y.active !== false);
+const yarnMap = () => { const m = {}; allYarns().forEach(y => { m[y.id] = y; }); return m; };
+const docYarnMap = doc => { const m = yarnMap(); const s = doc && doc._yarns; if (s) Object.keys(s).forEach(k => { if (!m[k] && s[k] && /^#[0-9a-fA-F]{6}$/.test(s[k].hex || '')) m[k] = { id: k, name: String(s[k].name || k).slice(0, 80), hex: s[k].hex, material: s[k].material || '' }; }); return m; };
+L.docYarnMap = docYarnMap;
+/** records the yarns a design uses (id, name, hex) inside the design */
+L.stampYarns = doc => { const m = yarnMap(), used = {}, add = id => { if (id && m[id]) used[id] = { name: m[id].name, hex: m[id].hex }; }; add(doc.bg); add(doc.borderYarn); (doc.layers || []).forEach(l => { add(l.fill); add(l.stroke); if (l.pal) Object.keys(l.pal).forEach(k => add(l.pal[k])); }); const old = doc._yarns || {}; Object.keys(old).forEach(k => { if (!used[k] && !m[k]) used[k] = old[k]; }); doc._yarns = used; return doc; };
 L.yarnList = yarnList; L.yarnMap = yarnMap;
 const rgbOf = y => y._rgb || (y._rgb = XD.hex2rgb(y.hex));
 function nearest(r, g, b, list) {
@@ -2439,7 +2535,7 @@ function drawLayer(c, l, W, H, ym, imgs) {
 L.drawLayer = drawLayer;
 /** draws the artwork. opts.clip=false skips the shape mask */
 L.render = (doc, canvas, imgs, opts) => {
-  opts = opts || {}; const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height, ym = yarnMap();
+  opts = opts || {}; const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height, ym = docYarnMap(doc);
   c.clearRect(0, 0, W, H); c.save(); if (opts.clip !== false) { shapePath(c, doc, W, H); c.clip(); }
   if (!opts.transparent) { c.fillStyle = (ym[doc.bg] || { hex: '#2A2D2A' }).hex; c.fillRect(0, 0, W, H); }
   doc.layers.forEach(l => drawLayer(c, l, W, H, ym, imgs));
@@ -2688,10 +2784,10 @@ function pdf(spec) {
   // legend table
   const lg = spec.legend;
   if (lg && lg.rows && lg.rows.length) {
-    const head = lg.head || [], n = head.length, avail = PW - 2 * M - 22, cw = lg.widths || head.map(() => avail / n);
-    const header = () => { T('Yarn legend', M, y - 12, 12, true); y -= 20; let x = M + 22; head.forEach((h, i) => { T(h, x, y - 8, 8, true); x += cw[i]; }); Ln(M, y - 12, PW - M, y - 12); y -= 18; };
+    const head = lg.head || [], n = head.length, off = lg.noSwatch ? 0 : 22, avail = PW - 2 * M - off, cw = lg.widths || head.map(() => avail / n);
+    const header = () => { T(lg.title || 'Yarn legend', M, y - 12, 12, true); y -= 20; let x = M + off; head.forEach((h, i) => { T(h, x, y - 8, 8, true); x += cw[i]; }); Ln(M, y - 12, PW - M, y - 12); y -= 18; };
     if (y < 120) { closePage(); newPage(); } header();
-    lg.rows.forEach(r => { if (y < 60) { closePage(); newPage(); header(); } R(M, y - 12, 16, 12, r.hex); cs.push(`0.4 0.4 0.4 RG 0.4 w ${M} ${(y - 12).toFixed(2)} 16 12 re S`); let x = M + 22; (r.cells || []).forEach((c, i) => { T(fit(c, 9, cw[i] - 6), x, y - 9, 9, i === 0); x += cw[i]; }); y -= 18; });
+    lg.rows.forEach(r => { if (y < 60) { closePage(); newPage(); header(); } if (!lg.noSwatch) { R(M, y - 12, 16, 12, r.hex); cs.push(`0.4 0.4 0.4 RG 0.4 w ${M} ${(y - 12).toFixed(2)} 16 12 re S`); } let x = M + off; (r.cells || []).forEach((c, i) => { T(fit(c, 9, cw[i] - 6), x, y - 9, 9, i === 0); x += cw[i]; }); y -= 18; });
   }
   const notes = (spec.notes || []).filter(Boolean);
   if (notes.length) { if (y < 90) { closePage(); newPage(); } y -= 6; T('Notes', M, y - 12, 12, true); y -= 20; notes.forEach(nt => { latin1(nt).match(/.{1,100}(\s|$)/g).forEach(line => { if (y < 50) { closePage(); newPage(); } T(line.trim(), M, y - 9, 9, false); y -= 13; }); }); }
@@ -4364,10 +4460,12 @@ A.roleLabel = p => !p ? '' : p.role === 'owner' ? 'Store owner' : p.account_type
 A.passwordHint = pw => { pw = String(pw || ''); let s = 0; if (pw.length >= 8) s++; if (pw.length >= 12) s++; if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++; if (/\d/.test(pw)) s++; if (/[^A-Za-z0-9]/.test(pw)) s++; return ['Too short', 'Weak', 'Fair', 'Good', 'Strong', 'Strong'][pw.length < 8 ? 0 : Math.max(1, s - 1)]; };
 
 /* ---------- data calls ---------- */
+const listeners = []; A.onState = fn => { listeners.push(fn); };
 A.refresh = async () => {
   const SB = SBref(); prof = null; biz = null;
-  if (!SB.signedIn()) return A.state();
-  try { prof = await SB.profile(); if (prof && prof.account_type === 'rugmaker') biz = await SB.myBusiness(); } catch (e) { if (e.status === 401) await SB.signOut(); }
+  try {
+    if (SB.signedIn()) { try { prof = await SB.profile(); if (prof && prof.account_type === 'rugmaker') biz = await SB.myBusiness(); } catch (e) { if (e.status === 401) await SB.signOut(); } }
+  } finally { listeners.forEach(f => { try { f(A.state()); } catch (e) {} }); }
   return A.state();
 };
 A.uploadImages = async (doc, imgs) => {
@@ -4453,6 +4551,733 @@ A.mount = c => { ctx = c; const b = ctx.$('#stAcct'); if (b) b.onclick = A.openA
 if (typeof module !== 'undefined' && module.exports) module.exports = A; else root.XACCT = A;
 })(typeof window !== 'undefined' ? window : globalThis);
 
+/* ============ Rug-maker workspace: pure logic (CSV, yarn import, rug calculator, quotations, reports) ============
+   No DOM, no network. Everything here is unit tested in node. The calculator NEVER invents a number: a rate the business has not
+   entered stays empty and the lines that depend on it are reported as "missing". */
+(function (root) {
+'use strict';
+const W = {};
+const HEX = /^#[0-9a-fA-F]{6}$/;
+const round = (n, d) => { const k = Math.pow(10, d == null ? 2 : d); return Math.round((+n + Number.EPSILON) * k) / k; };
+const isNum = v => v !== null && v !== undefined && v !== '' && isFinite(+v);
+const clampStr = (s, n) => String(s == null ? '' : s).trim().slice(0, n);
+
+/* ---------------------------------------------------------------- CSV (RFC 4180) */
+W.csvParse = text => {
+  text = String(text || '').replace(/^﻿/, ''); const rows = []; let row = [], f = '', q = false, i = 0;
+  for (; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"' && f === '') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); f = ''; if (row.length > 1 || row[0] !== '') rows.push(row); row = []; }
+    else f += c;
+  }
+  if (q) throw new Error('The file has an unclosed quote.');
+  if (f !== '' || row.length) { row.push(f); if (row.length > 1 || row[0] !== '') rows.push(row); }
+  return rows;
+};
+/** cells that a spreadsheet could read as a formula are prefixed with an apostrophe (CSV injection guard) */
+W.csvCell = v => { if (v == null) return ''; if (typeof v === 'number') return String(v); let s = String(v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+W.csvStringify = rows => rows.map(r => r.map(W.csvCell).join(',')).join('\r\n') + '\r\n';
+
+/* ---------------------------------------------------------------- yarn import / export */
+const YCOLS = { code: ['code', 'yarn code', 'sku', 'id', 'colour code', 'color code'], name: ['name', 'colour name', 'color name', 'shade'], hex: ['hex', 'colour', 'color', 'hex colour', 'hex color', 'rgb hex'], manufacturer: ['manufacturer', 'brand', 'make'], material: ['material', 'fibre', 'fiber'], price_per_kg: ['price per kg', 'price_per_kg', 'price', 'cost per kg'], stock_kg: ['stock kg', 'stock_kg', 'stock', 'in stock', 'quantity kg', 'kg'], reorder_kg: ['reorder kg', 'reorder_kg', 'reorder level', 'reorder', 'minimum kg'], supplier: ['supplier', 'vendor'] };
+W.normHex = h => { h = String(h == null ? '' : h).trim(); if (!h) return ''; if (h[0] !== '#') h = '#' + h; if (/^#[0-9a-fA-F]{3}$/.test(h)) h = '#' + h.slice(1).replace(/./g, '$&$&'); return HEX.test(h) ? h.toUpperCase() : ''; };
+W.YARN_MAX_ROWS = 2000;
+W.parseYarnCsv = text => {
+  let rows; try { rows = W.csvParse(text); } catch (e) { return { rows: [], errors: [{ line: 0, msg: e.message }] }; }
+  if (rows.length < 2) return { rows: [], errors: [{ line: 0, msg: 'The file needs a header row and at least one yarn.' }] };
+  const head = rows[0].map(h => String(h).trim().toLowerCase()), idx = {};
+  for (const [k, al] of Object.entries(YCOLS)) { const j = head.findIndex(h => al.includes(h)); if (j >= 0) idx[k] = j; }
+  const errors = [], out = [], seen = new Set();
+  if (idx.code === undefined || idx.hex === undefined) return { rows: [], errors: [{ line: 1, msg: 'The header must include a code column and a hex colour column.' }] };
+  if (rows.length - 1 > W.YARN_MAX_ROWS) return { rows: [], errors: [{ line: 0, msg: 'Import at most ' + W.YARN_MAX_ROWS + ' yarns at a time.' }] };
+  rows.slice(1).forEach((r, n) => {
+    const line = n + 2, g = k => (idx[k] === undefined ? '' : String(r[idx[k]] == null ? '' : r[idx[k]]).trim());
+    const code = clampStr(g('code'), 40), hex = W.normHex(g('hex')), name = clampStr(g('name'), 80) || code;
+    if (!code) return errors.push({ line, msg: 'Missing yarn code.' });
+    if (!hex) return errors.push({ line, msg: 'Row ' + code + ': "' + g('hex').slice(0, 12) + '" is not a valid #RRGGBB colour.' });
+    if (seen.has(code.toLowerCase())) return errors.push({ line, msg: 'Row ' + code + ': duplicate code in the file.' });
+    const nums = {}; for (const k of ['price_per_kg', 'stock_kg', 'reorder_kg']) { const v = g(k); if (v === '') { nums[k] = null; continue; } if (!isNum(v) || +v < 0) return errors.push({ line, msg: 'Row ' + code + ': ' + k.replace(/_/g, ' ') + ' must be a number of 0 or more.' }); nums[k] = round(+v, 3); }
+    seen.add(code.toLowerCase());
+    out.push({ code, name, hex, manufacturer: clampStr(g('manufacturer'), 80) || null, material: clampStr(g('material'), 80) || null, price_per_kg: nums.price_per_kg, stock_kg: nums.stock_kg == null ? 0 : nums.stock_kg, reorder_kg: nums.reorder_kg, supplier: clampStr(g('supplier'), 120) || null });
+  });
+  return { rows: out, errors };
+};
+W.yarnsToCsv = ys => W.csvStringify([['code', 'name', 'hex', 'manufacturer', 'material', 'price_per_kg', 'stock_kg', 'reorder_kg', 'supplier', 'availability']].concat(ys.map(y => [y.code, y.name, y.hex, y.manufacturer || '', y.material || '', y.price_per_kg == null ? '' : y.price_per_kg, y.stock_kg == null ? 0 : y.stock_kg, y.reorder_kg == null ? '' : y.reorder_kg, y.supplier || '', y.availability || ''])));
+
+/* ---------------------------------------------------------------- stock */
+W.MOVEMENT_KINDS = { purchase: 'Purchase (adds to stock)', actual_use: 'Actual use (removes from stock)', estimated_use: 'Estimated use (does not change stock)', adjustment: 'Adjustment (+ or -, e.g. stock count)' };
+/** validates a movement before it is sent; the database applies the same rules */
+W.checkMovement = m => {
+  if (!m.yarn_id) return 'Choose a yarn.'; if (!W.MOVEMENT_KINDS[m.kind]) return 'Choose a movement type.'; if (!isNum(m.kg) || +m.kg === 0) return 'Enter the weight in kg.';
+  if (m.kind !== 'adjustment' && +m.kg <= 0) return 'Weight must be more than 0 (use Adjustment for a correction).'; if (Math.abs(+m.kg) > 100000) return 'That weight looks wrong.'; return '';
+};
+W.stockAfter = (stock, m) => round(+stock + (m.kind === 'purchase' || m.kind === 'adjustment' ? +m.kg : m.kind === 'actual_use' ? -m.kg : 0), 3);
+W.lowStock = ys => ys.filter(y => y.reorder_kg != null && +y.stock_kg <= +y.reorder_kg && y.active !== false);
+
+/* ---------------------------------------------------------------- calculator */
+W.RATE_FIELDS = [
+  ['currency', 'Currency (3 letters)', 'text'], ['pileKgPerM2.low', 'Yarn kg per m2, low pile', 'num'], ['pileKgPerM2.standard', 'Yarn kg per m2, standard pile', 'num'], ['pileKgPerM2.high', 'Yarn kg per m2, high pile', 'num'],
+  ['wastePct', 'Yarn waste %', 'num'], ['labour.hoursPerM2', 'Tufting hours per m2', 'num'], ['labour.setupHours', 'Set-up hours per rug', 'num'], ['labour.hourlyRate', 'Labour rate per hour', 'num'],
+  ['backingPerM2', 'Backing cloth + latex per m2', 'num'], ['bindingPerM', 'Binding / edging per metre', 'num'], ['finishingFlat', 'Finishing per rug (flat)', 'num'], ['packagingFlat', 'Packaging per rug (flat)', 'num'],
+  ['overheadPct', 'Overhead %', 'num'], ['marginPct', 'Profit margin % of selling price', 'num'], ['taxPct', 'Tax %', 'num']
+];
+const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
+const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => { a[k] = a[k] && typeof a[k] === 'object' ? a[k] : {}; a = a[k]; }); a[ks[ks.length - 1]] = v; };
+W.getRate = getP;
+/** form values -> rates object. Empty fields stay absent (never defaulted to a number). */
+W.ratesFromForm = vals => {
+  const r = {}, errors = [];
+  W.RATE_FIELDS.forEach(([p, label, t]) => { let v = vals[p]; if (v == null || String(v).trim() === '') return; v = String(v).trim();
+    if (t === 'text') { if (!/^[A-Za-z]{3}$/.test(v)) errors.push(label + ' must be 3 letters.'); else setP(r, p, v.toUpperCase()); return; }
+    if (!isNum(v) || +v < 0) { errors.push(label + ' must be a number of 0 or more.'); return; } if (/Pct$/.test(p) && +v > 100) { errors.push(label + ' cannot be above 100.'); return; } setP(r, p, +v); });
+  if (r.marginPct != null && r.marginPct >= 100) errors.push('Profit margin must be below 100%.');
+  return { rates: r, errors };
+};
+W.areaM2 = (widthCm, heightCm, shape, radiusPct, areaFraction) => {
+  const w = widthCm / 100, h = heightCm / 100; if (isNum(areaFraction) && areaFraction > 0 && areaFraction <= 1) return round(w * h * areaFraction, 4);
+  if (shape === 'circle' || shape === 'oval') return round(Math.PI / 4 * w * h, 4);
+  const r = Math.min(50, Math.max(0, radiusPct || 0)) / 100 * Math.min(w, h); return round(w * h - (4 - Math.PI) * r * r, 4);
+};
+W.perimeterM = (widthCm, heightCm, shape) => { const w = widthCm / 100, h = heightCm / 100; return round(shape === 'circle' || shape === 'oval' ? Math.PI * (3 * (w / 2 + h / 2) - Math.sqrt((3 * w / 2 + h / 2) * (w / 2 + 3 * h / 2))) : 2 * (w + h), 4); };
+/**
+ * input: {widthCm,heightCm,shape,radius,areaFraction,pile,binding(bool), colours:[{yarnId,pct}]}  rates: from ratesFromForm / biz_rates.rates  yarns: biz_yarns rows
+ * Every line is {key,label,amount|null,note}. `missing` lists the rates still to be entered. total is only a number when nothing is missing.
+ */
+W.calc = (input, rates, yarns) => {
+  rates = rates || {}; yarns = yarns || []; const errs = [];
+  const w = +input.widthCm, h = +input.heightCm; if (!(w >= 5 && h >= 5)) errs.push('Width and height must be at least 5 cm.'); if (w > 2000 || h > 2000) errs.push('Maximum size is 2000 cm.');
+  if (errs.length) return { ok: false, errors: errs };
+  const area = W.areaM2(w, h, input.shape, input.radius, input.areaFraction), perim = W.perimeterM(w, h, input.shape), pile = input.pile || 'standard', ym = {}; yarns.forEach(y => { ym[y.id] = y; });
+  const missing = [], lines = [], need = (key, label) => { if (!missing.some(m => m.key === key)) missing.push({ key, label }); };
+  const kgM2 = getP(rates, 'pileKgPerM2.' + pile), waste = isNum(rates.wastePct) ? +rates.wastePct : null;
+  // yarn
+  const cols = (input.colours || []).filter(c => c && isNum(c.pct) && +c.pct > 0), shareTotal = cols.reduce((s, c) => s + +c.pct, 0) || 1, yarnRows = [];
+  let yarnKgTotal = null, yarnCost = 0, yarnCostKnown = true;
+  if (!isNum(kgM2)) need('pileKgPerM2.' + pile, 'Yarn kg per m2, ' + pile + ' pile'); if (waste === null) need('wastePct', 'Yarn waste %');
+  if (isNum(kgM2) && waste !== null) {
+    yarnKgTotal = 0;
+    cols.forEach(c => { const y = ym[c.yarnId], kg = round(area * +kgM2 * (+c.pct / shareTotal) * (1 + waste / 100), 3); yarnKgTotal += kg; const cost = y && isNum(y.price_per_kg) ? round(kg * y.price_per_kg, 2) : null; if (cost == null) yarnCostKnown = false; else yarnCost += cost; yarnRows.push({ yarnId: c.yarnId, code: y ? y.code : '(unmapped)', name: y ? y.name : '', hex: y ? y.hex : null, pct: round(+c.pct / shareTotal * 100, 1), kg, cost, stockKg: y ? +y.stock_kg : null, enough: y ? +y.stock_kg >= kg : null }); });
+    yarnKgTotal = round(yarnKgTotal, 3);
+  }
+  const unpriced = yarnRows.filter(r => r.cost == null).map(r => r.code);
+  lines.push({ key: 'yarn', label: 'Yarn', amount: yarnKgTotal != null && yarnCostKnown && cols.length ? round(yarnCost, 2) : null, note: yarnKgTotal == null ? 'needs yarn kg per m2 and waste %' : !cols.length ? 'no colours mapped yet' : unpriced.length ? 'no price per kg for ' + unpriced.join(', ') : yarnKgTotal + ' kg' });
+  const L = rates.labour || {};
+  const hours = isNum(L.hoursPerM2) ? round(area * +L.hoursPerM2 + (isNum(L.setupHours) ? +L.setupHours : 0), 2) : null;
+  if (!isNum(L.hoursPerM2)) need('labour.hoursPerM2', 'Tufting hours per m2'); if (!isNum(L.hourlyRate)) need('labour.hourlyRate', 'Labour rate per hour');
+  lines.push({ key: 'labour', label: 'Labour', amount: hours != null && isNum(L.hourlyRate) ? round(hours * L.hourlyRate, 2) : null, note: hours != null ? hours + ' h' : 'needs hours per m2 and a labour rate' });
+  const per = (key, label, rate, qty, unit) => { if (!isNum(rate)) { need(key, label); lines.push({ key, label: label.replace(/ per .*| \(flat\)/, ''), amount: null, note: 'rate not entered' }); } else lines.push({ key, label: label.replace(/ per .*| \(flat\)/, ''), amount: round(+rate * qty, 2), note: unit }); };
+  per('backingPerM2', 'Backing cloth + latex per m2', rates.backingPerM2, area, area + ' m2');
+  if (input.binding) per('bindingPerM', 'Binding / edging per metre', rates.bindingPerM, perim, perim + ' m');
+  per('finishingFlat', 'Finishing per rug (flat)', rates.finishingFlat, 1, 'per rug'); per('packagingFlat', 'Packaging per rug (flat)', rates.packagingFlat, 1, 'per rug');
+  const complete = missing.length === 0 && lines.every(l => l.amount != null), costs = round(lines.reduce((s, l) => s + (l.amount || 0), 0), 2);
+  const out = { ok: true, areaM2: area, perimeterM: perim, pile, hours, yarnKg: yarnKgTotal, yarn: yarnRows, lines, missing, complete, knownCost: costs, currency: rates.currency || null };
+  if (complete) {
+    const over = isNum(rates.overheadPct) ? round(costs * rates.overheadPct / 100, 2) : 0, cost = round(costs + over, 2), m = isNum(rates.marginPct) ? +rates.marginPct : null;
+    out.overhead = over; out.cost = cost;
+    if (m === null) { need('marginPct', 'Profit margin % of selling price'); out.complete = false; out.missing = missing; } else { const sell = round(cost / (1 - m / 100), 2); out.price = sell; out.margin = round(sell - cost, 2); const t = isNum(rates.taxPct) ? round(sell * rates.taxPct / 100, 2) : 0; out.tax = t; out.total = round(sell + t, 2); if (!isNum(rates.taxPct)) out.taxNote = 'Tax rate not entered, so no tax is added.'; }
+  }
+  return out;
+};
+
+/* ---------------------------------------------------------------- quotations and orders */
+W.QUOTE_STATUS = ['draft', 'sent', 'accepted', 'rejected', 'expired'];
+W.ORDER_STATUS = ['open', 'in_production', 'ready', 'delivered', 'cancelled'];
+W.PROJECT_STATUS = ['enquiry', 'quoted', 'confirmed', 'in_production', 'finished', 'delivered', 'cancelled'];
+W.cleanLines = lines => { const out = [], errors = []; (lines || []).forEach((l, i) => { const desc = clampStr(l.desc, 200), blank = !desc && !isNum(l.qty) && !isNum(l.unit); if (blank) return; if (!desc) return errors.push('Line ' + (i + 1) + ' needs a description.'); if (!isNum(l.qty) || +l.qty <= 0 || +l.qty > 100000) return errors.push('Line ' + (i + 1) + ': quantity must be more than 0.'); if (!isNum(l.unit) || +l.unit < 0 || +l.unit > 1e9) return errors.push('Line ' + (i + 1) + ': unit price must be 0 or more.'); out.push({ desc, qty: round(+l.qty, 3), unit: round(+l.unit, 2) }); }); if (!out.length && !errors.length) errors.push('Add at least one line.'); if (out.length > 100) errors.push('At most 100 lines.'); return { lines: out, errors }; };
+W.quoteTotals = (lines, o) => { o = o || {}; const sub = round(lines.reduce((s, l) => s + l.qty * l.unit, 0), 2), d = isNum(o.discountPct) ? Math.min(100, Math.max(0, +o.discountPct)) : 0, disc = round(sub * d / 100, 2), after = round(sub - disc, 2), t = isNum(o.taxPct) ? Math.min(100, Math.max(0, +o.taxPct)) : 0, tax = round(after * t / 100, 2); return { subtotal: sub, discount: disc, tax, total: round(after + tax, 2) }; };
+/** next reference such as Q-2026-0007 from the refs already used */
+W.nextRef = (prefix, refs, year) => { const re = new RegExp('^' + prefix + '-' + year + '-(\\d+)$'); let max = 0; (refs || []).forEach(r => { const m = re.exec(r); if (m) max = Math.max(max, +m[1]); }); return prefix + '-' + year + '-' + String(max + 1).padStart(4, '0'); };
+W.orderFromQuote = (q, year, refs) => ({ ref: W.nextRef('O', refs, year), quotation_id: q.id, project_id: q.project_id || null, customer_id: q.customer_id || null, currency: q.currency, total: q.total != null ? q.total : q.subtotal, paid: 0, status: 'open' });
+W.balance = o => round(Math.max(0, (+o.total || 0) - (+o.paid || 0)), 2);
+
+/* ---------------------------------------------------------------- reports */
+W.report = ({ orders = [], quotes = [], projects = [], stock = [], customers = [] }) => {
+  const by = (arr, f) => arr.reduce((m, x) => { const k = f(x); m[k] = (m[k] || 0) + 1; return m; }, {});
+  const live = orders.filter(o => o.status !== 'cancelled'), cur = [...new Set(live.map(o => o.currency))];
+  const money = cur.map(c => { const os = live.filter(o => o.currency === c); return { currency: c, orders: os.length, total: round(os.reduce((s, o) => s + +o.total, 0), 2), paid: round(os.reduce((s, o) => s + +o.paid, 0), 2), outstanding: round(os.reduce((s, o) => s + W.balance(o), 0), 2) }; });
+  const sentOrDone = quotes.filter(q => q.status === 'accepted' || q.status === 'rejected'), accepted = quotes.filter(q => q.status === 'accepted').length;
+  const cust = {}; live.forEach(o => { if (o.customer_id) cust[o.customer_id] = (cust[o.customer_id] || 0) + 1; });
+  const top = Object.entries(cust).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, n]) => ({ id, name: (customers.find(c => c.id === id) || {}).name || '(deleted)', orders: n }));
+  return { ordersByStatus: by(orders, o => o.status), quotesByStatus: by(quotes, q => q.status), projectsByStatus: by(projects, p => p.status), money, acceptRate: sentOrDone.length ? round(accepted / sentOrDone.length * 100, 1) : null,
+    yarn: stock.map(s => ({ code: s.code, name: s.name, stock_kg: +s.stock_kg, estimated_use_kg: +s.estimated_use_kg, actual_use_kg: +s.actual_use_kg, difference_kg: round(+s.actual_use_kg - +s.estimated_use_kg, 3), low: !!s.low_stock })), lowStock: stock.filter(s => s.low_stock).length, topCustomers: top };
+};
+W.reportCsv = r => W.csvStringify([['section', 'item', 'value']].concat(
+  Object.entries(r.ordersByStatus).map(([k, v]) => ['orders by status', k, v]), Object.entries(r.quotesByStatus).map(([k, v]) => ['quotations by status', k, v]), Object.entries(r.projectsByStatus).map(([k, v]) => ['projects by status', k, v]),
+  r.money.map(m => ['money ' + m.currency, 'total / paid / outstanding', m.total + ' / ' + m.paid + ' / ' + m.outstanding]),
+  r.yarn.map(y => ['yarn ' + y.code, 'stock kg / estimated use kg / actual use kg', y.stock_kg + ' / ' + y.estimated_use_kg + ' / ' + y.actual_use_kg])));
+
+if (typeof module !== 'undefined' && module.exports) module.exports = W; else root.XWORK = W;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ============ Rug-maker workspace: shell, shared helpers, Dashboard, My Designs, Account Settings ============
+   A full-screen area inside the Studio for signed-in rug makers who have a business profile. Every request goes to Supabase as the signed-in
+   user; the database (row-level security) decides what each person may read or change. Other sections register themselves with XWS.register. */
+(function (root) {
+'use strict';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const WS = root.XWS = { sections: [] };
+let el = null, ctx = null, cur = '', seq = 0;
+const $ = (s, r) => (r || el).querySelector(s), $$ = (s, r) => [...(r || el).querySelectorAll(s)];
+const SB = () => root.XSB, biz = () => (root.XACCT && XACCT.state().business) || null, prof = () => (root.XACCT && XACCT.state().profile) || null;
+const canWrite = () => { const b = biz(); return !!b && (b.memberRole === 'owner' || b.memberRole === 'manager'); };
+
+/* ---------------------------------------------------------------- helpers shared by every section */
+let tt; const toast = (m, bad) => { const t = $('.xw-tt'); if (!t) return; t.textContent = m; t.className = 'xw-tt on' + (bad ? ' bad' : ''); clearTimeout(tt); tt = setTimeout(() => { t.className = 'xw-tt'; }, 3600); };
+const msg = e => { const m = (e && e.message) || String(e); return /JWT|expired/i.test(m) ? 'Your session expired. Please sign in again.' : /row-level security|42501|permission denied/i.test(m) ? 'You do not have permission to do that.' : /23505|duplicate key/i.test(m) ? 'That already exists (a code or reference must be unique).' : /23503|foreign key/i.test(m) ? 'That item is still linked to other records.' : m; };
+const guard = fn => async (...a) => { try { return await fn(...a); } catch (e) { toast(msg(e), true); } };
+function dlg(title, body, actions, wide) {
+  const m = document.createElement('div'); m.className = 'xw-mod'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', title);
+  m.innerHTML = `<div class="xw-sheet"${wide ? ' style="width:min(980px,100%)"' : ''}><button class="xw-b sm x" aria-label="Close">✕</button><h3>${esc(title)}</h3><div class="xw-mb">${body}</div><div class="xw-acts"></div></div>`;
+  el.appendChild(m); const close = () => { m.remove(); }; $('.x', m).onclick = close; m.addEventListener('mousedown', e => { if (e.target === m) close(); });
+  (actions || []).forEach(a => { const b = document.createElement('button'); b.type = 'button'; b.className = 'xw-b ' + (a.cls || ''); b.textContent = a.label; b.onclick = guard(() => a.run(close, m)); $('.xw-acts', m).appendChild(b); });
+  const f = $('input:not([type=file]),textarea,select', m); if (f) setTimeout(() => f.focus(), 30); return { m, close };
+}
+const ask = (text, yes) => new Promise(res => { const d = dlg('Please confirm', `<p>${esc(text)}</p>`, [{ label: 'Cancel', run: c => { c(); res(false); } }, { label: yes || 'Confirm', cls: 'bad', run: c => { c(); res(true); } }]); d.m.querySelector('.x').addEventListener('click', () => res(false)); });
+const field = (id, label, val, o) => { o = o || {}; const v = val == null ? '' : val; return `<div class="xw-f${o.cls ? ' ' + o.cls : ''}"><label for="${id}">${esc(label)}</label>` + (o.type === 'select' ? `<select id="${id}">${(o.options || []).map(x => { const [k, t] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(k)}"${String(k) === String(v) ? ' selected' : ''}>${esc(t)}</option>`; }).join('')}</select>` : o.type === 'textarea' ? `<textarea id="${id}" rows="${o.rows || 3}" maxlength="${o.max || 4000}">${esc(v)}</textarea>` : `<input id="${id}" type="${o.type || 'text'}" value="${esc(v)}"${o.max ? ` maxlength="${o.max}"` : ''}${o.step ? ` step="${o.step}"` : ''}${o.min != null ? ` min="${o.min}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}${o.req ? ' required' : ''}>`) + (o.hint ? `<small>${esc(o.hint)}</small>` : '') + '</div>'; };
+const val = (id, r) => { const x = $('#' + id, r); return x ? x.value : ''; };
+const money = (n, cur) => { if (n == null || n === '') return '-'; const v = Number(n); try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'USD', maximumFractionDigits: 2 }).format(v); } catch (e) { return v.toFixed(2) + ' ' + (cur || ''); } };
+const dateS = d => { if (!d) return ''; const t = new Date(d); return isNaN(t) ? '' : t.toLocaleDateString('en-GB'); };
+const download = (name, data, type) => { const a = document.createElement('a'), blob = data instanceof Blob ? data : new Blob([data], { type: type || 'text/plain' }); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
+const safeName = s => String(s || 'file').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'file';
+const empty = (t, b) => `<div class="xw-empty"><p>${esc(t)}</p>${b || ''}</div>`;
+const badge = (t, kind) => `<span class="xw-badge ${kind || ''}">${esc(String(t).replace(/_/g, ' '))}</span>`;
+const sw = hex => `<i class="xw-sw" style="background:${/^#[0-9a-fA-F]{6}$/.test(hex) ? hex : '#888'}"></i>`;
+/* database access scoped to the business */
+const db = {
+  sel: (t, o) => SB().select(t, Object.assign({}, o, { eq: Object.assign({ business_id: biz().id }, o && o.eq) })),
+  one: (t, o) => SB().single(t, Object.assign({}, o, { eq: Object.assign({ business_id: biz().id }, o && o.eq) })),
+  ins: (t, row, o) => SB().insert(t, Array.isArray(row) ? row.map(r => Object.assign({ business_id: biz().id }, r)) : Object.assign({ business_id: biz().id }, row), o),
+  upd: (t, patch, eq, o) => SB().update(t, patch, Object.assign({}, o, { eq: Object.assign({ business_id: biz().id }, eq) })),
+  del: (t, eq) => SB().remove(t, { eq: Object.assign({ business_id: biz().id }, eq) })
+};
+const H = WS.h = { esc, $, $$, dlg, ask, field, val, money, dateS, download, safeName, empty, badge, sw, db, toast, guard, msg, canWrite, biz, prof, SB, nav: k => WS.open(k), yarnId: code => 'BY-' + code };
+const readOnlyNote = () => canWrite() ? '' : '<p class="xw-note warn">Your role is staff: you can view this workspace but only owners and managers can change it.</p>';
+H.readOnlyNote = readOnlyNote;
+
+/* ---------------------------------------------------------------- the business yarn library inside the editor */
+let yarnCache = [];
+H.loadYarns = async () => { yarnCache = await db.sel('biz_yarns', { select: '*', order: 'code.asc', limit: 1000 }); return yarnCache; };
+H.yarns = () => yarnCache;
+H.studioYarns = () => yarnCache.filter(y => y.active !== false).map(y => ({ id: H.yarnId(y.code), name: y.name, hex: y.hex.toUpperCase(), material: y.material || '', availability: y.availability, active: true, _biz: y.id }));
+H.applyYarnSource = on => { if (!root.XSTUDIO_LIB) return; XSTUDIO_LIB.useYarns(on && yarnCache.length ? H.studioYarns : null); };
+
+/* ---------------------------------------------------------------- registry + shell */
+WS.register = (key, label, render, hint) => { WS.sections.push({ key, label, render, hint }); };
+WS.open = async key => {
+  if (!el) return; if (!biz()) { toast('Create your business profile first (Account button).', true); return; }
+  cur = key || cur || 'dashboard'; const s = WS.sections.find(x => x.key === cur) || WS.sections[0]; cur = s.key; const my = ++seq;
+  $$('.xw-nav button').forEach(b => b.setAttribute('aria-current', b.dataset.k === cur ? 'page' : 'false'));
+  const main = $('#xwMain'); main.innerHTML = `<div class="xw-load" role="status">Loading ${esc(s.label)}...</div>`;
+  try { await H.loadYarns(); } catch (e) { /* sections that need yarns will show their own error */ }
+  if (my !== seq) return;
+  main.innerHTML = `<header class="xw-h"><h2>${esc(s.label)}</h2>${s.hint ? `<p class="xw-note">${esc(s.hint)}</p>` : ''}</header><div class="xw-body" id="xwBody"></div>`;
+  try { await s.render($('#xwBody'), H); } catch (e) { if (my === seq) $('#xwBody').innerHTML = `<div class="xw-err" role="alert">${esc(msg(e))}</div>`; }
+};
+WS.close = () => { if (!el) return; el.classList.remove('on'); document.body.classList.remove('xw-open'); };
+function build() {
+  el = document.createElement('div'); el.id = 'xwork'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'XARO rug maker workspace');
+  el.innerHTML = `<div class="xw-top"><h1>Rug maker <span>workspace</span></h1><span class="xw-biz" id="xwBiz"></span><span class="xw-sp"></span><button class="xw-b" id="xwStudio">Back to Studio</button><button class="xw-b" id="xwClose" aria-label="Close workspace">Close</button></div>
+  <div class="xw-grid"><nav class="xw-nav" aria-label="Workspace sections"></nav><main id="xwMain" tabindex="-1"></main></div><div class="xw-tt" role="status" aria-live="polite"></div>`;
+  document.body.appendChild(el);
+  const ORDER = ['dashboard', 'designs', 'vector', 'colour', 'yarns', 'calculator', 'preview3d', 'sheets', 'projects', 'quotes', 'orders', 'inventory', 'reports', 'settings'];
+  WS.sections.sort((a, b) => ORDER.indexOf(a.key) - ORDER.indexOf(b.key));
+  $('.xw-nav').innerHTML = WS.sections.map(s => `<button data-k="${s.key}">${esc(s.label)}</button>`).join('');
+  $('.xw-nav').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (b) WS.open(b.dataset.k); });
+  $('#xwClose').onclick = WS.close; $('#xwStudio').onclick = () => { WS.close(); };
+  addEventListener('keydown', e => { if (e.key === 'Escape' && el.classList.contains('on')) { const m = $$('.xw-mod'); if (m.length) m.pop().remove(); else WS.close(); } });
+}
+WS.show = key => { if (!biz()) return; if (!el) build(); $('#xwBiz').textContent = biz().name; el.classList.add('on'); document.body.classList.add('xw-open'); return WS.open(key || cur || 'dashboard'); };
+H.loadDesignIntoStudio = async (id, view) => { const r = await XACCT.open(id), images = {}; for (const [k, v] of Object.entries(r.images || {})) { const im = await XSTUDIO_LIB.imageFromData(v.data); if (im) images[k] = { el: im, data: v.data, name: v.name, w: v.w, h: v.h }; } WS.close(); XSTUDIO.loadDoc(r.doc, { name: r.name, cloudId: r.id, images, view }); return r; };
+/** called by the studio once it is built: shows the Workspace button for rug makers with a business */
+WS.mount = c => {
+  ctx = c; const btn = c.studioRoot.querySelector('#stWork'); if (!btn) return;
+  const sync = () => { const b = biz(); btn.hidden = !b; if (b) { btn.textContent = 'Workspace'; H.loadYarns().then(() => H.applyYarnSource(true)).catch(() => {}); } else H.applyYarnSource(false); };
+  btn.onclick = () => WS.show(); if (root.XACCT && XACCT.onState) XACCT.onState(sync); sync();
+};
+
+/* ---------------------------------------------------------------- Dashboard */
+WS.register('dashboard', 'Dashboard', async (b) => {
+  const [designs, projects, orders, quotes, stock, rates, yarnCount] = await Promise.all([
+    db.sel('custom_designs', { select: 'id,name,status,updated_at,doc->_thumb', order: 'updated_at.desc', limit: 200 }), db.sel('biz_projects', { select: 'id,title,status,due_date', limit: 500 }), db.sel('biz_orders', { select: 'id,ref,status,total,paid,currency,due_date', limit: 500 }),
+    db.sel('biz_quotations', { select: 'id,status', limit: 500 }), db.sel('v_yarn_stock', { select: '*', limit: 1000 }), db.one('biz_rates', { select: 'rates' }), db.sel('biz_yarns', { select: 'id', limit: 1 })]);
+  const W = root.XWORK, rep = W.report({ orders, quotes, projects, stock }), active = projects.filter(p => !['delivered', 'cancelled'].includes(p.status)).length, openOrders = orders.filter(o => ['open', 'in_production', 'ready'].includes(o.status));
+  const soon = openOrders.filter(o => o.due_date).sort((x, y) => x.due_date < y.due_date ? -1 : 1).slice(0, 5), low = stock.filter(s => s.low_stock), recent = designs.filter(d => d.status !== 'archived').slice(0, 6);
+  const ratesSet = rates && rates.rates && Object.keys(rates.rates).length > 0, steps = [['Add your yarns', yarnCount.length > 0, 'yarns'], ['Enter your calculator rates', ratesSet, 'calculator'], ['Create your first design', designs.length > 0, 'designs']];
+  b.innerHTML = `<div class="xw-cards">${[['Designs', designs.filter(d => d.status !== 'archived').length, 'designs'], ['Active projects', active, 'projects'], ['Open orders', openOrders.length, 'orders'], ['Quotes awaiting reply', quotes.filter(q => q.status === 'sent').length, 'quotes'], ['Low-stock yarns', low.length, 'inventory']].map(c => `<button class="xw-card" data-go="${c[2]}"><b>${c[1]}</b><span>${esc(c[0])}</span></button>`).join('')}</div>
+  ${steps.some(s => !s[1]) ? `<section class="xw-sec"><h3>Getting set up</h3><ul class="xw-check">${steps.map(s => `<li class="${s[1] ? 'done' : ''}"><span aria-hidden="true">${s[1] ? '✓' : '○'}</span> ${s[1] ? esc(s[0]) : `<a href="#" data-go="${s[2]}">${esc(s[0])}</a>`}</li>`).join('')}</ul></section>` : ''}
+  <section class="xw-sec"><h3>Money</h3>${rep.money.length ? `<table class="xw-t"><thead><tr><th>Currency</th><th>Orders</th><th>Total</th><th>Paid</th><th>Outstanding</th></tr></thead><tbody>${rep.money.map(m => `<tr><td>${esc(m.currency)}</td><td>${m.orders}</td><td>${money(m.total, m.currency)}</td><td>${money(m.paid, m.currency)}</td><td>${money(m.outstanding, m.currency)}</td></tr>`).join('')}</tbody></table>` : '<p class="xw-note">No orders yet.</p>'}</section>
+  <div class="xw-two"><section class="xw-sec"><h3>Due soon</h3>${soon.length ? `<ul class="xw-list">${soon.map(o => `<li><b>${esc(o.ref)}</b> ${badge(o.status)} <span>${esc(dateS(o.due_date))}</span></li>`).join('')}</ul>` : '<p class="xw-note">No orders with a due date.</p>'}</section>
+  <section class="xw-sec"><h3>Low stock</h3>${low.length ? `<ul class="xw-list">${low.map(s => `<li>${sw(s.hex)} <b>${esc(s.code)}</b> ${esc(s.name)} <span>${Number(s.stock_kg)} kg left</span></li>`).join('')}</ul>` : '<p class="xw-note">Nothing is below its reorder level.</p>'}</section></div>
+  <section class="xw-sec"><h3>Recent designs</h3>${recent.length ? `<div class="xw-grid3">${recent.map(d => `<button class="xw-dcard" data-open="${esc(d.id)}">${d._thumb ? `<img src="${esc(d._thumb)}" alt="">` : '<div class="xw-ph"></div>'}<b>${esc(d.name)}</b><small>${esc(dateS(d.updated_at))}</small></button>`).join('')}</div>` : '<p class="xw-note">No designs yet. Open the Studio and press Save.</p>'}</section>`;
+  b.addEventListener('click', guard(async e => { const g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); return WS.open(g.dataset.go); } const o = e.target.closest('[data-open]'); if (o) await H.loadDesignIntoStudio(o.dataset.open); }));
+});
+
+/* ---------------------------------------------------------------- My Designs */
+WS.register('designs', 'My Designs', async (b) => {
+  let folders = await db.sel('design_folders', { select: 'id,name,parent_id', order: 'name.asc', limit: 200 }), q = '', folder = '', status = 'active', rows = [];
+  const load = async () => { const o = { select: 'id,name,status,updated_at,folder_id,doc->_thumb', order: 'updated_at.desc', limit: 300 }; if (q) o.ilike = { name: q }; if (folder === '_none') o.is = { folder_id: null }; else if (folder) o.eq = { folder_id: folder }; rows = (await db.sel('custom_designs', o)).filter(d => status === 'archived' ? d.status === 'archived' : d.status !== 'archived'); };
+  const draw = () => {
+    b.innerHTML = `${readOnlyNote()}<div class="xw-bar"><input type="search" id="dq" placeholder="Search designs" value="${esc(q)}" aria-label="Search designs"><select id="df" aria-label="Folder"><option value="">All folders</option><option value="_none"${folder === '_none' ? ' selected' : ''}>No folder</option>${folders.map(f => `<option value="${esc(f.id)}"${folder === f.id ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}</select>
+      <select id="ds" aria-label="Show"><option value="active"${status === 'active' ? ' selected' : ''}>Active</option><option value="archived"${status === 'archived' ? ' selected' : ''}>Archived</option></select><span class="xw-sp"></span><button class="xw-b" id="dnf">New folder</button><button class="xw-b pri" id="dnew">New design</button></div>
+    ${rows.length ? `<div class="xw-grid3">${rows.map(d => `<article class="xw-dcard"><button class="xw-thumb" data-open="${esc(d.id)}" aria-label="Open ${esc(d.name)}">${d._thumb ? `<img src="${esc(d._thumb)}" alt="">` : '<div class="xw-ph"></div>'}</button><b>${esc(d.name)}</b><small>${esc(dateS(d.updated_at))}${d.folder_id ? ' | ' + esc((folders.find(f => f.id === d.folder_id) || {}).name || '') : ''}</small>
+      <div class="xw-chips"><button class="xw-b sm" data-open="${esc(d.id)}">Open</button><button class="xw-b sm" data-dup="${esc(d.id)}">Duplicate</button><button class="xw-b sm" data-ren="${esc(d.id)}">Rename</button><button class="xw-b sm" data-mv="${esc(d.id)}">Move</button><button class="xw-b sm" data-hist="${esc(d.id)}">History</button>
+      <button class="xw-b sm" data-arc="${esc(d.id)}">${d.status === 'archived' ? 'Restore' : 'Archive'}</button><button class="xw-b sm bad" data-rm="${esc(d.id)}">Delete</button></div></article>`).join('')}</div>` : empty(q || folder ? 'No designs match.' : status === 'archived' ? 'No archived designs.' : 'No designs yet. Click New design, make something, and press Save.')}`;
+  };
+  const refresh = async () => { await load(); draw(); };
+  b.addEventListener('input', e => { if (e.target.id === 'dq') { clearTimeout(b._t); b._t = setTimeout(guard(async () => { q = e.target.value.trim(); await refresh(); b.querySelector('#dq').focus(); b.querySelector('#dq').setSelectionRange(q.length, q.length); }), 250); } });
+  b.addEventListener('change', guard(async e => { if (e.target.id === 'df') { folder = e.target.value; await refresh(); } if (e.target.id === 'ds') { status = e.target.value; await refresh(); } }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target, g = a => t.closest('[' + a + ']'); let x;
+    if (t.closest('#dnew')) { WS.close(); XSTUDIO.loadDoc(XSTUDIO_LIB.newDoc({ layers: [] }), {}); }
+    else if (t.closest('#dnf')) { const d = dlg('New folder', field('fn', 'Folder name', '', { max: 80 }), [{ label: 'Cancel', run: c => c() }, { label: 'Create', cls: 'pri', run: async c => { const n = val('fn', d.m).trim(); if (!n) return toast('Enter a name.', true); await SB().insert('design_folders', { name: n.slice(0, 80), owner_id: SB().user().id, business_id: biz().id }); c(); folders = await db.sel('design_folders', { select: 'id,name,parent_id', order: 'name.asc', limit: 200 }); await refresh(); } }]); }
+    else if (x = g('data-open')) await H.loadDesignIntoStudio(x.dataset.open);
+    else if (x = g('data-dup')) { await XACCT.duplicate(x.dataset.dup); toast('Duplicated'); await refresh(); }
+    else if (x = g('data-ren')) { const id = x.dataset.ren, cur0 = rows.find(r => r.id === id); const d = dlg('Rename design', field('rn', 'Name', cur0 && cur0.name, { max: 120 }), [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: async c => { const n = val('rn', d.m).trim(); if (!n) return toast('Enter a name.', true); await db.upd('custom_designs', { name: n.slice(0, 120) }, { id }); c(); await refresh(); } }]); }
+    else if (x = g('data-mv')) { const id = x.dataset.mv; const d = dlg('Move to folder', field('mf', 'Folder', rows.find(r => r.id === id).folder_id || '', { type: 'select', options: [['', 'No folder']].concat(folders.map(f => [f.id, f.name])) }), [{ label: 'Cancel', run: c => c() }, { label: 'Move', cls: 'pri', run: async c => { await db.upd('custom_designs', { folder_id: val('mf', d.m) || null }, { id }); c(); await refresh(); } }]); }
+    else if (x = g('data-arc')) { const d0 = rows.find(r => r.id === x.dataset.arc); await db.upd('custom_designs', { status: d0.status === 'archived' ? 'draft' : 'archived' }, { id: d0.id }); await refresh(); }
+    else if (x = g('data-rm')) { if (await ask('Delete this design permanently? Its saved versions are deleted too.', 'Delete')) { await db.del('custom_designs', { id: x.dataset.rm }); toast('Deleted'); await refresh(); } }
+    else if (x = g('data-hist')) { const id = x.dataset.hist, vs = await SB().select('design_versions', { select: 'version,created_at', eq: { design_id: id }, order: 'version.desc', limit: 50 });
+      const d = dlg('Version history', vs.length ? `<p class="xw-note">Each save is kept (last 50). Restoring copies that version back as the current design; nothing is lost.</p><ul class="xw-list">${vs.map(v => `<li><b>Version ${v.version}</b> <span>${esc(new Date(v.created_at).toLocaleString('en-GB'))}</span><button class="xw-b sm" data-rest="${v.version}">Restore</button></li>`).join('')}</ul>` : '<p>No versions yet.</p>', [{ label: 'Close', run: c => c() }]);
+      d.m.addEventListener('click', guard(async ev => { const r = ev.target.closest('[data-rest]'); if (!r) return; const row = await SB().single('design_versions', { select: 'doc', eq: { design_id: id, version: r.dataset.rest } }); if (!row) throw new Error('That version was not found.'); await db.upd('custom_designs', { doc: row.doc }, { id }); d.close(); toast('Restored version ' + r.dataset.rest); await refresh(); })); }
+  }));
+  await refresh();
+});
+
+/* ---------------------------------------------------------------- Account Settings */
+WS.register('settings', 'Account Settings', async (b) => {
+  const bz = biz(), members = await SB().select('business_members', { select: 'user_id,role,created_at', eq: { business_id: bz.id } }), me = SB().user(), owner = bz.memberRole === 'owner', a = bz.address || {};
+  b.innerHTML = `${readOnlyNote()}<section class="xw-sec"><h3>Business profile</h3><div class="xw-form">${field('bn', 'Business name', bz.name, { max: 120 })}${field('bo', 'Owner name', bz.owner_name, { max: 120 })}${field('bp', 'Phone', bz.phone, { max: 30 })}${field('bc', 'Country (2 letters)', bz.country, { max: 2 })}${field('bu', 'Currency (3 letters)', bz.currency, { max: 3 })}${field('ba', 'Address', a.line1 || '', { max: 200 })}${field('bt', 'City', a.city || '', { max: 100 })}</div><p class="xw-err" id="bErr" role="alert"></p><button class="xw-b pri" id="bSave"${canWrite() ? '' : ' disabled'}>Save profile</button></section>
+  <section class="xw-sec"><h3>Logo</h3><div id="logoBox" class="xw-note">${bz.logo_path ? 'A logo is saved.' : 'No logo yet.'}</div><input type="file" id="logoF" accept="image/png,image/jpeg,image/webp"${canWrite() ? '' : ' disabled'}><p class="xw-note">PNG, JPG or WebP up to 2 MB. Stored privately for your team.</p></section>
+  <section class="xw-sec"><h3>Team</h3><table class="xw-t"><thead><tr><th>Member</th><th>Role</th><th>Joined</th><th></th></tr></thead><tbody>${members.map(m => `<tr><td>${m.user_id === me.id ? 'You' : 'Team member ' + esc(m.user_id.slice(0, 6))}</td><td>${badge(m.role)}</td><td>${esc(dateS(m.created_at))}</td><td>${owner && m.role !== 'owner' ? `<button class="xw-b sm bad" data-rmm="${esc(m.user_id)}">Remove</button>` : ''}</td></tr>`).join('')}</tbody></table>
+  ${owner ? `<div class="xw-bar"><input type="email" id="mE" placeholder="Their account email" aria-label="Team member email"><select id="mR" aria-label="Role"><option value="staff">Staff (view only)</option><option value="manager">Manager (can edit)</option></select><button class="xw-b" id="mAdd">Add member</button></div><p class="xw-note">The person must already have a XARO rug maker account. Staff can view; managers can edit; only the owner can manage the team.</p>` : '<p class="xw-note">Only the owner can add or remove team members.</p>'}</section>
+  <section class="xw-sec"><h3>Your data</h3><p class="xw-note">Download everything stored for this business as a JSON file (designs without artwork pixels, yarns, customers, projects, quotations, orders, stock movements).</p><button class="xw-b" id="xport">Export my data</button></section>
+  <section class="xw-sec"><h3>Password and sign-out</h3><div class="xw-bar"><input type="password" id="pw" autocomplete="new-password" placeholder="New password (8+ characters)" aria-label="New password"><button class="xw-b" id="pwSave">Change password</button><button class="xw-b" id="so">Sign out</button></div></section>`;
+  b.addEventListener('click', guard(async e => {
+    const t = e.target;
+    if (t.id === 'bSave') { const n = val('bn').trim(), cc = val('bc').trim().toUpperCase(), cu = val('bu').trim().toUpperCase(), err = $('#bErr'); err.textContent = '';
+      if (n.length < 2) return err.textContent = 'Business name needs at least 2 characters.'; if (cc && !/^[A-Z]{2}$/.test(cc)) return err.textContent = 'Country must be 2 letters, for example LK.'; if (cu && !/^[A-Z]{3}$/.test(cu)) return err.textContent = 'Currency must be 3 letters, for example USD.';
+      await SB().update('businesses', { name: n, owner_name: val('bo').trim() || null, phone: val('bp').trim() || null, country: cc || null, currency: cu || null, address: { line1: val('ba').trim(), city: val('bt').trim() } }, { eq: { id: bz.id } }); await XACCT.refresh(); $('#xwBiz').textContent = biz().name; toast('Profile saved'); }
+    else if (t.id === 'mAdd') { const em = val('mE').trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast('Enter a valid email.', true); await SB().addMember(bz.id, em, val('mR')); toast('Member added'); await WS.open('settings'); }
+    else if (t.dataset.rmm) { if (await ask('Remove this member from the business?', 'Remove')) { await SB().remove('business_members', { eq: { business_id: bz.id, user_id: t.dataset.rmm } }); await WS.open('settings'); } }
+    else if (t.id === 'xport') { const out = { exported_at: new Date().toISOString(), business: { id: bz.id, name: bz.name } }; for (const [k, tbl, sel] of [['designs', 'custom_designs', 'id,name,status,folder_id,created_at,updated_at,doc'], ['yarns', 'biz_yarns', '*'], ['customers', 'biz_customers', '*'], ['projects', 'biz_projects', '*'], ['quotations', 'biz_quotations', '*'], ['orders', 'biz_orders', '*'], ['yarn_movements', 'yarn_movements', '*'], ['production_sheets', 'production_sheets', '*']]) out[k] = await db.sel(tbl, { select: sel, limit: 1000 }); out.designs.forEach(d => { if (d.doc) { delete d.doc._thumb; } }); download('xaro-business-' + safeName(bz.name) + '.json', JSON.stringify(out, null, 2), 'application/json'); toast('Exported'); }
+    else if (t.id === 'pwSave') { const p = val('pw'); if (p.length < 8) return toast('Use at least 8 characters.', true); await SB().updatePassword(p); $('#pw').value = ''; toast('Password changed'); }
+    else if (t.id === 'so') { await SB().signOut(); WS.close(); }
+  }));
+  b.addEventListener('change', guard(async e => { if (e.target.id !== 'logoF') return; const f = e.target.files[0]; if (!f) return; if (!/^image\/(png|jpeg|webp)$/.test(f.type)) return toast('Use a PNG, JPG or WebP image.', true); if (f.size > 2 * 1048576) return toast('That file is over 2 MB.', true);
+    const path = SB().businessPath(bz.id, 'logo-' + Date.now() + '.' + (f.type === 'image/png' ? 'png' : f.type === 'image/webp' ? 'webp' : 'jpg')); await SB().upload('business-assets', path, f, f.type); await SB().update('businesses', { logo_path: path }, { eq: { id: bz.id } }); await XACCT.refresh(); $('#logoBox').textContent = 'Logo saved.'; toast('Logo saved'); }));
+});
+
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ============ Workspace: Yarn Manager, Inventory (stock ledger) and Rug Calculator ============ */
+(function (root) {
+'use strict';
+const WS = root.XWS, H = WS.h, W = root.XWORK, { esc, field, val, dlg, ask, money, dateS, download, empty, badge, sw, db, toast, guard } = H;
+const SB = () => root.XSB;
+const AVAIL = [['unknown', 'Unknown'], ['in-stock', 'In stock'], ['low', 'Low'], ['out', 'Out of stock'], ['discontinued', 'Discontinued']];
+const num = v => (v === '' || v == null ? null : +v);
+const chunk = (a, n) => { const o = []; for (let i = 0; i < a.length; i += n) o.push(a.slice(i, i + n)); return o; };
+
+/* ---------------------------------------------------------------- stock movement dialog (shared by Yarn Manager and Inventory) */
+H.movementDialog = async (yarnId, after) => {
+  const yarns = H.yarns(), projects = await db.sel('biz_projects', { select: 'id,title', order: 'created_at.desc', limit: 200 });
+  const d = dlg('Record stock movement', `<div class="xw-form">${field('mY', 'Yarn', yarnId || (yarns[0] && yarns[0].id), { type: 'select', options: yarns.map(y => [y.id, y.code + ' - ' + y.name]) })}${field('mK', 'Type', 'purchase', { type: 'select', options: Object.entries(W.MOVEMENT_KINDS) })}${field('mG', 'Weight (kg)', '', { type: 'number', step: '0.001', hint: 'Adjustments may be negative.' })}${field('mP', 'Project (optional)', '', { type: 'select', options: [['', 'None']].concat(projects.map(p => [p.id, p.title])) })}${field('mN', 'Note', '', { max: 500 })}</div><p class="xw-note">Estimated use is a plan and never changes stock. Only purchases, actual use and adjustments do.</p><p class="xw-err" id="mE" role="alert"></p>`,
+    [{ label: 'Cancel', run: c => c() }, { label: 'Save movement', cls: 'pri', run: async c => {
+      const m = { yarn_id: val('mY', d.m), kind: val('mK', d.m), kg: val('mG', d.m) }, err = W.checkMovement(m); if (err) { d.m.querySelector('#mE').textContent = err; return; }
+      await db.ins('yarn_movements', { yarn_id: m.yarn_id, kind: m.kind, kg: +m.kg, project_id: val('mP', d.m) || null, note: val('mN', d.m).trim() || null, created_by: SB().user().id }); c(); toast('Movement saved'); if (after) await after(); } }]);
+};
+
+/* ---------------------------------------------------------------- Yarn Manager */
+WS.register('yarns', 'Yarn Manager', async (b) => {
+  let q = '', av = '', sel = new Set(); const mayEdit = H.canWrite();
+  const palettes = () => db.sel('biz_palettes', { select: 'id,name,colours', order: 'name.asc', limit: 100 });
+  const rows = () => H.yarns().filter(y => (!av || y.availability === av) && (!q || (y.code + ' ' + y.name + ' ' + (y.manufacturer || '')).toLowerCase().includes(q)));
+  const reload = async () => { await H.loadYarns(); H.applyYarnSource(true); draw(); };
+  const draw = () => {
+    const list = rows(), low = W.lowStock(H.yarns());
+    b.innerHTML = `${H.readOnlyNote()}${low.length ? `<p class="xw-note warn" role="status"><b>${low.length} yarn${low.length > 1 ? 's' : ''} at or below the reorder level:</b> ${low.slice(0, 8).map(y => esc(y.code)).join(', ')}${low.length > 8 ? '...' : ''}</p>` : ''}
+    <div class="xw-bar"><input type="search" id="yq" placeholder="Search code, name or brand" value="${esc(q)}" aria-label="Search yarns"><select id="ya" aria-label="Availability"><option value="">Any availability</option>${AVAIL.map(a => `<option value="${a[0]}"${av === a[0] ? ' selected' : ''}>${a[1]}</option>`).join('')}</select><span class="xw-sp"></span>
+      <button class="xw-b" id="yPal"${sel.size && mayEdit ? '' : ' disabled'}>Save selected as palette</button><button class="xw-b" id="yPals">Palettes</button><button class="xw-b" id="yExp"${H.yarns().length ? '' : ' disabled'}>Export CSV</button><label class="xw-b" style="cursor:pointer">Import CSV<input type="file" id="yImp" accept=".csv,text/csv" hidden${mayEdit ? '' : ' disabled'}></label><button class="xw-b pri" id="yAdd"${mayEdit ? '' : ' disabled'}>Add yarn</button></div>
+    ${list.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th></th><th>Code</th><th>Name</th><th>Brand</th><th>Material</th><th class="num">Price/kg</th><th class="num">Stock kg</th><th class="num">Reorder</th><th>Supplier</th><th>Status</th><th></th></tr></thead><tbody>${list.map(y => `<tr class="${W.lowStock([y]).length ? 'low' : ''}"><td><input type="checkbox" data-sel="${esc(y.id)}" aria-label="Select ${esc(y.code)}"${sel.has(y.id) ? ' checked' : ''} style="width:auto"></td><td>${sw(y.hex)}</td><td><b>${esc(y.code)}</b></td><td>${esc(y.name)}${y.active === false ? ' ' + badge('inactive') : ''}</td><td>${esc(y.manufacturer || '')}</td><td>${esc(y.material || '')}</td><td class="num">${y.price_per_kg == null ? '-' : Number(y.price_per_kg).toFixed(2)}</td><td class="num">${Number(y.stock_kg)}</td><td class="num">${y.reorder_kg == null ? '-' : Number(y.reorder_kg)}</td><td>${esc(y.supplier || '')}</td><td>${badge(y.availability)}</td>
+      <td style="white-space:nowrap"><button class="xw-b sm" data-mov="${esc(y.id)}"${mayEdit ? '' : ' disabled'}>Stock</button> <button class="xw-b sm" data-edit="${esc(y.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm bad" data-del="${esc(y.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`).join('')}</tbody></table></div>`
+      : empty(H.yarns().length ? 'No yarns match.' : 'Your yarn library is empty. Add yarns one by one, or import a CSV (columns: code, name, hex, brand, material, price, stock, reorder, supplier).')}`;
+  };
+  const form = y => { y = y || {}; return `<div class="xw-form">${field('yC', 'Code', y.code, { max: 40, req: true })}${field('yN', 'Name', y.name, { max: 80 })}<div class="xw-f"><label for="yH">Colour</label><div style="display:flex;gap:6px"><input type="color" id="yHc" value="${esc(y.hex || '#808080')}" style="width:46px;padding:2px" aria-label="Pick colour"><input type="text" id="yH" value="${esc(y.hex || '#808080')}" maxlength="7"></div></div>${field('yM', 'Brand / manufacturer', y.manufacturer, { max: 80 })}${field('yT', 'Material', y.material, { max: 80 })}${field('yP', 'Price per kg', y.price_per_kg, { type: 'number', step: '0.01', min: 0 })}${y.id ? '' : field('yS', 'Opening stock (kg)', 0, { type: 'number', step: '0.001', min: 0, hint: 'Recorded as a purchase so the stock ledger balances.' })}${field('yR', 'Reorder level (kg)', y.reorder_kg, { type: 'number', step: '0.001', min: 0 })}${field('yU', 'Supplier', y.supplier, { max: 120 })}${field('yA', 'Availability', y.availability || 'unknown', { type: 'select', options: AVAIL })}</div><label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="yAct" style="width:auto"${y.active === false ? '' : ' checked'}> Show in the design editor</label><p class="xw-err" id="yE" role="alert"></p>`; };
+  const read = d => { const hx = W.normHex(val('yH', d.m)); if (!val('yC', d.m).trim()) return { err: 'Enter a code.' }; if (!hx) return { err: 'Colour must look like #RRGGBB.' }; const p = num(val('yP', d.m)), r = num(val('yR', d.m)); if (p != null && !(p >= 0)) return { err: 'Price must be 0 or more.' }; if (r != null && !(r >= 0)) return { err: 'Reorder level must be 0 or more.' };
+    return { row: { code: val('yC', d.m).trim().slice(0, 40), name: (val('yN', d.m).trim() || val('yC', d.m).trim()).slice(0, 80), hex: hx, manufacturer: val('yM', d.m).trim() || null, material: val('yT', d.m).trim() || null, price_per_kg: p, reorder_kg: r, supplier: val('yU', d.m).trim() || null, availability: val('yA', d.m), active: d.m.querySelector('#yAct').checked } }; };
+  const bindColor = d => { const c = d.m.querySelector('#yHc'), t = d.m.querySelector('#yH'); c.oninput = () => { t.value = c.value.toUpperCase(); }; t.oninput = () => { const h = W.normHex(t.value); if (h) c.value = h.toLowerCase(); }; };
+  b.addEventListener('input', e => { if (e.target.id === 'yq') { q = e.target.value.trim().toLowerCase(); draw(); const i = b.querySelector('#yq'); i.focus(); i.setSelectionRange(q.length, q.length); } });
+  b.addEventListener('change', guard(async e => {
+    const t = e.target; if (t.id === 'ya') { av = t.value; draw(); } else if (t.dataset.sel) { t.checked ? sel.add(t.dataset.sel) : sel.delete(t.dataset.sel); b.querySelector('#yPal').disabled = !sel.size || !mayEdit; }
+    else if (t.id === 'yImp') { const f = t.files[0]; if (!f) return; if (f.size > 2 * 1048576) return toast('That file is over 2 MB.', true); const res = W.parseYarnCsv(await f.text()), have = new Map(H.yarns().map(y => [y.code.toLowerCase(), y])), news = res.rows.filter(r => !have.has(r.code.toLowerCase())), upd = res.rows.filter(r => have.has(r.code.toLowerCase()));
+      const d = dlg('Import yarns', `<p><b>${news.length}</b> new, <b>${upd.length}</b> existing (details are updated; stock is not overwritten), <b>${res.errors.length}</b> row${res.errors.length === 1 ? '' : 's'} with problems.</p>${res.errors.length ? `<ul class="xw-list">${res.errors.slice(0, 12).map(x => `<li>${x.line ? 'Line ' + x.line + ': ' : ''}${esc(x.msg)}</li>`).join('')}</ul>${res.errors.length > 12 ? '<p class="xw-note">...and more.</p>' : ''}<p class="xw-note">Rows with problems are skipped.</p>` : ''}`,
+        [{ label: 'Cancel', run: c => c() }, { label: 'Import ' + (news.length + upd.length) + ' yarns', cls: 'pri', run: async c => { if (!news.length && !upd.length) return c(); let opening = [];
+          for (const part of chunk(news, 100)) { const out = await db.ins('biz_yarns', part.map(r => ({ code: r.code, name: r.name, hex: r.hex, manufacturer: r.manufacturer, material: r.material, price_per_kg: r.price_per_kg, reorder_kg: r.reorder_kg, supplier: r.supplier, stock_kg: 0 })), { select: 'id,code' }); out.forEach(o => { const src = part.find(p => p.code === o.code); if (src && src.stock_kg > 0) opening.push({ yarn_id: o.id, kind: 'purchase', kg: src.stock_kg, note: 'Opening stock (CSV import)', created_by: SB().user().id }); }); }
+          for (const part of chunk(opening, 100)) await db.ins('yarn_movements', part);
+          for (const r of upd.slice(0, 500)) await db.upd('biz_yarns', { name: r.name, hex: r.hex, manufacturer: r.manufacturer, material: r.material, price_per_kg: r.price_per_kg, reorder_kg: r.reorder_kg, supplier: r.supplier }, { id: have.get(r.code.toLowerCase()).id });
+          c(); toast('Imported ' + (news.length + Math.min(500, upd.length)) + ' yarns'); await reload(); } }]); t.value = ''; }
+  }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target, g = a => t.closest('[' + a + ']'); let x;
+    if (t.closest('#yAdd')) { const d = dlg('Add yarn', form(), [{ label: 'Cancel', run: c => c() }, { label: 'Add yarn', cls: 'pri', run: async c => { const r = read(d); if (r.err) { d.m.querySelector('#yE').textContent = r.err; return; } const open = num(val('yS', d.m)) || 0; if (open < 0) { d.m.querySelector('#yE').textContent = 'Opening stock must be 0 or more.'; return; }
+      const out = await db.ins('biz_yarns', Object.assign({ stock_kg: 0 }, r.row), { select: 'id' }); if (open > 0) await db.ins('yarn_movements', { yarn_id: out[0].id, kind: 'purchase', kg: open, note: 'Opening stock', created_by: SB().user().id }); c(); toast('Yarn added'); await reload(); } }]); bindColor(d); }
+    else if (x = g('data-edit')) { const y = H.yarns().find(v => v.id === x.dataset.edit), d = dlg('Edit yarn', form(y), [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: async c => { const r = read(d); if (r.err) { d.m.querySelector('#yE').textContent = r.err; return; } await db.upd('biz_yarns', r.row, { id: y.id }); c(); toast('Saved'); await reload(); } }]); bindColor(d); }
+    else if (x = g('data-del')) { const y = H.yarns().find(v => v.id === x.dataset.del); if (await ask('Delete yarn ' + y.code + '? Its stock movements are deleted too. Designs that use it keep their colour.', 'Delete')) { await db.del('biz_yarns', { id: y.id }); sel.delete(y.id); toast('Deleted'); await reload(); } }
+    else if (x = g('data-mov')) await H.movementDialog(x.dataset.mov, async () => { await reload(); });
+    else if (t.closest('#yExp')) download('xaro-yarns.csv', W.yarnsToCsv(H.yarns()), 'text/csv');
+    else if (t.closest('#yPal')) { const d = dlg('Save palette', field('pN', 'Palette name', '', { max: 80 }) + `<p class="xw-note">${sel.size} yarn${sel.size > 1 ? 's' : ''} selected.</p>`, [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: async c => { const n = val('pN', d.m).trim(); if (!n) return toast('Enter a name.', true); await db.ins('biz_palettes', { name: n.slice(0, 80), colours: H.yarns().filter(y => sel.has(y.id)).map(y => y.code) }); c(); toast('Palette saved'); } }]); }
+    else if (t.closest('#yPals')) { const ps = await palettes(); const d = dlg('Palettes', ps.length ? `<ul class="xw-list">${ps.map(p => `<li><b>${esc(p.name)}</b> <span>${(p.colours || []).length} yarns</span><button class="xw-b sm" data-pu="${esc(p.id)}">Select these</button><button class="xw-b sm bad" data-pd="${esc(p.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></li>`).join('')}</ul>` : '<p>No palettes yet. Tick some yarns and press "Save selected as palette".</p>', [{ label: 'Close', run: c => c() }]);
+      d.m.addEventListener('click', guard(async ev => { const u = ev.target.closest('[data-pu]'), r = ev.target.closest('[data-pd]'); if (u) { const p = ps.find(v => v.id === u.dataset.pu); sel = new Set(H.yarns().filter(y => (p.colours || []).includes(y.code)).map(y => y.id)); d.close(); draw(); } if (r) { await db.del('biz_palettes', { id: r.dataset.pd }); d.close(); toast('Palette deleted'); } })); }
+  }));
+  draw();
+}, 'Your own yarn libraries. The yarns you add here become the colours offered in the design editor while you are signed in.');
+
+/* ---------------------------------------------------------------- Inventory */
+WS.register('inventory', 'Inventory', async (b) => {
+  let fy = '', fk = ''; const mayEdit = H.canWrite();
+  const load = async () => { const [stock, moves, projects] = await Promise.all([db.sel('v_yarn_stock', { select: '*', order: 'code.asc', limit: 1000 }), db.sel('yarn_movements', Object.assign({ select: 'id,yarn_id,kind,kg,note,at,project_id', order: 'at.desc', limit: 200 }, { eq: Object.assign({}, fy ? { yarn_id: fy } : {}, fk ? { kind: fk } : {}) })), db.sel('biz_projects', { select: 'id,title', limit: 500 })]); return { stock, moves, projects }; };
+  const draw = async () => {
+    const { stock, moves, projects } = await load(), low = stock.filter(s => s.low_stock), ym = Object.fromEntries(stock.map(s => [s.id, s])), pm = Object.fromEntries(projects.map(p => [p.id, p.title]));
+    b.innerHTML = `${H.readOnlyNote()}${low.length ? `<p class="xw-note warn" role="status"><b>Below reorder level:</b> ${low.map(s => esc(s.code) + ' (' + Number(s.stock_kg) + ' kg, reorder at ' + Number(s.reorder_kg) + ')').join(', ')}</p>` : ''}
+    <div class="xw-bar"><button class="xw-b pri" id="iMove"${mayEdit && stock.length ? '' : ' disabled'}>Record movement</button><button class="xw-b" id="iCsv"${stock.length ? '' : ' disabled'}>Export stock CSV</button></div>
+    ${stock.length ? `<section class="xw-sec"><h3>Stock, estimated use and actual use</h3><div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th>Code</th><th>Name</th><th class="num">In stock kg</th><th class="num">Reorder kg</th><th class="num">Estimated use kg</th><th class="num">Actual use kg</th><th class="num">Actual - estimated</th></tr></thead><tbody>${stock.map(s => { const df = +s.actual_use_kg - +s.estimated_use_kg; return `<tr class="${s.low_stock ? 'low' : ''}"><td>${sw(s.hex)}</td><td><b>${esc(s.code)}</b></td><td>${esc(s.name)}</td><td class="num">${Number(s.stock_kg)}</td><td class="num">${s.reorder_kg == null ? '-' : Number(s.reorder_kg)}</td><td class="num">${Number(s.estimated_use_kg)}</td><td class="num">${Number(s.actual_use_kg)}</td><td class="num">${+s.estimated_use_kg || +s.actual_use_kg ? (df > 0 ? '+' : '') + Math.round(df * 1000) / 1000 : '-'}</td></tr>`; }).join('')}</tbody></table></div><p class="xw-note">Estimated use comes from calculator plans and never changes stock. Actual use is what you record when yarn is consumed.</p></section>
+    <section class="xw-sec"><h3>Movement history</h3><div class="xw-bar"><select id="iFy" aria-label="Yarn"><option value="">All yarns</option>${stock.map(s => `<option value="${esc(s.id)}"${fy === s.id ? ' selected' : ''}>${esc(s.code)}</option>`).join('')}</select><select id="iFk" aria-label="Type"><option value="">All types</option>${Object.entries(W.MOVEMENT_KINDS).map(([k, t]) => `<option value="${k}"${fk === k ? ' selected' : ''}>${esc(t.split(' (')[0])}</option>`).join('')}</select></div>
+    ${moves.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Date</th><th>Yarn</th><th>Type</th><th class="num">kg</th><th>Project</th><th>Note</th></tr></thead><tbody>${moves.map(m => `<tr><td>${esc(dateS(m.at))}</td><td>${ym[m.yarn_id] ? esc(ym[m.yarn_id].code) : ''}</td><td>${badge(m.kind)}</td><td class="num">${Number(m.kg)}</td><td>${esc(pm[m.project_id] || '')}</td><td>${esc(m.note || '')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="xw-note">No movements recorded.</p>'}</section>` : empty('No yarns yet. Add yarns in the Yarn Manager first.')}`;
+  };
+  b.addEventListener('change', guard(async e => { if (e.target.id === 'iFy') { fy = e.target.value; await draw(); } if (e.target.id === 'iFk') { fk = e.target.value; await draw(); } }));
+  b.addEventListener('click', guard(async e => { if (e.target.closest('#iMove')) await H.movementDialog('', draw); if (e.target.closest('#iCsv')) { const st = await db.sel('v_yarn_stock', { select: '*', order: 'code.asc', limit: 1000 }); download('xaro-stock.csv', W.csvStringify([['code', 'name', 'stock_kg', 'reorder_kg', 'estimated_use_kg', 'actual_use_kg', 'low_stock']].concat(st.map(s => [s.code, s.name, s.stock_kg, s.reorder_kg == null ? '' : s.reorder_kg, s.estimated_use_kg, s.actual_use_kg, s.low_stock ? 'yes' : 'no']))), 'text/csv'); } }));
+  await draw();
+}, 'Stock on hand, planned (estimated) use and actual use, kept apart on purpose.');
+
+/* ---------------------------------------------------------------- Rug Calculator */
+WS.register('calculator', 'Rug Calculator', async (b) => {
+  const [ratesRow, designs, projects] = await Promise.all([db.one('biz_rates', { select: 'rates' }), db.sel('custom_designs', { select: 'id,name', order: 'updated_at.desc', limit: 200 }), db.sel('biz_projects', { select: 'id,title', order: 'created_at.desc', limit: 200 })]);
+  let rates = (ratesRow && ratesRow.rates) || {}, rows = [], last = null; const yarns = H.yarns(), mayEdit = H.canWrite();
+  const rateForm = `<div class="xw-form">${W.RATE_FIELDS.map(([p, label, t]) => field('r_' + p.replace(/\./g, '__'), label, W.getRate(rates, p), t === 'text' ? { max: 3 } : { type: 'number', step: 'any', min: 0 })).join('')}</div>`;
+  const colRow = (r, i) => `<div class="xw-bar" data-ci="${i}"><select data-cy aria-label="Yarn">${[['', 'Choose yarn']].concat(yarns.map(y => [y.id, y.code + ' - ' + y.name])).map(([k, t]) => `<option value="${esc(k)}"${r.yarnId === k ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><input type="number" data-cp value="${r.pct || ''}" min="0" max="100" step="any" placeholder="%" aria-label="Share %" style="width:90px"><button class="xw-b sm bad" data-crm="${i}" aria-label="Remove colour">✕</button></div>`;
+  b.innerHTML = `${H.readOnlyNote()}<div class="xw-split"><div><section class="xw-sec"><h3>Your rug</h3><div class="xw-form">${field('cDes', 'Start from a saved design', '', { type: 'select', options: [['', 'Enter size by hand']].concat(designs.map(d => [d.id, d.name])) })}${field('cW', 'Width (cm)', 100, { type: 'number', min: 5, step: 'any' })}${field('cH', 'Height (cm)', 100, { type: 'number', min: 5, step: 'any' })}${field('cS', 'Shape', 'rect', { type: 'select', options: [['rect', 'Rectangle'], ['oval', 'Oval'], ['circle', 'Circle']] })}${field('cR', 'Corner radius %', 0, { type: 'number', min: 0, max: 50 })}${field('cP', 'Pile', 'standard', { type: 'select', options: [['low', 'Low'], ['standard', 'Standard'], ['high', 'High']] })}</div><label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="cB" style="width:auto"> Bound / edged border</label>
+  <h3 style="margin-top:14px">Colours</h3><div id="cCols"></div><div class="xw-bar"><button class="xw-b sm" id="cAdd"${yarns.length ? '' : ' disabled'}>Add colour</button></div><p class="xw-note">${yarns.length ? 'Shares are scaled to 100%.' : 'Add yarns in the Yarn Manager to map colours to your own stock.'}</p></section>
+  <section class="xw-sec"><h3>Your rates</h3><p class="xw-note">Nothing is pre-filled. Enter your own numbers; anything left empty is reported as missing rather than guessed.</p>${rateForm}<p class="xw-err" id="rErr" role="alert"></p><button class="xw-b pri" id="rSave"${mayEdit ? '' : ' disabled'}>Save rates</button></section></div>
+  <div><section class="xw-sec" id="cOut" aria-live="polite"></section></div></div>`;
+  const colsEl = b.querySelector('#cCols'), drawCols = () => { colsEl.innerHTML = rows.map(colRow).join('') || '<p class="xw-note">No colours added.</p>'; };
+  const currency = () => rates.currency || (H.biz().currency || '');
+  const input = () => ({ widthCm: +val('cW', b), heightCm: +val('cH', b), shape: val('cS', b), radius: +val('cR', b) || 0, pile: val('cP', b), binding: b.querySelector('#cB').checked, colours: rows.filter(r => r.yarnId && +r.pct > 0) });
+  const calc = () => { last = W.calc(input(), rates, yarns); const o = b.querySelector('#cOut'), c = last, cur = currency();
+    if (!c.ok) { o.innerHTML = `<h3>Estimate</h3><p class="xw-err">${esc(c.errors.join(' '))}</p>`; return; }
+    o.innerHTML = `<h3>Estimate</h3><p class="xw-note">Area ${c.areaM2} m2 | perimeter ${c.perimeterM} m${c.hours != null ? ' | ' + c.hours + ' tufting hours' : ''}${c.yarnKg != null ? ' | ' + c.yarnKg + ' kg yarn' : ''}</p>
+    ${c.yarn.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th>Yarn</th><th class="num">Share</th><th class="num">kg needed</th><th class="num">Cost</th><th>Stock</th></tr></thead><tbody>${c.yarn.map(y => `<tr><td>${sw(y.hex)}</td><td>${esc(y.code)}</td><td class="num">${y.pct}%</td><td class="num">${y.kg}</td><td class="num">${y.cost == null ? '-' : money(y.cost, cur || 'USD')}</td><td>${y.enough === null ? '' : y.enough ? badge('enough', 'good') : badge('short by ' + Math.round((y.kg - y.stockKg) * 1000) / 1000 + ' kg', 'bad')}</td></tr>`).join('')}</tbody></table></div>` : ''}
+    <table class="xw-t"><thead><tr><th>Cost line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>${c.lines.map(l => `<tr><td>${esc(l.label)}</td><td class="xw-note" style="margin:0">${esc(l.note || '')}</td><td class="num">${l.amount == null ? '<span class="xw-badge warn">missing</span>' : money(l.amount, cur || 'USD')}</td></tr>`).join('')}</tbody></table>
+    ${c.missing.length ? `<p class="xw-note warn" role="status"><b>${c.missing.length} rate${c.missing.length > 1 ? 's' : ''} still to enter:</b> ${c.missing.map(m => esc(m.label)).join('; ')}. No total is shown until they are set.</p>` : ''}
+    ${c.complete ? `<table class="xw-t"><tbody><tr><td>Cost</td><td class="num">${money(c.cost, cur)}${c.overhead ? ' <small>(incl. overhead ' + money(c.overhead, cur) + ')</small>' : ''}</td></tr><tr><td>Selling price</td><td class="num">${money(c.price, cur)}</td></tr><tr><td>Profit</td><td class="num">${money(c.margin, cur)}</td></tr>${c.tax ? `<tr><td>Tax</td><td class="num">${money(c.tax, cur)}</td></tr>` : ''}</tbody></table><p class="xw-total">${money(c.total, cur)}</p>${c.taxNote ? `<p class="xw-note">${esc(c.taxNote)}</p>` : ''}
+    ${cur && /^[A-Z]{3}$/.test(cur) ? `<div class="xw-bar"><button class="xw-b pri" id="cQuote"${mayEdit ? '' : ' disabled'}>Create quotation draft</button></div>` : '<p class="xw-note warn">Set a 3-letter currency in your rates to create a quotation.</p>'}` : `<p class="xw-note">Known costs so far: ${money(c.knownCost, cur || 'USD')}</p>`}
+    ${c.yarn.some(y => y.kg > 0) ? `<div class="xw-bar"><select id="cPrj" aria-label="Project"><option value="">Choose project</option>${projects.map(p => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join('')}</select><button class="xw-b" id="cPlan"${mayEdit ? '' : ' disabled'}>Save estimated yarn use</button></div><p class="xw-note">Saves the kg above as <i>estimated</i> use for that project. Stock does not change until you record actual use.</p>` : ''}`; };
+  b.addEventListener('input', e => { const t = e.target; if (t.matches('[data-cy]')) rows[+t.closest('[data-ci]').dataset.ci].yarnId = t.value; else if (t.matches('[data-cp]')) rows[+t.closest('[data-ci]').dataset.ci].pct = t.value; if (t.closest('.xw-split') && !t.id.startsWith('r_')) calc(); });
+  b.addEventListener('change', guard(async e => { if (e.target.id === 'cDes' && e.target.value) { const r = await XACCT.open(e.target.value), d = r.doc, L = root.XSTUDIO_LIB; b.querySelector('#cW').value = d.widthCm; b.querySelector('#cH').value = d.heightCm; b.querySelector('#cS').value = d.shape === 'circle' || d.shape === 'oval' ? d.shape : 'rect'; b.querySelector('#cR').value = d.radius || 0; b.querySelector('#cP').value = ['low', 'standard', 'high'].includes(d.pile) ? d.pile : 'standard'; b.querySelector('#cB').checked = d.borderCm > 0;
+    const imgs = {}; for (const [k, v] of Object.entries(r.images || {})) { const im = await L.imageFromData(v.data); if (im) imgs[k] = { el: im, data: v.data }; } L.stampYarns(d); const an = L.analyse(d, imgs), byCode = Object.fromEntries(yarns.map(y => [H.yarnId(y.code), y.id]));
+    rows = an.rows.map(x => ({ yarnId: byCode[x.yarn.id] || '', pct: Math.round(x.pct * 10) / 10 })); const un = an.rows.filter(x => !byCode[x.yarn.id]).length; drawCols(); calc(); if (un) toast(un + ' colour' + (un > 1 ? 's are' : ' is') + ' not in your yarn library yet. Pick a yarn for them.'); } }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target;
+    if (t.id === 'cAdd') { rows.push({ yarnId: '', pct: '' }); drawCols(); calc(); }
+    else if (t.dataset.crm !== undefined) { rows.splice(+t.dataset.crm, 1); drawCols(); calc(); }
+    else if (t.id === 'rSave') { const vals = {}; W.RATE_FIELDS.forEach(([p]) => { vals[p] = val('r_' + p.replace(/\./g, '__'), b); }); const r = W.ratesFromForm(vals); b.querySelector('#rErr').textContent = r.errors.join(' '); if (r.errors.length) return;
+      const ex = await db.one('biz_rates', { select: 'business_id' }); if (ex) await db.upd('biz_rates', { rates: r.rates, updated_at: new Date().toISOString() }, {}); else await db.ins('biz_rates', { rates: r.rates }); rates = r.rates; toast('Rates saved'); calc(); }
+    else if (t.id === 'cPlan') { const pid = val('cPrj', b); if (!pid) return toast('Choose a project first.', true); const mv = last.yarn.filter(y => y.kg > 0 && y.yarnId).map(y => ({ yarn_id: y.yarnId, kind: 'estimated_use', kg: y.kg, project_id: pid, note: 'Calculator estimate', created_by: SB().user().id })); if (!mv.length) return toast('Map each colour to a yarn first.', true); await db.ins('yarn_movements', mv); toast('Estimated use saved for ' + mv.length + ' yarn' + (mv.length > 1 ? 's' : '')); }
+    else if (t.id === 'cQuote') { const refs = (await db.sel('biz_quotations', { select: 'ref', limit: 1000 })).map(x => x.ref), yr = new Date().getFullYear(), c = last, i = input(); const lines = { items: [{ desc: 'Custom tufted rug ' + i.widthCm + ' x ' + i.heightCm + ' cm', qty: 1, unit: c.price }], discountPct: 0, taxPct: rates.taxPct || 0 }; const tot = W.quoteTotals(lines.items, lines); lines.total = tot.total;
+      await db.ins('biz_quotations', { ref: W.nextRef('Q', refs, yr), lines, currency: currency(), subtotal: tot.subtotal, status: 'draft' }); toast('Quotation draft created. Open Quotations to edit it.'); }
+  }));
+  drawCols(); calc();
+}, 'Estimate yarn, labour and price from your own rates. Missing rates are listed, never guessed.');
+
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ============ Workspace: Image to Vector, Colour Separation, 3D Preview entry ============ */
+(function (root) {
+'use strict';
+const WS = root.XWS, H = WS.h, W = root.XWORK, { esc, field, val, dlg, download, empty, sw, db, toast, guard } = H;
+const L = () => root.XSTUDIO_LIB, C = () => root.XCOLOUR, V = () => root.XVEC;
+const handoff = { palette: null, canvas: null, name: '' };   // passed from Colour Separation to Image to Vector
+
+/* before / after comparison: `after` is clipped by a slider, so both images stay perfectly aligned */
+H.baSlider = (box, before, after) => {
+  box.className = 'xw-view xw-ba'; box.innerHTML = ''; const a = document.createElement('div'); a.className = 'after'; a.appendChild(after); box.appendChild(before); box.appendChild(a);
+  const bar = document.createElement('div'); bar.className = 'bar'; const r = document.createElement('input'); r.type = 'range'; r.min = 0; r.max = 100; r.value = 50; r.setAttribute('aria-label', 'Before and after slider'); box.appendChild(bar); box.appendChild(r);
+  const set = p => { a.style.clipPath = 'inset(0 ' + (100 - p) + '% 0 0)'; bar.style.left = p + '%'; }; r.oninput = () => set(+r.value); set(50);
+};
+const readImage = async file => { const im = await L().intake(file, 8), c = document.createElement('canvas'), s = Math.min(1, 1200 / Math.max(im.el.width, im.el.height)); c.width = Math.max(1, Math.round(im.el.width * s)); c.height = Math.max(1, Math.round(im.el.height * s)); c.getContext('2d', { willReadFrequently: true }).drawImage(im.el, 0, 0, c.width, c.height); return { canvas: c, name: im.name }; };
+const canvasToImg = c => { const i = new Image(); i.src = c.toDataURL('image/png'); i.alt = ''; return i; };
+const dropZone = (id, label) => `<label class="xw-drop" id="${id}Z" for="${id}">${esc(label)}<input type="file" id="${id}" accept="image/png,image/jpeg,image/webp,image/svg+xml,.svg" hidden></label>`;
+const wireDrop = (b, id, fn) => { const z = b.querySelector('#' + id + 'Z'); if (!z) return; b.querySelector('#' + id).onchange = guard(async e => { const f = e.target.files[0]; if (f) await fn(f); e.target.value = ''; }); z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('on'); }); z.addEventListener('dragleave', () => z.classList.remove('on')); z.addEventListener('drop', guard(async e => { e.preventDefault(); z.classList.remove('on'); if (e.dataTransfer.files[0]) await fn(e.dataTransfer.files[0]); })); };
+
+/* ---------------------------------------------------------------- Image to Vector */
+const LEVEL_NAMES = ['', 'Most detail', 'Detailed', 'Balanced', 'Simple', 'Simplest'];
+WS.register('vector', 'Image to Vector', async (b) => {
+  let src = handoff.canvas, name = handoff.name || '', res = null, level = 3, colours = 0, bg = '', pal = handoff.palette; handoff.canvas = null; handoff.palette = null;
+  const run = async () => {
+    if (!src) return; const out = b.querySelector('#vOut'); out.innerHTML = '<p class="xw-note" role="status">Vectorising...</p>'; await new Promise(r => setTimeout(r, 30));
+    const id = src.getContext('2d').getImageData(0, 0, src.width, src.height), t0 = performance.now();
+    res = V().vectorize({ width: id.width, height: id.height, data: id.data }, { level, colours: pal ? 0 : colours, palette: pal || undefined, background: bg || undefined }); res.ms = Math.round(performance.now() - t0); show();
+  };
+  const show = () => {
+    const out = b.querySelector('#vOut'); if (!res) { out.innerHTML = ''; return; }
+    out.innerHTML = `<div id="vBA"></div><p class="xw-note">${res.stats.colours} colours | ${res.stats.shapes} shapes | ${res.stats.points} points | ${res.ms} ms. Drag the slider to compare with the original.</p>
+    <h3 style="margin-top:12px">Colours</h3><div class="xw-pal">${res.shapes.map((s, i) => { const tot = res.shapes.reduce((a, x) => a + x.area, 0) || 1; return `<div class="xw-prow" data-i="${i}">${sw(s.fill)}<span><b>${esc(s.fill)}</b><small>${(s.area / tot * 100).toFixed(1)}% of the area | ${s.points} points</small></span><span class="xw-chips"><input type="color" data-rc value="${esc(s.fill.toLowerCase())}" aria-label="Recolour ${esc(s.fill)}" style="width:34px;padding:1px;height:28px"><select data-mg aria-label="Merge ${esc(s.fill)} into"><option value="">Merge into...</option>${res.shapes.filter((_, k) => k !== i).map(o => `<option value="${esc(o.fill)}">${esc(o.fill)}</option>`).join('')}</select><button class="xw-b sm bad" data-rm="${i}">Remove</button></span></div>`; }).join('')}</div>
+    <div class="xw-bar" style="margin-top:12px"><button class="xw-b" id="vSvg">Download SVG</button><button class="xw-b pri" id="vSend">Send to design editor</button></div>`;
+    const before = canvasToImg(src), after = new Image(); after.alt = ''; after.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(V().toSvg(res, { scale: 1 })); H.baSlider(out.querySelector('#vBA'), before, after);
+  };
+  b.innerHTML = `<div class="xw-split"><div>${dropZone('vFile', 'Drop a PNG, JPG, WebP or SVG here, or click to choose (max 8 MB)')}<div id="vView" style="margin-top:12px"></div><div id="vOut"></div></div>
+  <section class="xw-sec"><h3>Settings</h3><div class="xw-f"><label for="vLv">Simplification: <b id="vLvN">${LEVEL_NAMES[level]}</b></label><input type="range" id="vLv" min="1" max="5" value="${level}"><small>Low = follows every detail. High = fewer, smoother shapes that are easier to tuft.</small></div>
+  ${field('vCol', 'Number of colours', '0', { type: 'select', options: [['0', 'Automatic'], ...[2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24].map(n => [String(n), String(n)])] })}
+  <div class="xw-f"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="vBgOn" style="width:auto"> Leave one background colour out</label><input type="color" id="vBg" value="#ffffff" style="width:60px;height:34px;padding:2px" disabled></div>
+  <p class="xw-note" id="vPal">${pal ? 'Using the ' + pal.length + ' colours from Colour Separation.' : ''}</p><button class="xw-b pri" id="vGo" disabled>Vectorise</button></section></div>`;
+  const setSrc = (c, n) => { src = c; name = n; res = null; b.querySelector('#vView').innerHTML = ''; b.querySelector('#vGo').disabled = false; b.querySelector('#vOut').innerHTML = '<p class="xw-note">Image loaded (' + c.width + ' x ' + c.height + ' px). Adjust the settings, then press Vectorise.</p>'; };
+  wireDrop(b, 'vFile', async f => { const r = await readImage(f); pal = null; b.querySelector('#vPal').textContent = ''; setSrc(r.canvas, r.name); await run(); });
+  b.querySelector('#vLv').oninput = e => { level = +e.target.value; b.querySelector('#vLvN').textContent = LEVEL_NAMES[level]; };
+  b.querySelector('#vCol').onchange = e => { colours = +e.target.value; };
+  b.querySelector('#vBgOn').onchange = e => { b.querySelector('#vBg').disabled = !e.target.checked; bg = e.target.checked ? b.querySelector('#vBg').value.toUpperCase() : ''; }; b.querySelector('#vBg').oninput = e => { if (!e.target.disabled) bg = e.target.value.toUpperCase(); };
+  b.querySelector('#vGo').onclick = guard(run);
+  b.addEventListener('input', guard(async e => { const t = e.target; if (!res || !t.matches('[data-rc]')) return; const i = +t.closest('[data-i]').dataset.i; res = V().recolour(res, res.shapes[i].fill, t.value.toUpperCase()); show(); }), true);
+  b.addEventListener('change', guard(async e => { const t = e.target; if (!res || !t.matches('[data-mg]') || !t.value) return; const i = +t.closest('[data-i]').dataset.i; res = V().mergeColours(res, res.shapes[i].fill, t.value); show(); toast('Merged'); }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target; if (t.dataset.rm !== undefined && res) { res = V().removeShape(res, +t.dataset.rm); show(); }
+    else if (t.id === 'vSvg') download(H.safeName(name.replace(/\.[^.]+$/, '')) + '-vector.svg', V().toSvg(res, { scale: 1 }), 'image/svg+xml');
+    else if (t.id === 'vSend') {
+      const ar = res.width / res.height, d = dlg('Send to design editor', `<div class="xw-form">${field('sW', 'Rug width (cm)', 100, { type: 'number', min: 5, step: 'any' })}${field('sH', 'Rug height (cm)', Math.round(100 / ar * 10) / 10, { type: 'number', min: 5, step: 'any', hint: 'Keeps the artwork proportions unless you change it.' })}</div><p class="xw-note">Each colour becomes an editable vector layer, snapped to the nearest yarn in ${H.yarns().length ? 'your yarn library' : 'the XARO yarn range'}. The largest colour becomes the rug background.</p><p class="xw-err" id="sE" role="alert"></p>`,
+        [{ label: 'Cancel', run: c => c() }, { label: 'Open in editor', cls: 'pri', run: c => { const w = +val('sW', d.m), h = +val('sH', d.m); if (!(w >= 5 && h >= 5 && w <= 600 && h <= 600)) { d.m.querySelector('#sE').textContent = 'Width and height must be between 5 and 600 cm.'; return; }
+          H.applyYarnSource(true); const Lb = L(), specs = V().layerSpecs(res), big = res.shapes.reduce((m, s, i) => s.area > res.shapes[m].area ? i : m, 0), doc = Lb.newDoc({ widthCm: w, heightCm: h, bg: Lb.snapHex(res.shapes[big].fill) });
+          specs.forEach((s, i) => { if (i === big && res.shapes.length > 1) return; doc.layers.push(Lb.layer('path', { name: s.name, cx: 0.5, cy: 0.5, w: 1, h: 1, fill: Lb.snapHex(s.hex), d: s.d, lock: false })); }); Lb.stampYarns(doc); c(); WS.close(); XSTUDIO.loadDoc(doc, { name: (name.replace(/\.[^.]+$/, '') || 'Vector artwork').slice(0, 40) }); } }]);
+    }
+  }));
+  if (src) { setSrc(src, name); b.querySelector('#vGo').disabled = false; await run(); }
+}, 'Turn a logo, drawing or photo into clean, tuftable vector shapes with a limited number of colours.');
+
+/* ---------------------------------------------------------------- Colour Separation */
+const TARGETS = [['0', 'Original colours'], ['20', '20'], ['15', '15'], ['12', '12'], ['10', '10'], ['8', '8'], ['6', '6'], ['4', '4'], ['custom', 'Custom']];
+WS.register('colour', 'Colour Separation', async (b) => {
+  let src = null, name = '', pal = null, red = null, target = '8', custom = 8, locked = new Set(), wCm = 100, hCm = 100;
+  const rep = c => c.members.map(id => pal.colours.find(o => o.id === id)).sort((a, z) => z.n - a.n)[0].id;
+  const reduce = () => { if (target === '0') { const t = pal.colours.length; red = C().reduce(pal, t, []); } else red = C().reduce(pal, target === 'custom' ? custom : +target, [...locked]); };
+  const lockedFlags = () => red.colours.forEach(c => { c.locked = c.members.some(m => locked.has(m)); });
+  const draw = () => {
+    const out = b.querySelector('#cOut'); if (!pal) { out.innerHTML = ''; return; }
+    const yarns = H.yarns(), area = wCm * hCm, map = C().mapYarns(red, yarns, area), id = src.getContext('2d').getImageData(0, 0, src.width, src.height), data = C().remap(id.data, pal, red), o = document.createElement('canvas'); o.width = src.width; o.height = src.height; o.getContext('2d').putImageData(new ImageData(data, src.width, src.height), 0, 0); out._canvas = o;
+    out.innerHTML = `<div id="cBA"></div><p class="xw-note">Original: <b>${pal.colours.length}</b> visibly different colours. Now: <b>${red.colours.length}</b>.</p>
+    <div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th>Colour</th><th class="num">Share</th><th class="num">Area cm2</th><th>Nearest yarn</th><th>Lock</th><th>Replace</th><th>Merge</th></tr></thead><tbody>${map.map((m, i) => { const c = red.colours[i]; return `<tr data-c="${esc(c.id)}"><td>${sw(m.hex)}</td><td>${esc(m.hex)}</td><td class="num">${m.pct.toFixed(1)}%</td><td class="num">${m.areaCm2 == null ? '-' : Math.round(m.areaCm2)}</td><td>${m.yarn ? sw(m.yarn.hex) + ' ' + esc(m.yarn.code || m.yarn.name) + ' <small>(' + esc(C().describeDelta(m.deltaE)) + ', dE ' + m.deltaE.toFixed(1) + ')</small>' : '<small>add yarns to map</small>'}</td><td><input type="checkbox" data-lock style="width:auto"${c.locked ? ' checked' : ''} aria-label="Lock ${esc(m.hex)}"></td><td><input type="color" data-rep value="${esc(m.hex.toLowerCase())}" style="width:34px;padding:1px;height:28px" aria-label="Replace ${esc(m.hex)}"></td><td><select data-mrg aria-label="Merge ${esc(m.hex)} into"><option value="">...</option>${red.colours.filter(x => x.id !== c.id).map(x => `<option value="${esc(x.id)}">${esc(x.hex)}</option>`).join('')}</select></td></tr>`; }).join('')}</tbody></table></div>
+    <div class="xw-bar" style="margin-top:12px"><button class="xw-b" id="cPng">Download separated PNG</button><button class="xw-b" id="cCsv">Export colour/yarn mapping CSV</button><button class="xw-b pri" id="cVec">Vectorise with these colours</button></div>`;
+    const before = canvasToImg(src), after = canvasToImg(o); H.baSlider(out.querySelector('#cBA'), before, after); out._map = map;
+  };
+  b.innerHTML = `<div class="xw-split"><div>${dropZone('cFile', 'Drop a PNG, JPG, WebP or SVG here, or click to choose (max 8 MB)')}<div id="cOut" style="margin-top:12px"></div></div>
+  <section class="xw-sec"><h3>Settings</h3>${field('cT', 'Reduce to', '8', { type: 'select', options: TARGETS })}<div class="xw-f" id="cCw" hidden><label for="cN">Custom number of colours (1 to 64)</label><input type="number" id="cN" min="1" max="64" value="8"></div>
+  <div class="xw-form">${field('cWi', 'Rug width (cm)', 100, { type: 'number', min: 5, step: 'any' })}${field('cHi', 'Rug height (cm)', 100, { type: 'number', min: 5, step: 'any' })}</div><p class="xw-note">Colours are grouped by how different they look to the eye (CIEDE2000), not by raw RGB. Locked colours never change and may absorb similar ones. Width and height give the area per colour.</p></section></div>`;
+  const rebuild = guard(async () => { reduce(); lockedFlags(); draw(); });
+  wireDrop(b, 'cFile', async f => { const r = await readImage(f); src = r.canvas; name = r.name; const id = src.getContext('2d').getImageData(0, 0, src.width, src.height); pal = C().extract(id.data, { tol: 3, max: 64 }); if (!pal.colours.length) throw new Error('That image has no visible pixels.'); locked = new Set(); const ar = src.width / src.height; b.querySelector('#cHi').value = Math.round(wCm / ar * 10) / 10; hCm = +b.querySelector('#cHi').value; await rebuild(); });
+  b.addEventListener('change', guard(async e => { const t = e.target;
+    if (t.id === 'cT') { target = t.value; b.querySelector('#cCw').hidden = target !== 'custom'; if (pal) await rebuild(); }
+    else if (t.id === 'cN') { custom = Math.min(64, Math.max(1, +t.value || 1)); t.value = custom; if (pal) await rebuild(); }
+    else if (t.id === 'cWi' || t.id === 'cHi') { wCm = +b.querySelector('#cWi').value || 100; hCm = +b.querySelector('#cHi').value || 100; if (pal) draw(); }
+    else if (t.matches('[data-lock]')) { const c = red.colours.find(x => x.id === t.closest('[data-c]').dataset.c); if (t.checked) locked.add(rep(c)); else c.members.forEach(m => locked.delete(m)); await rebuild(); }
+    else if (t.matches('[data-mrg]') && t.value) { red = C().merge(red, t.closest('[data-c]').dataset.c, t.value); draw(); toast('Merged'); }
+  }));
+  b.addEventListener('input', guard(async e => { const t = e.target; if (t.matches('[data-rep]')) { C().replace(red, t.closest('[data-c]').dataset.c, t.value); draw(); } }), true);
+  b.addEventListener('click', guard(async e => { const t = e.target, out = b.querySelector('#cOut');
+    if (t.id === 'cPng') out._canvas.toBlob(bl => download(H.safeName(name.replace(/\.[^.]+$/, '')) + '-separated.png', bl), 'image/png');
+    else if (t.id === 'cCsv') download('xaro-colour-mapping.csv', W.csvStringify([['colour', 'share_pct', 'area_cm2', 'nearest_yarn_code', 'yarn_name', 'delta_e', 'match']].concat(out._map.map(m => [m.hex, +m.pct.toFixed(2), m.areaCm2 == null ? '' : Math.round(m.areaCm2), m.yarn ? (m.yarn.code || '') : '', m.yarn ? m.yarn.name : '', m.deltaE == null ? '' : +m.deltaE.toFixed(2), C().describeDelta(m.deltaE)]))), 'text/csv');
+    else if (t.id === 'cVec') { handoff.canvas = src; handoff.palette = red.colours.map(c => c.hex); handoff.name = name; await WS.open('vector'); }
+  }));
+}, 'Reduce an image to a limited colour set, see the share and area of each colour, and match them to your yarns.');
+
+/* ---------------------------------------------------------------- 3D Preview entry */
+WS.register('preview3d', '3D Preview', async (b) => {
+  const designs = await db.sel('custom_designs', { select: 'id,name,status,doc->_thumb', order: 'updated_at.desc', limit: 200 }), live = designs.filter(d => d.status !== 'archived');
+  b.innerHTML = live.length ? `<p class="xw-note">Pick a design to see it as a tufted rug in 3D: choose the shape, thickness, pile height and edge finish in the editor, then drag to rotate.</p><div class="xw-grid3">${live.map(d => `<button class="xw-dcard" data-d="${esc(d.id)}">${d._thumb ? `<img src="${esc(d._thumb)}" alt="">` : '<div class="xw-ph"></div>'}<b>${esc(d.name)}</b><small>Open in 3D</small></button>`).join('')}</div>` : empty('No designs yet. Save a design in the Studio first.');
+  b.addEventListener('click', guard(async e => { const x = e.target.closest('[data-d]'); if (x) await H.loadDesignIntoStudio(x.dataset.d, 'v3d'); }));
+});
+
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ============ Workspace: Customer Projects, Quotations, Orders, Production Sheets, Reports ============ */
+(function (root) {
+'use strict';
+const WS = root.XWS, H = WS.h, W = root.XWORK, { esc, field, val, dlg, ask, money, dateS, download, empty, badge, sw, db, toast, guard, safeName } = H;
+const SB = () => root.XSB, X = () => root.XEXP, L = () => root.XSTUDIO_LIB;
+const opt = (rows, f, none) => (none ? [['', none]] : []).concat(rows.map(r => [r.id, f(r)]));
+const sel = (id, label, v, rows, f, none) => field(id, label, v || '', { type: 'select', options: opt(rows, f, none) });
+const nm = (rows, id) => (rows.find(r => r.id === id) || {}).name || (rows.find(r => r.id === id) || {}).title || '';
+const bcur = () => (H.biz().currency && /^[A-Za-z]{3}$/.test(H.biz().currency) ? H.biz().currency.toUpperCase() : '');
+const statusKind = s => (['delivered', 'accepted', 'finished'].includes(s) ? 'good' : ['cancelled', 'rejected', 'expired'].includes(s) ? 'bad' : ['sent', 'in_production', 'quoted', 'confirmed', 'ready'].includes(s) ? 'warn' : '');
+const lineItems = q => { const l = q.lines; return Array.isArray(l) ? { items: l, discountPct: 0, taxPct: 0 } : { items: (l && l.items) || [], discountPct: (l && l.discountPct) || 0, taxPct: (l && l.taxPct) || 0 }; };
+
+/* ---------------------------------------------------------------- Customer Projects (projects + customers) */
+WS.register('projects', 'Customer Projects', async (b) => {
+  let tab = 'projects', q = '', fs = ''; const mayEdit = H.canWrite();
+  const load = async () => { const [customers, projects, designs] = await Promise.all([db.sel('biz_customers', { select: '*', order: 'name.asc', limit: 1000 }), db.sel('biz_projects', { select: '*', order: 'created_at.desc', limit: 1000 }), db.sel('custom_designs', { select: 'id,name', order: 'updated_at.desc', limit: 300 })]); return { customers, projects, designs }; };
+  const draw = async () => {
+    const { customers, projects, designs } = await load(); const ql = q.toLowerCase();
+    const pr = projects.filter(p => (!fs || p.status === fs) && (!ql || (p.title + ' ' + nm(customers, p.customer_id)).toLowerCase().includes(ql))), cu = customers.filter(c => !ql || (c.name + ' ' + (c.email || '') + ' ' + (c.phone || '')).toLowerCase().includes(ql));
+    b.innerHTML = `${H.readOnlyNote()}<div class="xw-bar"><button class="xw-b" data-tab="projects" aria-pressed="${tab === 'projects'}">Projects (${projects.length})</button><button class="xw-b" data-tab="customers" aria-pressed="${tab === 'customers'}">Customers (${customers.length})</button><input type="search" id="pq" placeholder="Search" value="${esc(q)}" aria-label="Search">${tab === 'projects' ? `<select id="pfs" aria-label="Status"><option value="">Any status</option>${W.PROJECT_STATUS.map(s => `<option value="${s}"${fs === s ? ' selected' : ''}>${esc(s.replace(/_/g, ' '))}</option>`).join('')}</select>` : ''}<button class="xw-b pri" id="pNew"${mayEdit ? '' : ' disabled'}>${tab === 'projects' ? 'New project' : 'New customer'}</button></div>
+    ${tab === 'projects' ? (pr.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Project</th><th>Customer</th><th>Status</th><th>Due</th><th>Design</th><th></th></tr></thead><tbody>${pr.map(p => `<tr><td><b>${esc(p.title)}</b></td><td>${esc(nm(customers, p.customer_id))}</td><td><select data-ps="${esc(p.id)}" aria-label="Status of ${esc(p.title)}"${mayEdit ? '' : ' disabled'} style="width:auto">${W.PROJECT_STATUS.map(s => `<option value="${s}"${p.status === s ? ' selected' : ''}>${esc(s.replace(/_/g, ' '))}</option>`).join('')}</select></td><td>${esc(dateS(p.due_date))}</td><td>${esc(nm(designs, p.design_id))}</td><td style="white-space:nowrap"><button class="xw-b sm" data-pd="${esc(p.id)}">Details</button> <button class="xw-b sm" data-pe="${esc(p.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm bad" data-px="${esc(p.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`).join('')}</tbody></table></div>` : empty('No projects yet. A project groups the design, quotation, order, production sheet and yarn use for one customer job.'))
+      : (cu.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Notes</th><th></th></tr></thead><tbody>${cu.map(c => `<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.email || '')}</td><td>${esc(c.phone || '')}</td><td>${esc((c.notes || '').slice(0, 80))}</td><td style="white-space:nowrap"><button class="xw-b sm" data-ce="${esc(c.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm bad" data-cx="${esc(c.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`).join('')}</tbody></table></div>` : empty('No customers yet.'))}`;
+    b._data = { customers, projects, designs };
+  };
+  const custForm = c => { c = c || {}; return `<div class="xw-form">${field('cuN', 'Name', c.name, { max: 120 })}${field('cuE', 'Email', c.email, { type: 'email', max: 200 })}${field('cuP', 'Phone', c.phone, { max: 40 })}${field('cuA', 'Address', (c.address || {}).line1 || '', { max: 200 })}</div>${field('cuT', 'Notes', c.notes, { type: 'textarea', max: 4000 })}<p class="xw-err" id="cuErr" role="alert"></p>`; };
+  const custRow = d => { const n = val('cuN', d.m).trim(), e = val('cuE', d.m).trim(); if (!n) return { err: 'Enter a name.' }; if (e && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return { err: 'That email does not look right.' }; return { row: { name: n.slice(0, 120), email: e || null, phone: val('cuP', d.m).trim() || null, address: { line1: val('cuA', d.m).trim() }, notes: val('cuT', d.m).trim() || null } }; };
+  const projForm = (p, cs, ds) => { p = p || {}; return `<div class="xw-form">${field('prT', 'Project title', p.title, { max: 160 })}${sel('prC', 'Customer', p.customer_id, cs, c => c.name, 'No customer')}${sel('prD', 'Design', p.design_id, ds, d => d.name, 'No design')}${field('prS', 'Status', p.status || 'enquiry', { type: 'select', options: W.PROJECT_STATUS.map(s => [s, s.replace(/_/g, ' ')]) })}${field('prU', 'Due date', p.due_date, { type: 'date' })}</div>${field('prN', 'Notes', p.notes, { type: 'textarea', max: 4000 })}<p class="xw-err" id="prErr" role="alert"></p>`; };
+  const projRow = d => { const t = val('prT', d.m).trim(); if (!t) return { err: 'Enter a title.' }; return { row: { title: t.slice(0, 160), customer_id: val('prC', d.m) || null, design_id: val('prD', d.m) || null, status: val('prS', d.m), due_date: val('prU', d.m) || null, notes: val('prN', d.m).trim() || null } }; };
+  b.addEventListener('input', e => { if (e.target.id === 'pq') { q = e.target.value.trim(); clearTimeout(b._t); b._t = setTimeout(guard(async () => { await draw(); const i = b.querySelector('#pq'); i.focus(); i.setSelectionRange(q.length, q.length); }), 250); } });
+  b.addEventListener('change', guard(async e => { const t = e.target; if (t.id === 'pfs') { fs = t.value; await draw(); } else if (t.dataset.ps) { await db.upd('biz_projects', { status: t.value }, { id: t.dataset.ps }); toast('Status updated'); } }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target, g = a => t.closest('[' + a + ']'); let x; const D = b._data;
+    if (x = g('data-tab')) { tab = x.dataset.tab; q = ''; fs = ''; await draw(); }
+    else if (t.closest('#pNew')) { if (tab === 'customers') { const d = dlg('New customer', custForm(), [{ label: 'Cancel', run: c => c() }, { label: 'Add', cls: 'pri', run: async c => { const r = custRow(d); if (r.err) { d.m.querySelector('#cuErr').textContent = r.err; return; } await db.ins('biz_customers', r.row); c(); toast('Customer added'); await draw(); } }]); }
+      else { const d = dlg('New project', projForm(null, D.customers, D.designs), [{ label: 'Cancel', run: c => c() }, { label: 'Create', cls: 'pri', run: async c => { const r = projRow(d); if (r.err) { d.m.querySelector('#prErr').textContent = r.err; return; } await db.ins('biz_projects', r.row); c(); toast('Project created'); await draw(); } }]); } }
+    else if (x = g('data-ce')) { const cu = D.customers.find(c => c.id === x.dataset.ce), d = dlg('Edit customer', custForm(cu), [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: async c => { const r = custRow(d); if (r.err) { d.m.querySelector('#cuErr').textContent = r.err; return; } await db.upd('biz_customers', r.row, { id: cu.id }); c(); await draw(); } }]); }
+    else if (x = g('data-cx')) { if (await ask('Delete this customer? Their projects, quotations and orders stay but lose the customer link.', 'Delete')) { await db.del('biz_customers', { id: x.dataset.cx }); await draw(); } }
+    else if (x = g('data-pe')) { const p = D.projects.find(v => v.id === x.dataset.pe), d = dlg('Edit project', projForm(p, D.customers, D.designs), [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: async c => { const r = projRow(d); if (r.err) { d.m.querySelector('#prErr').textContent = r.err; return; } await db.upd('biz_projects', r.row, { id: p.id }); c(); await draw(); } }]); }
+    else if (x = g('data-px')) { if (await ask('Delete this project? Quotations, orders and sheets stay but lose the project link.', 'Delete')) { await db.del('biz_projects', { id: x.dataset.px }); await draw(); } }
+    else if (x = g('data-pd')) { const p = D.projects.find(v => v.id === x.dataset.pd), [qs, os, ss, mv] = await Promise.all([db.sel('biz_quotations', { select: 'ref,status,subtotal,currency,lines', eq: { project_id: p.id } }), db.sel('biz_orders', { select: 'ref,status,total,paid,currency', eq: { project_id: p.id } }), db.sel('production_sheets', { select: 'title,created_at', eq: { project_id: p.id } }), db.sel('yarn_movements', { select: 'kind,kg', eq: { project_id: p.id } })]);
+      const sum = k => Math.round(mv.filter(m => m.kind === k).reduce((a, m) => a + +m.kg, 0) * 1000) / 1000;
+      dlg(p.title, `<p class="xw-note">${esc(nm(D.customers, p.customer_id) || 'No customer')} | ${badge(p.status, statusKind(p.status))} ${p.due_date ? '| due ' + esc(dateS(p.due_date)) : ''}</p><h4>Quotations</h4>${qs.length ? `<ul class="xw-list">${qs.map(r => `<li><b>${esc(r.ref)}</b> ${badge(r.status, statusKind(r.status))}<span>${money(lineItems(r).items.length && r.lines && r.lines.total != null ? r.lines.total : r.subtotal, r.currency)}</span></li>`).join('')}</ul>` : '<p class="xw-note">None</p>'}<h4>Orders</h4>${os.length ? `<ul class="xw-list">${os.map(r => `<li><b>${esc(r.ref)}</b> ${badge(r.status, statusKind(r.status))}<span>${money(r.total, r.currency)} (paid ${money(r.paid, r.currency)})</span></li>`).join('')}</ul>` : '<p class="xw-note">None</p>'}<h4>Production sheets</h4>${ss.length ? `<ul class="xw-list">${ss.map(r => `<li>${esc(r.title)}<span>${esc(dateS(r.created_at))}</span></li>`).join('')}</ul>` : '<p class="xw-note">None</p>'}<h4>Yarn for this project</h4><p class="xw-note">Estimated ${sum('estimated_use')} kg | actual ${sum('actual_use')} kg</p>`, [{ label: 'Close', run: c => c() }]); }
+  }));
+  await draw();
+});
+
+/* ---------------------------------------------------------------- Quotations */
+function quotePdf(q, cust, proj) {
+  const li = lineItems(q), tot = W.quoteTotals(li.items, li), cur = q.currency, f = n => Number(n).toFixed(2), bz = H.biz();
+  return X().pdf({ title: 'Quotation ' + q.ref, subtitle: bz.name, meta: [['Customer', cust ? cust.name : '-'], ['Project', proj ? proj.title : '-'], ['Date', dateS(q.created_at || new Date())], ['Valid until', q.valid_until ? dateS(q.valid_until) : '-'], ['Currency', cur], ['Status', q.status]],
+    legend: { title: 'Items', noSwatch: true, head: ['Description', 'Qty', 'Unit price', 'Amount'], widths: [270, 50, 85, 90], rows: li.items.map(i => ({ cells: [i.desc, String(i.qty), f(i.unit) + ' ' + cur, f(i.qty * i.unit) + ' ' + cur] })) },
+    notes: ['Subtotal: ' + f(tot.subtotal) + ' ' + cur, li.discountPct ? 'Discount ' + li.discountPct + '%: -' + f(tot.discount) + ' ' + cur : '', li.taxPct ? 'Tax ' + li.taxPct + '%: ' + f(tot.tax) + ' ' + cur : '', 'TOTAL: ' + f(tot.total) + ' ' + cur, q.notes || ''], footer: bz.name + (bz.phone ? ' | ' + bz.phone : '') + (bz.email ? ' | ' + bz.email : '') });
+}
+WS.register('quotes', 'Quotations', async (b) => {
+  let fs = ''; const mayEdit = H.canWrite();
+  const load = async () => { const [qs, customers, projects] = await Promise.all([db.sel('biz_quotations', { select: '*', order: 'created_at.desc', limit: 1000 }), db.sel('biz_customers', { select: 'id,name', order: 'name.asc', limit: 1000 }), db.sel('biz_projects', { select: 'id,title', order: 'created_at.desc', limit: 1000 })]); return { qs, customers, projects }; };
+  const draw = async () => {
+    const D = await load(); b._d = D; const list = D.qs.filter(r => !fs || r.status === fs);
+    b.innerHTML = `${H.readOnlyNote()}<div class="xw-bar"><select id="qf" aria-label="Status"><option value="">Any status</option>${W.QUOTE_STATUS.map(s => `<option value="${s}"${fs === s ? ' selected' : ''}>${s}</option>`).join('')}</select><span class="xw-sp"></span><button class="xw-b pri" id="qNew"${mayEdit ? '' : ' disabled'}>New quotation</button></div>
+    ${list.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Ref</th><th>Customer</th><th>Project</th><th>Status</th><th class="num">Total</th><th>Valid until</th><th></th></tr></thead><tbody>${list.map(r => { const li = lineItems(r), tot = W.quoteTotals(li.items, li); return `<tr><td><b>${esc(r.ref)}</b></td><td>${esc(nm(D.customers, r.customer_id))}</td><td>${esc(nm(D.projects, r.project_id))}</td><td>${badge(r.status, statusKind(r.status))}</td><td class="num">${money(tot.total, r.currency)}</td><td>${esc(dateS(r.valid_until))}</td><td style="white-space:nowrap"><button class="xw-b sm" data-qe="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm" data-qp="${esc(r.id)}">PDF</button> <button class="xw-b sm" data-qo="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Make order</button> <button class="xw-b sm bad" data-qx="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`; }).join('')}</tbody></table></div>` : empty('No quotations yet.')}`;
+  };
+  const editor = (r) => { const D = b._d, li = lineItems(r || {}), items = li.items.length ? li.items.map(i => ({ desc: i.desc, qty: i.qty, unit: i.unit })) : [{ desc: '', qty: 1, unit: '' }]; const isNew = !r.id;
+    const lineHtml = () => items.map((i, k) => `<div class="xw-bar" data-li="${k}"><input type="text" data-ld value="${esc(i.desc)}" placeholder="Description" maxlength="200" aria-label="Description" style="flex:3"><input type="number" data-lq value="${esc(i.qty)}" min="0" step="any" placeholder="Qty" aria-label="Quantity" style="width:80px"><input type="number" data-lu value="${esc(i.unit)}" min="0" step="any" placeholder="Unit price" aria-label="Unit price" style="width:110px"><button class="xw-b sm bad" data-lrm="${k}" aria-label="Remove line">✕</button></div>`).join('');
+    const d = dlg(isNew ? 'New quotation' : 'Edit ' + r.ref, `<div class="xw-form">${sel('qC', 'Customer', r.customer_id, D.customers, c => c.name, 'No customer')}${sel('qP', 'Project', r.project_id, D.projects, p => p.title, 'No project')}${field('qCur', 'Currency', r.currency || bcur(), { max: 3 })}${field('qS', 'Status', r.status || 'draft', { type: 'select', options: W.QUOTE_STATUS })}${field('qV', 'Valid until', r.valid_until, { type: 'date' })}${field('qD', 'Discount %', li.discountPct || 0, { type: 'number', min: 0, max: 100, step: 'any' })}${field('qT', 'Tax %', li.taxPct || 0, { type: 'number', min: 0, max: 100, step: 'any' })}</div><h4>Items</h4><div id="qLines">${lineHtml()}</div><button class="xw-b sm" id="qAddL">Add line</button>${field('qN', 'Notes', r.notes, { type: 'textarea', max: 4000 })}<p class="xw-total" id="qTot"></p><p class="xw-err" id="qErr" role="alert"></p>`,
+      [{ label: 'Cancel', run: c => c() }, { label: 'Save quotation', cls: 'pri', run: async c => {
+        const cl = W.cleanLines(items), cur = val('qCur', d.m).trim().toUpperCase(); if (cl.errors.length) { d.m.querySelector('#qErr').textContent = cl.errors[0]; return; } if (!/^[A-Z]{3}$/.test(cur)) { d.m.querySelector('#qErr').textContent = 'Currency must be 3 letters, for example USD.'; return; }
+        const meta = { discountPct: +val('qD', d.m) || 0, taxPct: +val('qT', d.m) || 0 }, tot = W.quoteTotals(cl.lines, meta), row = { customer_id: val('qC', d.m) || null, project_id: val('qP', d.m) || null, currency: cur, status: val('qS', d.m), valid_until: val('qV', d.m) || null, notes: val('qN', d.m).trim() || null, lines: Object.assign({ items: cl.lines }, meta, { total: tot.total }), subtotal: tot.subtotal };
+        if (isNew) { const refs = D.qs.map(x => x.ref); row.ref = W.nextRef('Q', refs, new Date().getFullYear()); await db.ins('biz_quotations', row); } else await db.upd('biz_quotations', row, { id: r.id });
+        if (row.project_id && row.status === 'sent') await db.upd('biz_projects', { status: 'quoted' }, { id: row.project_id }).catch(() => {});
+        c(); toast('Quotation saved'); await draw(); } }], true);
+    const upd = () => { const cl = W.cleanLines(items.filter(i => i.desc || i.qty || i.unit)), t = W.quoteTotals(cl.lines, { discountPct: +val('qD', d.m) || 0, taxPct: +val('qT', d.m) || 0 }); d.m.querySelector('#qTot').textContent = 'Total ' + money(t.total, val('qCur', d.m).trim().toUpperCase() || 'USD'); }; upd();
+    d.m.addEventListener('input', e => { const t = e.target, row = t.closest('[data-li]'); if (row) { const i = items[+row.dataset.li]; if (t.matches('[data-ld]')) i.desc = t.value; if (t.matches('[data-lq]')) i.qty = t.value; if (t.matches('[data-lu]')) i.unit = t.value; } upd(); });
+    d.m.addEventListener('click', e => { const t = e.target; if (t.id === 'qAddL') { items.push({ desc: '', qty: 1, unit: '' }); d.m.querySelector('#qLines').innerHTML = lineHtml(); upd(); } else if (t.dataset.lrm !== undefined) { items.splice(+t.dataset.lrm, 1); if (!items.length) items.push({ desc: '', qty: 1, unit: '' }); d.m.querySelector('#qLines').innerHTML = lineHtml(); upd(); } });
+  };
+  b.addEventListener('change', guard(async e => { if (e.target.id === 'qf') { fs = e.target.value; await draw(); } }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target, g = a => t.closest('[' + a + ']'); let x, D = b._d;
+    if (t.closest('#qNew')) editor({});
+    else if (x = g('data-qe')) editor(D.qs.find(r => r.id === x.dataset.qe));
+    else if (x = g('data-qp')) { const r = D.qs.find(v => v.id === x.dataset.qp); download(safeName(r.ref) + '.pdf', new Blob([quotePdf(r, D.customers.find(c => c.id === r.customer_id), D.projects.find(p => p.id === r.project_id))], { type: 'application/pdf' })); }
+    else if (x = g('data-qx')) { if (await ask('Delete this quotation?', 'Delete')) { await db.del('biz_quotations', { id: x.dataset.qx }); await draw(); } }
+    else if (x = g('data-qo')) { const r = D.qs.find(v => v.id === x.dataset.qo), li = lineItems(r), tot = W.quoteTotals(li.items, li);
+      const existing = await db.sel('biz_orders', { select: 'ref,quotation_id', limit: 1000 }); if (existing.some(o => o.quotation_id === r.id) && !(await ask('This quotation already has an order. Create another?', 'Create another'))) return;
+      const d = dlg('Make order from ' + r.ref, `<p>Total ${money(tot.total, r.currency)}</p>${field('oDue', 'Due date (optional)', '', { type: 'date' })}`, [{ label: 'Cancel', run: c => c() }, { label: 'Create order', cls: 'pri', run: async c => { const o = W.orderFromQuote(Object.assign({}, r, { total: tot.total }), new Date().getFullYear(), existing.map(v => v.ref)); o.due_date = val('oDue', d.m) || null; await db.ins('biz_orders', o); await db.upd('biz_quotations', { status: 'accepted' }, { id: r.id }); if (r.project_id) await db.upd('biz_projects', { status: 'confirmed' }, { id: r.project_id }); c(); toast('Order ' + o.ref + ' created'); await draw(); } }]); }
+  }));
+  await draw();
+});
+
+/* ---------------------------------------------------------------- Orders */
+const PROJECT_OF = { in_production: 'in_production', ready: 'finished', delivered: 'delivered', cancelled: 'cancelled' };
+WS.register('orders', 'Orders', async (b) => {
+  let fs = ''; const mayEdit = H.canWrite();
+  const load = async () => { const [os, customers, projects] = await Promise.all([db.sel('biz_orders', { select: '*', order: 'created_at.desc', limit: 1000 }), db.sel('biz_customers', { select: 'id,name', limit: 1000 }), db.sel('biz_projects', { select: 'id,title', limit: 1000 })]); return { os, customers, projects }; };
+  const draw = async () => {
+    const D = await load(); b._d = D; const list = D.os.filter(o => !fs || o.status === fs);
+    b.innerHTML = `${H.readOnlyNote()}<div class="xw-bar"><select id="of" aria-label="Status"><option value="">Any status</option>${W.ORDER_STATUS.map(s => `<option value="${s}"${fs === s ? ' selected' : ''}>${s.replace(/_/g, ' ')}</option>`).join('')}</select><span class="xw-sp"></span><button class="xw-b pri" id="oNew"${mayEdit ? '' : ' disabled'}>New order</button></div>
+    ${list.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Ref</th><th>Customer</th><th>Project</th><th>Status</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th><th>Due</th><th></th></tr></thead><tbody>${list.map(o => `<tr><td><b>${esc(o.ref)}</b></td><td>${esc(nm(D.customers, o.customer_id))}</td><td>${esc(nm(D.projects, o.project_id))}</td><td><select data-os="${esc(o.id)}" aria-label="Status of ${esc(o.ref)}"${mayEdit ? '' : ' disabled'} style="width:auto">${W.ORDER_STATUS.map(s => `<option value="${s}"${o.status === s ? ' selected' : ''}>${s.replace(/_/g, ' ')}</option>`).join('')}</select></td><td class="num">${money(o.total, o.currency)}</td><td class="num">${money(o.paid, o.currency)}</td><td class="num">${money(W.balance(o), o.currency)}</td><td>${esc(dateS(o.due_date))}</td><td style="white-space:nowrap"><button class="xw-b sm" data-op="${esc(o.id)}"${mayEdit ? '' : ' disabled'}>Payment</button> <button class="xw-b sm" data-oe="${esc(o.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm bad" data-ox="${esc(o.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`).join('')}</tbody></table></div>` : empty('No orders yet. Accept a quotation and press Make order, or create one here.')}`;
+  };
+  const form = o => { o = o || {}; const D = b._d; return `<div class="xw-form">${sel('oC', 'Customer', o.customer_id, D.customers, c => c.name, 'No customer')}${sel('oP', 'Project', o.project_id, D.projects, p => p.title, 'No project')}${field('oCur', 'Currency', o.currency || bcur(), { max: 3 })}${field('oT', 'Total', o.total, { type: 'number', min: 0, step: '0.01' })}${field('oD', 'Due date', o.due_date, { type: 'date' })}${field('oS', 'Status', o.status || 'open', { type: 'select', options: W.ORDER_STATUS.map(s => [s, s.replace(/_/g, ' ')]) })}</div>${field('oN', 'Notes', o.notes, { type: 'textarea', max: 4000 })}<p class="xw-err" id="oErr" role="alert"></p>`; };
+  const read = d => { const cur = val('oCur', d.m).trim().toUpperCase(), t = val('oT', d.m); if (!/^[A-Z]{3}$/.test(cur)) return { err: 'Currency must be 3 letters.' }; if (t === '' || !(+t >= 0)) return { err: 'Enter the total (0 or more).' }; return { row: { customer_id: val('oC', d.m) || null, project_id: val('oP', d.m) || null, currency: cur, total: Math.round(+t * 100) / 100, due_date: val('oD', d.m) || null, status: val('oS', d.m), notes: val('oN', d.m).trim() || null } }; };
+  const syncProject = async (pid, status) => { if (pid && PROJECT_OF[status]) await db.upd('biz_projects', { status: PROJECT_OF[status] }, { id: pid }); };
+  b.addEventListener('change', guard(async e => { const t = e.target; if (t.id === 'of') { fs = t.value; await draw(); } else if (t.dataset.os) { const o = b._d.os.find(v => v.id === t.dataset.os); await db.upd('biz_orders', { status: t.value }, { id: o.id }); await syncProject(o.project_id, t.value); toast('Order ' + o.ref + ' is now ' + t.value.replace(/_/g, ' ')); await draw(); } }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target, g = a => t.closest('[' + a + ']'); let x; const D = b._d;
+    if (t.closest('#oNew')) { const d = dlg('New order', form(), [{ label: 'Cancel', run: c => c() }, { label: 'Create', cls: 'pri', run: async c => { const r = read(d); if (r.err) { d.m.querySelector('#oErr').textContent = r.err; return; } r.row.ref = W.nextRef('O', D.os.map(o => o.ref), new Date().getFullYear()); r.row.paid = 0; await db.ins('biz_orders', r.row); await syncProject(r.row.project_id, r.row.status); c(); toast('Order created'); await draw(); } }]); }
+    else if (x = g('data-oe')) { const o = D.os.find(v => v.id === x.dataset.oe), d = dlg('Edit ' + o.ref, form(o), [{ label: 'Cancel', run: c => c() }, { label: 'Save', cls: 'pri', run: async c => { const r = read(d); if (r.err) { d.m.querySelector('#oErr').textContent = r.err; return; } await db.upd('biz_orders', r.row, { id: o.id }); await syncProject(r.row.project_id, r.row.status); c(); await draw(); } }]); }
+    else if (x = g('data-ox')) { if (await ask('Delete this order?', 'Delete')) { await db.del('biz_orders', { id: x.dataset.ox }); await draw(); } }
+    else if (x = g('data-op')) { const o = D.os.find(v => v.id === x.dataset.op), bal = W.balance(o), d = dlg('Record payment for ' + o.ref, `<p class="xw-note">Total ${money(o.total, o.currency)} | paid ${money(o.paid, o.currency)} | balance ${money(bal, o.currency)}</p>${field('pA', 'Amount received', bal || '', { type: 'number', min: 0, step: '0.01' })}<p class="xw-err" id="pE" role="alert"></p>`, [{ label: 'Cancel', run: c => c() }, { label: 'Add payment', cls: 'pri', run: async c => { const a = +val('pA', d.m); if (!(a > 0)) { d.m.querySelector('#pE').textContent = 'Enter an amount above 0.'; return; } if (a > bal + 0.004 && !(await ask('That is more than the balance. Record it anyway?', 'Record'))) return; await db.upd('biz_orders', { paid: Math.round((+o.paid + a) * 100) / 100 }, { id: o.id }); c(); toast('Payment recorded'); await draw(); } }]); }
+  }));
+  await draw();
+});
+
+/* ---------------------------------------------------------------- Production Sheets */
+const dpiCanvas = async (doc, imgs, dpi, o) => {
+  const Lb = L(); let plan = X().dpiPlan(doc.widthCm, doc.heightCm, dpi), lastErr;
+  for (let tries = 0; tries < 4; tries++) {
+    try { const c = document.createElement('canvas'); c.width = plan.w; c.height = plan.h; const ctx = c.getContext('2d'); if (!ctx) throw new Error('canvas'); if (o && o.white) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); } Lb.render(doc, c, imgs, { transparent: !!(o && o.transparent), noBg: false });
+      const an = Lb.analyse(doc, imgs); let out = c; if (an.sepOn && !(o && o.transparent)) out = Lb.separate(c, an.list); return { canvas: out, plan }; }
+    catch (e) { lastErr = e; plan = X().dpiPlan(doc.widthCm, doc.heightCm, plan.dpi * 0.7 < 72 ? 72 : plan.dpi * 0.7); plan.capped = true; }
+  }
+  throw new Error('This size is too large for your browser. Try a lower DPI. (' + (lastErr && lastErr.message) + ')');
+};
+const toBlob = (c, type, q) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('Your browser could not create that image. Try a lower DPI.')), type, q));
+const u8 = async blob => new Uint8Array(await blob.arrayBuffer());
+H.exportDesign = async (doc, imgs, fmt, dpi, name, transparent) => {
+  const Lb = L(), base = safeName(name || 'rug');
+  if (fmt === 'svg') { const yarns = Object.values(Lb.docYarnMap(doc)), im = {}; Object.entries(imgs || {}).forEach(([k, v]) => { im[k] = { data: v.data, w: v.w, h: v.h }; }); return { name: base + '.svg', blob: new Blob([X().svg(doc, yarns, { transparent, images: im, title: name })], { type: 'image/svg+xml' }) }; }
+  const r = await dpiCanvas(doc, imgs, dpi, { transparent: fmt === 'png' && transparent, white: fmt === 'jpeg' });
+  if (fmt === 'jpeg') { const wh = document.createElement('canvas'); wh.width = r.canvas.width; wh.height = r.canvas.height; const x = wh.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, wh.width, wh.height); x.drawImage(r.canvas, 0, 0); return { name: base + '-' + Math.round(r.plan.dpi) + 'dpi.jpg', blob: new Blob([X().jpegSetDpi(await u8(await toBlob(wh, 'image/jpeg', 0.93)), r.plan.dpi)], { type: 'image/jpeg' }), plan: r.plan }; }
+  return { name: base + '-' + Math.round(r.plan.dpi) + 'dpi' + (transparent ? '-transparent' : '') + '.png', blob: new Blob([X().pngSetDpi(await u8(await toBlob(r.canvas, 'image/png')), r.plan.dpi)], { type: 'image/png' }), plan: r.plan };
+};
+const sheetSpec = (doc, imgs, f, rates, an) => {
+  const Lb = L(), areaM2 = W.areaM2(doc.widthCm, doc.heightCm, doc.shape, doc.radius), kgM2 = W.getRate(rates, 'pileKgPerM2.' + (['low', 'standard', 'high'].includes(doc.pile) ? doc.pile : 'standard')), waste = rates.wastePct, yarnBy = Object.fromEntries(H.yarns().map(y => [H.yarnId(y.code), y]));
+  const rows = an.rows.map(r => { const y = yarnBy[r.yarn.id], kg = kgM2 != null && waste != null ? Math.round(areaM2 * kgM2 * r.pct / 100 * (1 + waste / 100) * 1000) / 1000 : null; return { hex: r.yarn.hex, cells: [y ? y.code : r.yarn.id, r.yarn.name, r.pct.toFixed(1) + '%', Math.round(doc.widthCm * doc.heightCm * r.pct / 100) + ' cm2', kg == null ? '-' : kg + ' kg'] }; });
+  return { rows, areaM2, meta: [['Size', doc.widthCm + ' x ' + doc.heightCm + ' cm'], ['Shape', doc.shape + (doc.shape === 'rect' && doc.radius ? ' (corner radius ' + doc.radius + '%)' : '')], ['Area', areaM2 + ' m2'], ['Pile', doc.pile || '-'], ['Backing', doc.backing || '-'], ['Border', doc.borderCm > 0 ? doc.borderCm + ' cm' : 'none'], ['Colours', String(rows.length)], ['Date', dateS(new Date())]] };
+};
+WS.register('sheets', 'Production Sheets', async (b) => {
+  const [designs, projects, customers, ratesRow, saved] = await Promise.all([db.sel('custom_designs', { select: 'id,name', order: 'updated_at.desc', limit: 300 }), db.sel('biz_projects', { select: 'id,title,customer_id,design_id', order: 'created_at.desc', limit: 300 }), db.sel('biz_customers', { select: 'id,name', limit: 500 }), db.one('biz_rates', { select: 'rates' }), db.sel('production_sheets', { select: 'id,title,created_at,pdf_path,design_id', order: 'created_at.desc', limit: 100 })]);
+  const rates = (ratesRow && ratesRow.rates) || {}, mayEdit = H.canWrite(); let cur = null;   // cur = {doc, imgs, name, id, an, spec}
+  b.innerHTML = `${H.readOnlyNote()}<div class="xw-split"><div><section class="xw-sec"><h3>New production sheet</h3><div class="xw-form">${sel('sD', 'Design', '', designs, d => d.name, 'Choose a design')}${sel('sP', 'Project', '', projects, p => p.title, 'No project')}${field('sT', 'Sheet title', '', { max: 120 })}${field('sDpi', 'Image resolution', '300', { type: 'select', options: [['150', '150 DPI'], ['300', '300 DPI (print)'], ['600', '600 DPI (large print)']] })}</div>${field('sN', 'Notes for the tufting team', '', { type: 'textarea', max: 1500 })}<label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="sTr" style="width:auto"> Transparent background (PNG and SVG)</label><p class="xw-note">Files are free of watermarks. Image DPI is written into the file. Very large rugs are reduced to what a browser can render, and the reduced DPI is reported.</p></section>
+  <section class="xw-sec" id="sPrev"><p class="xw-note">Choose a design to preview the sheet.</p></section></div>
+  <section class="xw-sec"><h3>Saved sheets</h3>${saved.length ? `<ul class="xw-list">${saved.map(s => `<li><b>${esc(s.title)}</b><span>${esc(dateS(s.created_at))}</span>${s.pdf_path ? `<button class="xw-b sm" data-sd="${esc(s.id)}">PDF</button>` : ''}<button class="xw-b sm bad" data-sx="${esc(s.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></li>`).join('')}</ul>` : '<p class="xw-note">None saved yet.</p>'}</section></div>`;
+  const prev = b.querySelector('#sPrev');
+  const build = async () => { const id = val('sD', b); if (!id) { cur = null; prev.innerHTML = '<p class="xw-note">Choose a design to preview the sheet.</p>'; return; } prev.innerHTML = '<p class="xw-note" role="status">Preparing...</p>';
+    const r = await XACCT.open(id), Lb = L(), imgs = {}; for (const [k, v] of Object.entries(r.images || {})) { const im = await Lb.imageFromData(v.data); if (im) imgs[k] = { el: im, data: v.data, name: v.name, w: v.w, h: v.h }; } Lb.stampYarns(r.doc); const an = Lb.analyse(r.doc, imgs), spec = sheetSpec(r.doc, imgs, {}, rates, an);
+    cur = { doc: r.doc, imgs, name: r.name, id, an, spec }; if (!val('sT', b)) b.querySelector('#sT').value = r.name + ' production sheet';
+    const cv = Lb.makeCanvas(r.doc, 900); Lb.render(r.doc, cv, imgs); prev.innerHTML = `<h3>Preview</h3><div class="xw-view" id="sCv"></div><div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th>Code</th><th>Name</th><th class="num">Share</th><th class="num">Area</th><th class="num">Est. kg</th></tr></thead><tbody>${spec.rows.map(x => `<tr><td>${sw(x.hex)}</td>${x.cells.map((c, i) => `<td${i > 1 ? ' class="num"' : ''}>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${spec.rows.some(x => x.cells[4] === '-') ? '<p class="xw-note">Estimated kg appears once your yarn kg per m2 and waste % are entered in the Rug Calculator.</p>' : ''}${spec.rows.some(x => /^XY-|^BY-/.test(x.cells[0]) && x.cells[0].startsWith('XY-')) ? '<p class="xw-note">Some colours use XARO catalogue codes. Add your own yarns in the Yarn Manager to show your codes.</p>' : ''}
+      <div class="xw-bar"><button class="xw-b pri" data-x="pdf">Download PDF</button><button class="xw-b" data-x="png">PNG</button><button class="xw-b" data-x="jpeg">JPEG</button><button class="xw-b" data-x="svg">SVG</button><button class="xw-b" data-x="save"${mayEdit ? '' : ' disabled'}>Save to workspace</button></div>`; prev.querySelector('#sCv').appendChild(cv); };
+  const makePdf = async () => { const Lb = L(), sj = await dpiCanvas(cur.doc, cur.imgs, 150, {}), jc = document.createElement('canvas'), long = 1600, s = Math.min(1, long / Math.max(sj.canvas.width, sj.canvas.height)); jc.width = Math.round(sj.canvas.width * s); jc.height = Math.round(sj.canvas.height * s); const x = jc.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, jc.width, jc.height); x.drawImage(sj.canvas, 0, 0, jc.width, jc.height);
+    const jpeg = await u8(await toBlob(jc, 'image/jpeg', 0.9)), pid = val('sP', b), pj = projects.find(p => p.id === pid), cu = pj && customers.find(c => c.id === pj.customer_id), bz = H.biz();
+    const meta = cur.spec.meta.concat([['Project', pj ? pj.title : '-'], ['Customer', cu ? cu.name : '-']]); return { pdf: X().pdf({ title: val('sT', b).trim() || cur.name, subtitle: bz.name, meta, image: { jpeg, w: jc.width, h: jc.height }, legend: { head: ['Code', 'Name', 'Share', 'Area', 'Est. kg'], widths: [80, 170, 55, 80, 80], rows: cur.spec.rows }, notes: [val('sN', b).trim()], footer: bz.name + ' | production sheet' }), pid, jc }; };
+  b.addEventListener('change', guard(async e => { if (e.target.id === 'sD') await build(); }));
+  b.addEventListener('click', guard(async e => {
+    const t = e.target; if (t.dataset.x && cur) { const f = t.dataset.x, dpi = +val('sDpi', b), tr = b.querySelector('#sTr').checked; t.disabled = true; try {
+      if (f === 'pdf') { const r = await makePdf(); download(safeName(val('sT', b) || cur.name) + '.pdf', new Blob([r.pdf], { type: 'application/pdf' })); }
+      else if (f === 'save') { const r = await makePdf(), title = (val('sT', b).trim() || cur.name).slice(0, 120), path = SB().businessPath(H.biz().id, 'sheets/' + Date.now().toString(36) + '.pdf'); await SB().upload('design-exports', path, new Blob([r.pdf], { type: 'application/pdf' }), 'application/pdf');
+        await db.ins('production_sheets', { title, design_id: cur.id, project_id: r.pid || null, pdf_path: path, created_by: SB().user().id, spec: { size: cur.doc.widthCm + 'x' + cur.doc.heightCm, shape: cur.doc.shape, pile: cur.doc.pile, backing: cur.doc.backing, colours: cur.spec.rows.map(x => x.cells), notes: val('sN', b).trim() } }); toast('Saved. It appears under Saved sheets.'); await WS.open('sheets'); return; }
+      else { const o = await H.exportDesign(cur.doc, cur.imgs, f, dpi, cur.name, tr); download(o.name, o.blob); if (o.plan && o.plan.capped) toast('Exported at ' + o.plan.dpi + ' DPI (' + o.plan.w + ' x ' + o.plan.h + ' px). Your browser cannot render ' + o.plan.requested + ' DPI at this size.'); }
+    } finally { t.disabled = false; } return; }
+    if (t.dataset.sd) { const s = saved.find(v => v.id === t.dataset.sd), url = await SB().signedUrl('design-exports', s.pdf_path, 120), res = await fetch(url); if (!res.ok) throw new Error('Could not download that file.'); download(safeName(s.title) + '.pdf', await res.blob()); }
+    if (t.dataset.sx) { if (!(await ask('Delete this saved sheet and its PDF?', 'Delete'))) return; const s = saved.find(v => v.id === t.dataset.sx); if (s.pdf_path) await SB().removeFile('design-exports', [s.pdf_path]).catch(() => {}); await db.del('production_sheets', { id: s.id }); toast('Deleted'); await WS.open('sheets'); }
+  }));
+});
+
+/* ---------------------------------------------------------------- Reports */
+WS.register('reports', 'Reports', async (b) => {
+  const [orders, quotes, projects, stock, customers] = await Promise.all([db.sel('biz_orders', { select: 'status,total,paid,currency,customer_id,created_at', limit: 1000 }), db.sel('biz_quotations', { select: 'status,created_at', limit: 1000 }), db.sel('biz_projects', { select: 'status,created_at', limit: 1000 }), db.sel('v_yarn_stock', { select: '*', limit: 1000 }), db.sel('biz_customers', { select: 'id,name', limit: 1000 })]);
+  let from = '', to = ''; const inRange = r => (!from || (r.created_at || '') >= from) && (!to || (r.created_at || '').slice(0, 10) <= to);
+  const draw = () => { const rep = W.report({ orders: orders.filter(inRange), quotes: quotes.filter(inRange), projects: projects.filter(inRange), stock, customers }); b._rep = rep; const kv = o => Object.keys(o).length ? `<ul class="xw-list">${Object.entries(o).map(([k, v]) => `<li>${badge(k, statusKind(k))}<span>${v}</span></li>`).join('')}</ul>` : '<p class="xw-note">No data.</p>';
+    b.innerHTML = `<div class="xw-bar"><label>From <input type="date" id="rf" value="${esc(from)}"></label><label>To <input type="date" id="rt" value="${esc(to)}"></label><span class="xw-sp"></span><button class="xw-b" id="rCsv">Export CSV</button></div><p class="xw-note">The date range applies to orders, quotations and projects. Yarn figures are all-time.</p>
+    <section class="xw-sec"><h3>Money</h3>${rep.money.length ? `<table class="xw-t"><thead><tr><th>Currency</th><th class="num">Orders</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Outstanding</th></tr></thead><tbody>${rep.money.map(m => `<tr><td>${esc(m.currency)}</td><td class="num">${m.orders}</td><td class="num">${money(m.total, m.currency)}</td><td class="num">${money(m.paid, m.currency)}</td><td class="num">${money(m.outstanding, m.currency)}</td></tr>`).join('')}</tbody></table><p class="xw-note">Cancelled orders are excluded. Each currency is shown separately; nothing is converted.</p>` : '<p class="xw-note">No orders in this range.</p>'}</section>
+    <div class="xw-two"><section class="xw-sec"><h3>Orders</h3>${kv(rep.ordersByStatus)}</section><section class="xw-sec"><h3>Quotations</h3>${kv(rep.quotesByStatus)}<p class="xw-note">${rep.acceptRate == null ? 'Acceptance rate appears once quotations are accepted or rejected.' : 'Acceptance rate: <b>' + rep.acceptRate + '%</b> of decided quotations.'}</p></section><section class="xw-sec"><h3>Projects</h3>${kv(rep.projectsByStatus)}</section></div>
+    <section class="xw-sec"><h3>Yarn: stock, estimated and actual use</h3>${rep.yarn.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Code</th><th>Name</th><th class="num">In stock kg</th><th class="num">Estimated kg</th><th class="num">Actual kg</th><th class="num">Actual - estimated</th><th></th></tr></thead><tbody>${rep.yarn.map(y => `<tr class="${y.low ? 'low' : ''}"><td><b>${esc(y.code)}</b></td><td>${esc(y.name)}</td><td class="num">${y.stock_kg}</td><td class="num">${y.estimated_use_kg}</td><td class="num">${y.actual_use_kg}</td><td class="num">${y.difference_kg > 0 ? '+' : ''}${y.difference_kg}</td><td>${y.low ? badge('low stock', 'bad') : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="xw-note">No yarns yet.</p>'}</section>
+    <section class="xw-sec"><h3>Top customers by orders</h3>${rep.topCustomers.length ? `<ul class="xw-list">${rep.topCustomers.map(c => `<li>${esc(c.name)}<span>${c.orders} order${c.orders > 1 ? 's' : ''}</span></li>`).join('')}</ul>` : '<p class="xw-note">No data.</p>'}</section>`; };
+  b.addEventListener('change', e => { if (e.target.id === 'rf') { from = e.target.value; draw(); } if (e.target.id === 'rt') { to = e.target.value; draw(); } });
+  b.addEventListener('click', e => { if (e.target.id === 'rCsv') download('xaro-report.csv', W.reportCsv(b._rep), 'text/csv'); });
+  draw();
+});
+
+})(typeof window !== 'undefined' ? window : globalThis);
+
 /* ============ 3D Custom Studio: UI ============ */
 (() => {
 'use strict';
@@ -4469,7 +5294,7 @@ const ym = () => L.yarnMap();
 const yname = id => (ym()[id] || { name: id }).name;
 const layer = id => doc.layers.find(l => l.id === id);
 const snap = () => JSON.stringify(doc);
-function commit() { hist = hist.slice(0, hi + 1); hist.push(snap()); if (hist.length > 80) hist.shift(); hi = hist.length - 1; dirty = true; changed(); }
+function commit() { L.stampYarns(doc); hist = hist.slice(0, hi + 1); hist.push(snap()); if (hist.length > 80) hist.shift(); hi = hist.length - 1; dirty = true; changed(); }
 function restore(i) { hi = i; doc = JSON.parse(hist[i]); if (sel && !layer(sel)) sel = ''; changed(true); }
 function changed(full) { draw2D(); schedule(); if (full !== 'live') { panelL(); panelR(); } undoBtns(); }
 function undoBtns() { const u = $('#stUndo', root), r = $('#stRedo', root); if (u) { u.disabled = hi <= 0; r.disabled = hi >= hist.length - 1; } }
@@ -4739,7 +5564,7 @@ function toCart() {
 function build() {
   root = document.createElement('div'); root.id = 'studio'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'XARO 3D Custom Studio');
   root.innerHTML = `<div class="sh"><img src="${IMG.logoBlock}" alt=""><h2>Custom <span class="neon">Studio</span></h2><span class="sp"></span>
-    <button class="sb sm" id="stAcct" aria-label="Account">Sign in</button><button class="sb sm" id="stUnit" aria-label="Switch units">cm</button>
+    <button class="sb sm" id="stWork" aria-label="Rug maker workspace" hidden>Workspace</button><button class="sb sm" id="stAcct" aria-label="Account">Sign in</button><button class="sb sm" id="stUnit" aria-label="Switch units">cm</button>
     <button class="sb sm" data-v="vboth" aria-pressed="true">Both</button><button class="sb sm" data-v="v2d" aria-pressed="false">Design</button><button class="sb sm" data-v="v3d" aria-pressed="false">3D</button>
     <button class="sb" id="stClose" aria-label="Close studio">Close</button></div>
   <div class="main"><aside class="pn"><div class="tabs" role="tablist" aria-label="Design tools"></div><div class="pb" id="stL"></div></aside>
@@ -4805,6 +5630,7 @@ function build() {
   $('#stUnit', root).onclick = () => { unit = unit === 'cm' ? 'in' : 'cm'; $('#stUnit', root).textContent = unit; panelL(); };
   $('#stClose', root).onclick = closeStudio; $('#stUndo', root).onclick = () => hi > 0 && restore(hi - 1); $('#stRedo', root).onclick = () => hi < hist.length - 1 && restore(hi + 1);
   $('#stReset', root).onclick = () => { if (confirm('Clear the whole design and start again?')) { imgs = {}; newDoc(L.newDoc()); } };
+  if (window.XWS) XWS.mount({ studioRoot: root, toast });
   if (window.XACCT) XACCT.mount({ $: q => $(q, root), sheet, toast, toPng: async im => { const c = document.createElement('canvas'); c.width = im.w; c.height = im.h; c.getContext('2d').drawImage(im.el, 0, 0, im.w, im.h); return c.toDataURL('image/png'); }, blobToDataUrl: b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); }) });
   $('#stSave', root).onclick = saveDesign; $('#stMine', root).onclick = myDesigns; $('#stPrev', root).onclick = preview; $('#stDl', root).onclick = downloadDesign; $('#stQuote', root).onclick = quote; $('#stCart', root).onclick = toCart;
   addEventListener('keydown', e => {
@@ -4829,7 +5655,9 @@ function openStudio(opts) {
   panelL(); panelR(); draw2D(); setTimeout(() => { fit(); update3D(); camPreset('angle'); }, 60); XD.track('studio'); XARO.emit('studio', {}, false); $('#stClose', root).focus();
 }
 function closeStudio() { if (dirty && doc.layers.length && !confirm('Close the studio? Unsaved changes will be lost. Use Save to keep this design.')) return; root.classList.remove('on'); document.body.classList.remove('studio-open'); if (location.hash === '#studio') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; } } }
-window.XSTUDIO = { open: openStudio, close: closeStudio };
+/* hooks used by the rug-maker workspace: load a design into the editor, read the current one */
+function loadDoc(d, o) { o = o || {}; openStudio(); imgs = {}; Object.entries(o.images || {}).forEach(([k, v]) => { if (v && v.el) imgs[k] = v; }); newDoc(JSON.parse(JSON.stringify(d))); savedName = o.name || ''; cloudId = o.cloudId || ''; if (o.view) { view = o.view; $('#stViews', root).className = 'views ' + view; $$('[data-v]', root).forEach(x => x.setAttribute('aria-pressed', x.dataset.v === view)); setTimeout(() => { fit(); update3D(); }, 60); } }
+window.XSTUDIO = { open: openStudio, close: closeStudio, loadDoc, getDoc: () => ({ doc: JSON.parse(JSON.stringify(doc)), imgs, name: savedName, cloudId }), setCloudId: id => { cloudId = id || ''; } };
 document.addEventListener('click', e => { const b = e.target.closest('[data-open-studio]'); if (b) { e.preventDefault(); openStudio(); } });
 addEventListener('hashchange', () => { if (location.hash === '#studio') openStudio(); });
 if (location.hash === '#studio') setTimeout(openStudio, 400);

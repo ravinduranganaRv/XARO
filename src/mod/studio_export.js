@@ -121,10 +121,10 @@ function pdf(spec) {
   // legend table
   const lg = spec.legend;
   if (lg && lg.rows && lg.rows.length) {
-    const head = lg.head || [], n = head.length, avail = PW - 2 * M - 22, cw = lg.widths || head.map(() => avail / n);
-    const header = () => { T('Yarn legend', M, y - 12, 12, true); y -= 20; let x = M + 22; head.forEach((h, i) => { T(h, x, y - 8, 8, true); x += cw[i]; }); Ln(M, y - 12, PW - M, y - 12); y -= 18; };
+    const head = lg.head || [], n = head.length, off = lg.noSwatch ? 0 : 22, avail = PW - 2 * M - off, cw = lg.widths || head.map(() => avail / n);
+    const header = () => { T(lg.title || 'Yarn legend', M, y - 12, 12, true); y -= 20; let x = M + off; head.forEach((h, i) => { T(h, x, y - 8, 8, true); x += cw[i]; }); Ln(M, y - 12, PW - M, y - 12); y -= 18; };
     if (y < 120) { closePage(); newPage(); } header();
-    lg.rows.forEach(r => { if (y < 60) { closePage(); newPage(); header(); } R(M, y - 12, 16, 12, r.hex); cs.push(`0.4 0.4 0.4 RG 0.4 w ${M} ${(y - 12).toFixed(2)} 16 12 re S`); let x = M + 22; (r.cells || []).forEach((c, i) => { T(fit(c, 9, cw[i] - 6), x, y - 9, 9, i === 0); x += cw[i]; }); y -= 18; });
+    lg.rows.forEach(r => { if (y < 60) { closePage(); newPage(); header(); } if (!lg.noSwatch) { R(M, y - 12, 16, 12, r.hex); cs.push(`0.4 0.4 0.4 RG 0.4 w ${M} ${(y - 12).toFixed(2)} 16 12 re S`); } let x = M + off; (r.cells || []).forEach((c, i) => { T(fit(c, 9, cw[i] - 6), x, y - 9, 9, i === 0); x += cw[i]; }); y -= 18; });
   }
   const notes = (spec.notes || []).filter(Boolean);
   if (notes.length) { if (y < 90) { closePage(); newPage(); } y -= 6; T('Notes', M, y - 12, 12, true); y -= 20; notes.forEach(nt => { latin1(nt).match(/.{1,100}(\s|$)/g).forEach(line => { if (y < 50) { closePage(); newPage(); } T(line.trim(), M, y - 9, 9, false); y -= 13; }); }); }

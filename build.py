@@ -3,8 +3,8 @@ Edit src/store.src.html (page), src/mod/*.js|css (data layer, sign-in gate, admi
 import pathlib
 R = pathlib.Path(__file__).parent
 rd = lambda p: (R / p).read_text() if (R / p).exists() else ''
-CSS_MODS = ['gate', 'admin', 'admin_cat', 'admin_sys', 'bot', 'studio_acct', 'studio']
-JS_MODS = ['costing', 'colour', 'vectorize', 'sb', 'studio_lib', 'studio_export', 'templates_extra', 'gate', 'admin', 'admin_cat', 'admin_sys', 'admin_ops', 'bot', 'studio_acct', 'studio']
+CSS_MODS = ['gate', 'admin', 'admin_cat', 'admin_sys', 'bot', 'studio_acct', 'studio', 'workspace']
+JS_MODS = ['costing', 'colour', 'vectorize', 'sb', 'studio_lib', 'studio_export', 'templates_extra', 'gate', 'admin', 'admin_cat', 'admin_sys', 'admin_ops', 'bot', 'studio_acct', 'workspace_core', 'workspace', 'workspace_yarn', 'workspace_vec', 'workspace_biz', 'studio']
 data = rd('src/mod/data.js').replace('/*%SEED_ADMIN%*/', rd('src/mod/seed_admin.json'))
 art = (rd('src/store.src.html').replace('/*%IMG%*/', rd('src/img.json')).replace('/*%CATALOG%*/', rd('src/catalog_public.json'))
        .replace('/*%DATA_JS%*/', data).replace('/*%MOD_CSS%*/', '\n'.join(rd(f'src/mod/{m}.css') for m in CSS_MODS))

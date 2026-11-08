@@ -6,8 +6,16 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 L.uid = uid;
 
 /* ---------------------------------------------------------------- yarn helpers */
-const yarnList = () => XD.yarns().filter(y => y.active !== false);
-const yarnMap = () => { const m = {}; XD.yarns().forEach(y => { m[y.id] = y; }); return m; };
+/* a rug maker can switch the studio to their own yarn library (L.useYarns(fn)); a design keeps a small snapshot of the yarns it uses (doc._yarns)
+   so it still renders with the right colours on a device that does not have that library */
+let ySrc = null; L.useYarns = fn => { ySrc = typeof fn === 'function' ? fn : null; };
+const allYarns = () => (ySrc ? ySrc() : XD.yarns());
+const yarnList = () => allYarns().filter(y => y.active !== false);
+const yarnMap = () => { const m = {}; allYarns().forEach(y => { m[y.id] = y; }); return m; };
+const docYarnMap = doc => { const m = yarnMap(); const s = doc && doc._yarns; if (s) Object.keys(s).forEach(k => { if (!m[k] && s[k] && /^#[0-9a-fA-F]{6}$/.test(s[k].hex || '')) m[k] = { id: k, name: String(s[k].name || k).slice(0, 80), hex: s[k].hex, material: s[k].material || '' }; }); return m; };
+L.docYarnMap = docYarnMap;
+/** records the yarns a design uses (id, name, hex) inside the design */
+L.stampYarns = doc => { const m = yarnMap(), used = {}, add = id => { if (id && m[id]) used[id] = { name: m[id].name, hex: m[id].hex }; }; add(doc.bg); add(doc.borderYarn); (doc.layers || []).forEach(l => { add(l.fill); add(l.stroke); if (l.pal) Object.keys(l.pal).forEach(k => add(l.pal[k])); }); const old = doc._yarns || {}; Object.keys(old).forEach(k => { if (!used[k] && !m[k]) used[k] = old[k]; }); doc._yarns = used; return doc; };
 L.yarnList = yarnList; L.yarnMap = yarnMap;
 const rgbOf = y => y._rgb || (y._rgb = XD.hex2rgb(y.hex));
 function nearest(r, g, b, list) {
@@ -74,7 +82,7 @@ function drawLayer(c, l, W, H, ym, imgs) {
 L.drawLayer = drawLayer;
 /** draws the artwork. opts.clip=false skips the shape mask */
 L.render = (doc, canvas, imgs, opts) => {
-  opts = opts || {}; const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height, ym = yarnMap();
+  opts = opts || {}; const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height, ym = docYarnMap(doc);
   c.clearRect(0, 0, W, H); c.save(); if (opts.clip !== false) { shapePath(c, doc, W, H); c.clip(); }
   if (!opts.transparent) { c.fillStyle = (ym[doc.bg] || { hex: '#2A2D2A' }).hex; c.fillRect(0, 0, W, H); }
   doc.layers.forEach(l => drawLayer(c, l, W, H, ym, imgs));
