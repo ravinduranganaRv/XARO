@@ -101,7 +101,7 @@ function myPassword() {
       const e = $('#pwE'), o = $('#pwO').value, n = $('#pwN').value, c = $('#pwC').value;
       if (await hashPw(o, a.salt, a.iter) !== a.hash) { e.textContent = 'Current password is wrong.'; return; }
       if (n.length < 8) { e.textContent = 'Use at least 8 characters.'; return; } if (n !== c) { e.textContent = 'The two new passwords do not match.'; return; }
-      const l = XD.admins(), x = l.find(y => y.username === a.username); x.salt = rand(16); x.iter = 120000; x.hash = await hashPw(n, x.salt, x.iter); XD.saveAdmins(l); close(); toast('Password changed'); } }] });
+      const l = XD.admins(), x = l.find(y => y.username === a.username); x.salt = rand(16); x.iter = 310000; x.hash = await hashPw(n, x.salt, x.iter); XD.saveAdmins(l); close(); toast('Password changed'); } }] });
 }
 
 /* ---------------------------------------------------------------- charts (inline SVG) */

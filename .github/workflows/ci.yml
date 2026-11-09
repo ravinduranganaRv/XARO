@@ -36,7 +36,7 @@ jobs:
       - name: PDF/PNG decoders for the export tests
         run: sudo apt-get install -y qpdf >/dev/null && pip install --quiet pillow pypdf
       - name: Costing engine tests
-        run: node --test tests/costing.test.js tests/colour.test.js tests/sb.test.js tests/acct.test.js tests/vectorize.test.js tests/export.test.js tests/workspace.test.js tests/edit.test.js tests/studio3d.test.js tests/edge.test.mjs
+        run: node --test tests/costing.test.js tests/colour.test.js tests/sb.test.js tests/acct.test.js tests/vectorize.test.js tests/export.test.js tests/workspace.test.js tests/edit.test.js tests/studio3d.test.js tests/security.test.js tests/edge.test.mjs
       - name: index.html is up to date with src/
         run: |
           python3 build.py

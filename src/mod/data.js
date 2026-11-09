@@ -114,8 +114,10 @@ function track(type, d) {
 }
 
 /* ---------------------------------------------------------------- optional sync to a Google Apps Script web app (Admin > Settings) */
+/** only a Google Apps Script web app address may receive customer details */
+const syncOK = u => /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+\/|macros\/)s\/[\w-]+\/exec$/.test(String(u || '').trim());
 function sync(type, payload) {
-  const url = settings().syncUrl; if (!url || !/^https:\/\//.test(url)) return;
+  const url = settings().syncUrl; if (!url || !syncOK(url)) return;
   try { fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type, at: new Date().toISOString(), payload }) }).catch(() => {}); } catch (e) {}
 }
 
@@ -179,5 +181,5 @@ function resetAll() { KEYS.concat(['me', 'region']).forEach(k => { try { localSt
 
 return { g, s, uid, esc, clone, CURRENCIES, FX_DEFAULT, ALL_PERMS, DEFAULT_KB, settings, setSettings, fxTable, setFx, countries, setCountries, country, money, convert, fmtMoney,
   region, setRegion, guessCountry, products, saveProducts, resetProducts, applyStarterPrices, priceFor, customers, saveCustomers, upsertCustomer, me, setMe, orders, saveOrders, addOrder, newOrderId,
-  yarns, saveYarns, YARN_DEFAULT, hex2rgb, designs, saveDesigns, quotes, saveQuotes, addQuote, costRates, setCostRates, sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll };
+  yarns, saveYarns, YARN_DEFAULT, hex2rgb, designs, saveDesigns, quotes, saveQuotes, addQuote, costRates, setCostRates, sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll, syncOK };
 })();

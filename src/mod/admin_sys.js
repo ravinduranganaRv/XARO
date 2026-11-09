@@ -64,7 +64,7 @@ A.reg('admins', 'Admin users', '♛', 'admins', box => {
           if (!pwOk(pw)) { er.textContent = `Password needs at least ${PW_MIN} characters with a letter and a number.`; return; }
           if (!perms.length) { er.textContent = 'Pick at least one permission.'; return; }
           if (!A.secure()) { er.textContent = 'Secure password storage needs https or localhost.'; return; }
-          const salt = A.rand(16), iter = 120000, hash = await A.hashPw(pw, salt, iter);
+          const salt = A.rand(16), iter = 310000, hash = await A.hashPw(pw, salt, iter);
           const l = XD.admins(); l.push({ username: un, name: $('#uF', m.el).value.trim().slice(0, 60), role: 'admin', perms, active: $('#uA', m.el).checked, salt, hash, iter, at: new Date().toISOString(), last: '' });
           XD.saveAdmins(l); toast('Admin created'); close(); draw();
         }
@@ -84,7 +84,7 @@ A.reg('admins', 'Admin users', '♛', 'admins', box => {
           const pw = $('#rP', m.el).value, er = $('#rE', m.el);
           if (!pwOk(pw)) { er.textContent = `Needs at least ${PW_MIN} characters with a letter and a number.`; return; }
           if (!A.secure()) { er.textContent = 'Needs https or localhost.'; return; }
-          const l = XD.admins(), x = l.find(y => y.username === username); x.salt = A.rand(16); x.iter = 120000; x.hash = await A.hashPw(pw, x.salt, x.iter); XD.saveAdmins(l); toast('Password updated'); close();
+          const l = XD.admins(), x = l.find(y => y.username === username); x.salt = A.rand(16); x.iter = 310000; x.hash = await A.hashPw(pw, x.salt, x.iter); XD.saveAdmins(l); toast('Password updated'); close();
         }
       }]
     });
@@ -201,8 +201,8 @@ A.reg('settings', 'Settings', '⚙', 'settings', box => {
       XD.setCountries(l); toast('Countries saved'); if (window.XARO) { XARO.fillRegionSelects(); XARO.refresh(); } draw();
     };
     const url = () => read('syU');
-    $('#syS').onclick = () => { const u = url(); if (u && !/^https:\/\//.test(u)) return toast('The address must start with https://', true); XD.setSettings({ syncUrl: u }); toast(u ? 'Sync address saved' : 'Sync turned off'); };
-    $('#syT').onclick = () => { const u = url(); if (!/^https:\/\//.test(u)) return toast('Enter an https address first', true); XD.setSettings({ syncUrl: u }); XD.sync('test', { note: 'Test from XARO admin', by: A.me().username }); toast('Test sent. Check your sheet in a few seconds. (The browser cannot read the reply.)'); };
+    $('#syS').onclick = () => { const u = url(); if (u && !XD.syncOK(u)) return toast('Use the Google Apps Script web app address: https://script.google.com/macros/s/.../exec', true); XD.setSettings({ syncUrl: u }); toast(u ? 'Sync address saved' : 'Sync turned off'); };
+    $('#syT').onclick = () => { const u = url(); if (!XD.syncOK(u)) return toast('Enter the Google Apps Script web app address first (https://script.google.com/macros/s/.../exec)', true); XD.setSettings({ syncUrl: u }); XD.sync('test', { note: 'Test from XARO admin', by: A.me().username }); toast('Test sent. Check your sheet in a few seconds. (The browser cannot read the reply.)'); };
     $('#bkD').onclick = () => { const b = new Blob([JSON.stringify(XD.exportAll(), null, 1)], { type: 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'xaro-backup-' + new Date().toISOString().slice(0, 10) + '.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
     $('#bkU').onchange = e => {
       const f = e.target.files[0]; if (!f) return; if (f.size > 20 * 1024 * 1024) return toast('That file is too large', true);

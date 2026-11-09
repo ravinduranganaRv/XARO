@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QsBgi87bjUCGii/xK3BPk0A8fu3dUyvpof0HWS8hJN8=' 'sha256-XS6vz+E7g/+buR6qponWuuigOY0v9OQYHaohaD8m0xc=' 'sha256-3Q9wGTjV7tBaTsFVSo/LpnQSJ60Zi1ec2Lh19+zV3tE=' 'sha256-O2sN3P7MLNFE55TNqlj5VsS5mXCmD7LkjumuOAHavXY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://mlrydpclqokizsqmigen.supabase.co https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://mlrydpclqokizsqmigen.supabase.co https://wa.me">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>XARO Industries | Custom hand-tufted rugs designed in 3D</title>
 <meta name="description" content="Design a custom hand-tufted rug in 3D and see the price as you build. XARO Industries makes keyboard rugs and 3D contour wall art by hand in Sri Lanka and ships worldwide. Preview store: no payments are taken yet.">
@@ -1171,8 +1173,10 @@ function track(type, d) {
 }
 
 /* ---------------------------------------------------------------- optional sync to a Google Apps Script web app (Admin > Settings) */
+/** only a Google Apps Script web app address may receive customer details */
+const syncOK = u => /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+\/|macros\/)s\/[\w-]+\/exec$/.test(String(u || '').trim());
 function sync(type, payload) {
-  const url = settings().syncUrl; if (!url || !/^https:\/\//.test(url)) return;
+  const url = settings().syncUrl; if (!url || !syncOK(url)) return;
   try { fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type, at: new Date().toISOString(), payload }) }).catch(() => {}); } catch (e) {}
 }
 
@@ -1236,7 +1240,7 @@ function resetAll() { KEYS.concat(['me', 'region']).forEach(k => { try { localSt
 
 return { g, s, uid, esc, clone, CURRENCIES, FX_DEFAULT, ALL_PERMS, DEFAULT_KB, settings, setSettings, fxTable, setFx, countries, setCountries, country, money, convert, fmtMoney,
   region, setRegion, guessCountry, products, saveProducts, resetProducts, applyStarterPrices, priceFor, customers, saveCustomers, upsertCustomer, me, setMe, orders, saveOrders, addOrder, newOrderId,
-  yarns, saveYarns, YARN_DEFAULT, hex2rgb, designs, saveDesigns, quotes, saveQuotes, addQuote, costRates, setCostRates, sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll };
+  yarns, saveYarns, YARN_DEFAULT, hex2rgb, designs, saveDesigns, quotes, saveQuotes, addQuote, costRates, setCostRates, sid, events, track, sync, admins, saveAdmins, kb, saveKb, chatlog, logChat, unanswered, addUnanswered, saveUnanswered, exportAll, importAll, resetAll, syncOK };
 })();
 
 </script>
@@ -1772,7 +1776,9 @@ const ctryObj = () => XD.country(region.country);
 const priceOf = p => XD.priceFor(p, region.country).amount;                 // amount in the selected country's currency
 const fmt = amt => XD.fmtMoney(amt, ctryObj().cur, region.cur);              // shown in the display currency
 const fmtUSD = usd => XD.fmtMoney(usd, 'USD', region.cur);
-const pimg = p => p.img || IMG['p_' + p.sku] || IMG.logoBlock;
+/* an image address from stored data is used only if it is an https address or an embedded image with no quote or angle-bracket characters */
+const okSrc = u => typeof u === 'string' && /^(https:\/\/|data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,)[^"'<>\s]*$/i.test(u);
+const pimg = p => (okSrc(p.img) ? p.img : '') || IMG['p_' + p.sku] || IMG.logoBlock;
 let cart = store.get('xaro_cart', []).filter(i => byId[i.sku]);
 const saveCart = () => store.set('xaro_cart', cart);
 let toastT; const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400); };
@@ -1835,10 +1841,10 @@ function renderShop() {
   renderFilters();
   const list = P.filter(p => filt === 'all' || p.cat === filt);
   $('#grid').innerHTML = list.map(p => { const d = sel[p.sku] || p.designs[0] || '';
-    return `<article class="card" data-sku="${p.sku}"><button class="ph" data-view="${p.sku}" aria-label="View ${esc(p.name)} in 3D"><img src="${pimg(p)}" alt="${esc(p.name)}" loading="lazy">${soldOut(p) ? '<span class="badge" style="background:#ff5c5c">Sold out</span>' : p.kind === 'custom' ? '<span class="badge">Custom</span>' : (p.sku === 'XS' ? '<span class="badge">Drop 001</span>' : '')}<span class="view">View in 3D</span></button>
+    return `<article class="card" data-sku="${esc(p.sku)}"><button class="ph" data-view="${esc(p.sku)}" aria-label="View ${esc(p.name)} in 3D"><img src="${pimg(p)}" alt="${esc(p.name)}" loading="lazy">${soldOut(p) ? '<span class="badge" style="background:#ff5c5c">Sold out</span>' : p.kind === 'custom' ? '<span class="badge">Custom</span>' : (p.sku === 'XS' ? '<span class="badge">Drop 001</span>' : '')}<span class="view">View in 3D</span></button>
     <div class="body"><h3>${esc(p.name)}</h3><div class="sz">${esc(p.size)}${p.weight ? ' | ' + esc(p.weight) : ''}</div><p>${esc(p.desc)}</p>
     ${p.designs.length ? `<div class="swatches" role="group" aria-label="Design">${p.designs.map(x => `<button class="sw" data-sw="${p.sku}|${x}" aria-pressed="${x === d}">${esc(designNames[x.toLowerCase().replace(/ /g, '')] || x)}</button>`).join('')}</div>` : ''}
-    <div class="row"><div class="price">${fmt(priceOf(p))}<small>${soldOut(p) ? 'Sold out' : p.stock != null && p.stock <= 5 ? 'Only ' + p.stock + ' left' : p.deposit ? '50% deposit today' : esc(p.lead)}</small></div>${p.kind === 'custom' ? `<button class="btn sm" data-build="${p.sku}">Build yours</button>` : `<button class="btn sm" data-add="${p.sku}" ${soldOut(p) ? 'disabled' : ''}>${soldOut(p) ? 'Sold out' : 'Add to cart'}</button>`}</div></div></article>`; }).join('');
+    <div class="row"><div class="price">${fmt(priceOf(p))}<small>${soldOut(p) ? 'Sold out' : p.stock != null && p.stock <= 5 ? 'Only ' + p.stock + ' left' : p.deposit ? '50% deposit today' : esc(p.lead)}</small></div>${p.kind === 'custom' ? `<button class="btn sm" data-build="${esc(p.sku)}">Build yours</button>` : `<button class="btn sm" data-add="${esc(p.sku)}" ${soldOut(p) ? 'disabled' : ''}>${soldOut(p) ? 'Sold out' : 'Add to cart'}</button>`}</div></div></article>`; }).join('');
 }
 const DKEY = { 'XARO Logo': 'logo', 'Street Crown': 'crown', 'Neon Waves': 'waves', 'Pixel Pad': 'pixel' };
 $('#grid').addEventListener('click', e => {
@@ -1880,7 +1886,7 @@ $('#pvInfo').addEventListener('click', e => {
 });
 
 /* custom builder */
-const bProd = $('#bProd'); function fillBuilder() { const keep = bProd.value; bProd.innerHTML = P.filter(p => p.kind === 'custom').map(p => `<option value="${p.sku}">${esc(p.name)} (${esc(p.size)})</option>`).join(''); if (keep && byId[keep]) bProd.value = keep; } fillBuilder();
+const bProd = $('#bProd'); function fillBuilder() { const keep = bProd.value; bProd.innerHTML = P.filter(p => p.kind === 'custom').map(p => `<option value="${esc(p.sku)}">${esc(p.name)} (${esc(p.size)})</option>`).join(''); if (keep && byId[keep]) bProd.value = keep; } fillBuilder();
 let bImg = null, bFileName = '', bViewer = null;
 function quote() {
   const p = byId[bProd.value]; if (!p) return; const a = priceOf(p); $('#qName').textContent = p.name; $('#qPrice').textContent = fmt(a); $('#qDep').textContent = fmt(a*0.5); $('#qBal').textContent = fmt(a*0.5); $('#qLead').textContent = 'Dispatch ' + String(p.lead).toLowerCase() + '. ' + (shipFee() ? 'Courier ' + fmt(shipFee()) + '.' : 'Shipping included.');
@@ -3645,7 +3651,7 @@ function myPassword() {
       const e = $('#pwE'), o = $('#pwO').value, n = $('#pwN').value, c = $('#pwC').value;
       if (await hashPw(o, a.salt, a.iter) !== a.hash) { e.textContent = 'Current password is wrong.'; return; }
       if (n.length < 8) { e.textContent = 'Use at least 8 characters.'; return; } if (n !== c) { e.textContent = 'The two new passwords do not match.'; return; }
-      const l = XD.admins(), x = l.find(y => y.username === a.username); x.salt = rand(16); x.iter = 120000; x.hash = await hashPw(n, x.salt, x.iter); XD.saveAdmins(l); close(); toast('Password changed'); } }] });
+      const l = XD.admins(), x = l.find(y => y.username === a.username); x.salt = rand(16); x.iter = 310000; x.hash = await hashPw(n, x.salt, x.iter); XD.saveAdmins(l); close(); toast('Password changed'); } }] });
 }
 
 /* ---------------------------------------------------------------- charts (inline SVG) */
@@ -3929,7 +3935,7 @@ A.reg('admins', 'Admin users', '♛', 'admins', box => {
           if (!pwOk(pw)) { er.textContent = `Password needs at least ${PW_MIN} characters with a letter and a number.`; return; }
           if (!perms.length) { er.textContent = 'Pick at least one permission.'; return; }
           if (!A.secure()) { er.textContent = 'Secure password storage needs https or localhost.'; return; }
-          const salt = A.rand(16), iter = 120000, hash = await A.hashPw(pw, salt, iter);
+          const salt = A.rand(16), iter = 310000, hash = await A.hashPw(pw, salt, iter);
           const l = XD.admins(); l.push({ username: un, name: $('#uF', m.el).value.trim().slice(0, 60), role: 'admin', perms, active: $('#uA', m.el).checked, salt, hash, iter, at: new Date().toISOString(), last: '' });
           XD.saveAdmins(l); toast('Admin created'); close(); draw();
         }
@@ -3949,7 +3955,7 @@ A.reg('admins', 'Admin users', '♛', 'admins', box => {
           const pw = $('#rP', m.el).value, er = $('#rE', m.el);
           if (!pwOk(pw)) { er.textContent = `Needs at least ${PW_MIN} characters with a letter and a number.`; return; }
           if (!A.secure()) { er.textContent = 'Needs https or localhost.'; return; }
-          const l = XD.admins(), x = l.find(y => y.username === username); x.salt = A.rand(16); x.iter = 120000; x.hash = await A.hashPw(pw, x.salt, x.iter); XD.saveAdmins(l); toast('Password updated'); close();
+          const l = XD.admins(), x = l.find(y => y.username === username); x.salt = A.rand(16); x.iter = 310000; x.hash = await A.hashPw(pw, x.salt, x.iter); XD.saveAdmins(l); toast('Password updated'); close();
         }
       }]
     });
@@ -4066,8 +4072,8 @@ A.reg('settings', 'Settings', '⚙', 'settings', box => {
       XD.setCountries(l); toast('Countries saved'); if (window.XARO) { XARO.fillRegionSelects(); XARO.refresh(); } draw();
     };
     const url = () => read('syU');
-    $('#syS').onclick = () => { const u = url(); if (u && !/^https:\/\//.test(u)) return toast('The address must start with https://', true); XD.setSettings({ syncUrl: u }); toast(u ? 'Sync address saved' : 'Sync turned off'); };
-    $('#syT').onclick = () => { const u = url(); if (!/^https:\/\//.test(u)) return toast('Enter an https address first', true); XD.setSettings({ syncUrl: u }); XD.sync('test', { note: 'Test from XARO admin', by: A.me().username }); toast('Test sent. Check your sheet in a few seconds. (The browser cannot read the reply.)'); };
+    $('#syS').onclick = () => { const u = url(); if (u && !XD.syncOK(u)) return toast('Use the Google Apps Script web app address: https://script.google.com/macros/s/.../exec', true); XD.setSettings({ syncUrl: u }); toast(u ? 'Sync address saved' : 'Sync turned off'); };
+    $('#syT').onclick = () => { const u = url(); if (!XD.syncOK(u)) return toast('Enter the Google Apps Script web app address first (https://script.google.com/macros/s/.../exec)', true); XD.setSettings({ syncUrl: u }); XD.sync('test', { note: 'Test from XARO admin', by: A.me().username }); toast('Test sent. Check your sheet in a few seconds. (The browser cannot read the reply.)'); };
     $('#bkD').onclick = () => { const b = new Blob([JSON.stringify(XD.exportAll(), null, 1)], { type: 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'xaro-backup-' + new Date().toISOString().slice(0, 10) + '.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
     $('#bkU').onchange = e => {
       const f = e.target.files[0]; if (!f) return; if (f.size > 20 * 1024 * 1024) return toast('That file is too large', true);

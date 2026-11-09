@@ -893,7 +893,9 @@ const ctryObj = () => XD.country(region.country);
 const priceOf = p => XD.priceFor(p, region.country).amount;                 // amount in the selected country's currency
 const fmt = amt => XD.fmtMoney(amt, ctryObj().cur, region.cur);              // shown in the display currency
 const fmtUSD = usd => XD.fmtMoney(usd, 'USD', region.cur);
-const pimg = p => p.img || IMG['p_' + p.sku] || IMG.logoBlock;
+/* an image address from stored data is used only if it is an https address or an embedded image with no quote or angle-bracket characters */
+const okSrc = u => typeof u === 'string' && /^(https:\/\/|data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,)[^"'<>\s]*$/i.test(u);
+const pimg = p => (okSrc(p.img) ? p.img : '') || IMG['p_' + p.sku] || IMG.logoBlock;
 let cart = store.get('xaro_cart', []).filter(i => byId[i.sku]);
 const saveCart = () => store.set('xaro_cart', cart);
 let toastT; const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400); };
@@ -956,10 +958,10 @@ function renderShop() {
   renderFilters();
   const list = P.filter(p => filt === 'all' || p.cat === filt);
   $('#grid').innerHTML = list.map(p => { const d = sel[p.sku] || p.designs[0] || '';
-    return `<article class="card" data-sku="${p.sku}"><button class="ph" data-view="${p.sku}" aria-label="View ${esc(p.name)} in 3D"><img src="${pimg(p)}" alt="${esc(p.name)}" loading="lazy">${soldOut(p) ? '<span class="badge" style="background:#ff5c5c">Sold out</span>' : p.kind === 'custom' ? '<span class="badge">Custom</span>' : (p.sku === 'XS' ? '<span class="badge">Drop 001</span>' : '')}<span class="view">View in 3D</span></button>
+    return `<article class="card" data-sku="${esc(p.sku)}"><button class="ph" data-view="${esc(p.sku)}" aria-label="View ${esc(p.name)} in 3D"><img src="${pimg(p)}" alt="${esc(p.name)}" loading="lazy">${soldOut(p) ? '<span class="badge" style="background:#ff5c5c">Sold out</span>' : p.kind === 'custom' ? '<span class="badge">Custom</span>' : (p.sku === 'XS' ? '<span class="badge">Drop 001</span>' : '')}<span class="view">View in 3D</span></button>
     <div class="body"><h3>${esc(p.name)}</h3><div class="sz">${esc(p.size)}${p.weight ? ' | ' + esc(p.weight) : ''}</div><p>${esc(p.desc)}</p>
     ${p.designs.length ? `<div class="swatches" role="group" aria-label="Design">${p.designs.map(x => `<button class="sw" data-sw="${p.sku}|${x}" aria-pressed="${x === d}">${esc(designNames[x.toLowerCase().replace(/ /g, '')] || x)}</button>`).join('')}</div>` : ''}
-    <div class="row"><div class="price">${fmt(priceOf(p))}<small>${soldOut(p) ? 'Sold out' : p.stock != null && p.stock <= 5 ? 'Only ' + p.stock + ' left' : p.deposit ? '50% deposit today' : esc(p.lead)}</small></div>${p.kind === 'custom' ? `<button class="btn sm" data-build="${p.sku}">Build yours</button>` : `<button class="btn sm" data-add="${p.sku}" ${soldOut(p) ? 'disabled' : ''}>${soldOut(p) ? 'Sold out' : 'Add to cart'}</button>`}</div></div></article>`; }).join('');
+    <div class="row"><div class="price">${fmt(priceOf(p))}<small>${soldOut(p) ? 'Sold out' : p.stock != null && p.stock <= 5 ? 'Only ' + p.stock + ' left' : p.deposit ? '50% deposit today' : esc(p.lead)}</small></div>${p.kind === 'custom' ? `<button class="btn sm" data-build="${esc(p.sku)}">Build yours</button>` : `<button class="btn sm" data-add="${esc(p.sku)}" ${soldOut(p) ? 'disabled' : ''}>${soldOut(p) ? 'Sold out' : 'Add to cart'}</button>`}</div></div></article>`; }).join('');
 }
 const DKEY = { 'XARO Logo': 'logo', 'Street Crown': 'crown', 'Neon Waves': 'waves', 'Pixel Pad': 'pixel' };
 $('#grid').addEventListener('click', e => {
@@ -1001,7 +1003,7 @@ $('#pvInfo').addEventListener('click', e => {
 });
 
 /* custom builder */
-const bProd = $('#bProd'); function fillBuilder() { const keep = bProd.value; bProd.innerHTML = P.filter(p => p.kind === 'custom').map(p => `<option value="${p.sku}">${esc(p.name)} (${esc(p.size)})</option>`).join(''); if (keep && byId[keep]) bProd.value = keep; } fillBuilder();
+const bProd = $('#bProd'); function fillBuilder() { const keep = bProd.value; bProd.innerHTML = P.filter(p => p.kind === 'custom').map(p => `<option value="${esc(p.sku)}">${esc(p.name)} (${esc(p.size)})</option>`).join(''); if (keep && byId[keep]) bProd.value = keep; } fillBuilder();
 let bImg = null, bFileName = '', bViewer = null;
 function quote() {
   const p = byId[bProd.value]; if (!p) return; const a = priceOf(p); $('#qName').textContent = p.name; $('#qPrice').textContent = fmt(a); $('#qDep').textContent = fmt(a*0.5); $('#qBal').textContent = fmt(a*0.5); $('#qLead').textContent = 'Dispatch ' + String(p.lead).toLowerCase() + '. ' + (shipFee() ? 'Courier ' + fmt(shipFee()) + '.' : 'Shipping included.');
