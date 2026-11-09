@@ -34,3 +34,7 @@ Project XARO-STUDIO (Singapore). All six migrations are applied remotely and mir
 - Owner claim is currently DISABLED: no business_settings row 'owner_email' exists and no account holds the owner role (owner confirmed this is still pending).
 - The mechanism is verified (real project, rolled-back test): once an 'owner_email' setting exists, only an account with that VERIFIED email, while no owner exists, becomes owner; metadata cannot grant roles; a second claim is refused.
 - To enable: the owner gives the address; a single insert into business_settings ('owner_email'). Keep "Confirm email" enabled in Supabase Auth (Authentication > Providers > Email).
+
+## Update 2026-11-10: owner configured, default rates
+- Owner email supplied by the owner and stored in business_settings 'owner_email' (is_public=false) on the real Supabase project. No account exists yet; the owner must sign up with that address and VERIFY the email, then the first verified claim becomes owner (mechanism tested earlier on the real project). Confirm-email must stay enabled.
+- Storefront costing: yarn kg/m² now starts at typical tufting averages (low 1.8, standard 2.5, high 3.5, carved 3.0). All rates remain editable in Admin > Costing; blank hides the yarn figure. Rug-maker workspace rates remain each maker's own (nothing assumed).

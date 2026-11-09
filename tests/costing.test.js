@@ -34,8 +34,9 @@ test('currency conversion uses the editable rates', () => {
   const R = C.mergeRates(C.DEFAULT_RATES, { fx: { LKR: 400 } }); const r2 = C.estimate({ ...base, currency: 'LKR' }, R);
   assert.ok(Math.abs(r2.local.sell / r2.usd.sell - 400) < 0.5);
 });
-test('yarn weight is never invented', () => {
-  assert.equal(C.estimate(base).yarnKg, null);
+test('yarn weight uses editable defaults; blank hides it', () => {
+  assert.ok(C.estimate(base).yarnKg > 0);
+  const blank = C.mergeRates(C.DEFAULT_RATES, { yarnKgPerM2: { standard: null } }); assert.equal(C.estimate(base, blank).yarnKg, null);
   const R = C.mergeRates(C.DEFAULT_RATES, { yarnKgPerM2: { standard: 1.2 } }); const r = C.estimate({ ...base, widthCm: 100, heightCm: 100 }, R);
   assert.equal(r.yarnKg, 1.2);
 });

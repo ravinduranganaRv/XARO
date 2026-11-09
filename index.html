@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QsBgi87bjUCGii/xK3BPk0A8fu3dUyvpof0HWS8hJN8=' 'sha256-XS6vz+E7g/+buR6qponWuuigOY0v9OQYHaohaD8m0xc=' 'sha256-3Q9wGTjV7tBaTsFVSo/LpnQSJ60Zi1ec2Lh19+zV3tE=' 'sha256-O2sN3P7MLNFE55TNqlj5VsS5mXCmD7LkjumuOAHavXY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://mlrydpclqokizsqmigen.supabase.co https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://mlrydpclqokizsqmigen.supabase.co https://wa.me">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QsBgi87bjUCGii/xK3BPk0A8fu3dUyvpof0HWS8hJN8=' 'sha256-XS6vz+E7g/+buR6qponWuuigOY0v9OQYHaohaD8m0xc=' 'sha256-3Q9wGTjV7tBaTsFVSo/LpnQSJ60Zi1ec2Lh19+zV3tE=' 'sha256-UcB7KBqRY6t1Aww8OzIVNhhd4N5fjdeml4zktkVC0SQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://mlrydpclqokizsqmigen.supabase.co https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://mlrydpclqokizsqmigen.supabase.co https://wa.me">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>XARO Industries | Custom hand-tufted rugs designed in 3D</title>
@@ -1971,13 +1971,13 @@ window.XARO = { refresh() { loadProducts(); fillBuilder(); rerender(); }, applyR
 /* ============ XARO costing engine (pure functions; also used by the node tests) ============
    Everything here is an ESTIMATE. All rates live in `DEFAULT_RATES` and are editable in Admin > Costing.
    Defaults are fitted to the cost assumptions in the project plan (materials, labour at US$2.50/h, assumed DHL rates);
-   they are placeholders to be replaced by your real, measured numbers. Yarn consumption is left empty on purpose. */
+   they are placeholders to be replaced by your real, measured numbers. Yarn use per m² starts at typical tufting averages. */
 (function (root) {
 'use strict';
 const DEFAULT_RATES = {
   v: 1,
   pileTypes: { low: { label: 'Low pile', matPerM2: 45, hoursMul: 0.85 }, standard: { label: 'Standard pile', matPerM2: 58, hoursMul: 1 }, high: { label: 'High pile', matPerM2: 80, hoursMul: 1.2 }, carved: { label: 'Carved pile', matPerM2: 90, hoursMul: 1.5 } },
-  yarnKgPerM2: { low: null, standard: null, high: null, carved: null },   // set from your own measurements; never guessed
+  yarnKgPerM2: { low: 1.8, standard: 2.5, high: 3.5, carved: 3 },   // typical tufting averages, a starting point only: replace with your own weighed pieces in Admin > Costing
   backing: { standard: { label: 'Standard primary + latex', perM2: 0 }, felt: { label: 'Non-slip felt back', perM2: 6 }, premium: { label: 'Premium cotton + latex', perM2: 12 } },
   border: { none: { label: 'No border', perM: 0 }, bound: { label: 'Twill binding', perM: 2.5 }, carved: { label: 'Carved border', perM: 1.5, hoursPerM: 0.6 } },
   finishing: { frame: { label: 'Black wood frame', flat: 25, perM2: 40 }, rush: { label: 'Rush production', pct: 0.15 } },
@@ -4111,7 +4111,7 @@ A.reg('costing', 'Costing', '∑', 'pricing', box => {
     <div class="pan"><h3>Materials per m² (US$) and time multiplier</h3>${tbl('pileTypes', [['matPerM2', 'Yarn US$/m²'], ['hoursMul', 'Time ×']])}
       <h3 style="margin-top:16px">Backing (US$ per m²)</h3>${tbl('backing', [['perM2', 'US$/m²']])}
       <h3 style="margin-top:16px">Border (US$ per metre)</h3>${tbl('border', [['perM', 'US$/m'], ['hoursPerM', 'Hours/m']])}
-      <h3 style="margin-top:16px">Yarn used (kg per m²)</h3><p class="note" style="margin:0 0 6px">Leave blank until you have weighed real pieces. Nothing is guessed.</p><div class="pgrid">${Object.keys(R.yarnKgPerM2).map(k => `<div class="field"><label for="c_y${k}">${esc(R.pileTypes[k].label)}</label><input class="inp" id="c_y${k}" data-k="yarnKgPerM2.${k}" inputmode="decimal" placeholder="not set" value="${R.yarnKgPerM2[k] == null ? '' : R.yarnKgPerM2[k]}"></div>`).join('')}</div></div></div>
+      <h3 style="margin-top:16px">Yarn used (kg per m²)</h3><p class="note" style="margin:0 0 6px">Starting values are typical tufting averages. Replace them with the weights of your own finished pieces; leave blank to hide the yarn figure.</p><div class="pgrid">${Object.keys(R.yarnKgPerM2).map(k => `<div class="field"><label for="c_y${k}">${esc(R.pileTypes[k].label)}</label><input class="inp" id="c_y${k}" data-k="yarnKgPerM2.${k}" inputmode="decimal" placeholder="not set" value="${R.yarnKgPerM2[k] == null ? '' : R.yarnKgPerM2[k]}"></div>`).join('')}</div></div></div>
     <div class="pan" style="margin-bottom:14px"><h3>Shipping bands (cost for pieces up to this area in m²)</h3><div class="grid2">${['local', 'export'].map(z => `<div><b>${esc(R.shipping[z].label)}</b>${R.shipping[z].bands.map((b, i) => `<div class="f2a" style="margin-top:6px"><div class="field" style="margin:0"><label for="s_${z}${i}a">Up to m²</label><input class="inp" id="s_${z}${i}a" data-b="${z}.${i}.0" inputmode="decimal" value="${b[0]}"></div><div class="field" style="margin:0"><label for="s_${z}${i}b">Cost US$</label><input class="inp" id="s_${z}${i}b" data-b="${z}.${i}.1" inputmode="decimal" value="${b[1]}"></div></div>`).join('')}</div>`).join('')}</div></div>
     <div class="pan"><h3>Check: 44 x 16 cm keyboard rug, 4 colours, felt back</h3><div class="pgrid">${[['Export', sample, 'USD'], ['Within Sri Lanka', sampleL, 'LKR']].map(([n, e, c]) => e.ok ? `<div><b>${n}</b><br>Cost (materials, labour, packaging, shipping, fees): <b>US$ ${e.usd.cost.toFixed(2)}</b><br>Selling price at the target margin: <b>US$ ${e.usd.sell.toFixed(2)}</b> (about ${money(e.local ? e.local.sell : e.usd.sell, c)})<br>Hours: ${e.hours.toFixed(2)}</div>` : `<div>${esc((e.errors || []).join(' '))}</div>`).join('')}</div></div>
     <p style="margin:14px 0 0"><button class="b2 pri" id="cSave">Save rates</button> <button class="b2" id="cReset">Reset to project-plan defaults</button></p>`;

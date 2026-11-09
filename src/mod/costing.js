@@ -1,13 +1,13 @@
 /* ============ XARO costing engine (pure functions; also used by the node tests) ============
    Everything here is an ESTIMATE. All rates live in `DEFAULT_RATES` and are editable in Admin > Costing.
    Defaults are fitted to the cost assumptions in the project plan (materials, labour at US$2.50/h, assumed DHL rates);
-   they are placeholders to be replaced by your real, measured numbers. Yarn consumption is left empty on purpose. */
+   they are placeholders to be replaced by your real, measured numbers. Yarn use per m² starts at typical tufting averages. */
 (function (root) {
 'use strict';
 const DEFAULT_RATES = {
   v: 1,
   pileTypes: { low: { label: 'Low pile', matPerM2: 45, hoursMul: 0.85 }, standard: { label: 'Standard pile', matPerM2: 58, hoursMul: 1 }, high: { label: 'High pile', matPerM2: 80, hoursMul: 1.2 }, carved: { label: 'Carved pile', matPerM2: 90, hoursMul: 1.5 } },
-  yarnKgPerM2: { low: null, standard: null, high: null, carved: null },   // set from your own measurements; never guessed
+  yarnKgPerM2: { low: 1.8, standard: 2.5, high: 3.5, carved: 3 },   // typical tufting averages, a starting point only: replace with your own weighed pieces in Admin > Costing
   backing: { standard: { label: 'Standard primary + latex', perM2: 0 }, felt: { label: 'Non-slip felt back', perM2: 6 }, premium: { label: 'Premium cotton + latex', perM2: 12 } },
   border: { none: { label: 'No border', perM: 0 }, bound: { label: 'Twill binding', perM: 2.5 }, carved: { label: 'Carved border', perM: 1.5, hoursPerM: 0.6 } },
   finishing: { frame: { label: 'Black wood frame', flat: 25, perM2: 40 }, rush: { label: 'Rush production', pct: 0.15 } },
