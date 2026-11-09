@@ -16,6 +16,7 @@ jobs:
     env: { PGHOST: localhost, PGPORT: "5432", PGUSER: postgres, PGPASSWORD: postgres }
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - uses: actions/setup-python@v5
@@ -41,6 +42,10 @@ jobs:
         run: |
           python3 build.py
           git diff --exit-code -- index.html || (echo "index.html is stale: run python3 build.py and commit" && exit 1)
+      - name: Storefront looks identical to the original (visual regression)
+        run: |
+          pip install --quiet playwright pillow && python3 -m playwright install --with-deps chromium >/dev/null
+          bash tests/e2e/visual_ci.sh
       - name: Database schema and row-level-security tests
         run: bash supabase/tests/run.sh
       - name: No secrets committed
