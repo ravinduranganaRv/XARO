@@ -3,7 +3,8 @@
 'use strict';
 const L = window.XSTUDIO_LIB, esc = XD.esc, $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
 const IN = 2.54, RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let root, doc = L.newDoc(), imgs = {}, sel = '', hist = [], hi = -1, unit = 'cm', view = '', ltab = 'art', target = 'fill', viewer = null, dirty = false, an = null, seq = 0, t3 = 0, tA = 0, prevCv = null, prevRatio = 1, filt = { cat: '', q: '', tcat: '' }, drag = null, savedName = '', cloudId = '';
+let root, doc = L.newDoc(), imgs = {}, sel = '', hist = [], hi = -1, unit = 'cm', view = '', ltab = 'art', target = 'fill', viewer = null, dirty = false, an = null, seq = 0, t3 = 0, tA = 0, prevCv = null, prevRatio = 1, filt = { cat: '', q: '', tcat: '' }, drag = null, savedName = '', cloudId = '', editId = '', selNode = null, pen = null, spaceDown = false, v2 = { zoom: 1, grid: false, snap: false, rulers: false };
+const E = window.XEDIT;
 const cv2 = () => $('#stC', root), ov = () => $('#stO', root);
 
 /* ---------------------------------------------------------------- tiny helpers */
@@ -15,7 +16,7 @@ const yname = id => (ym()[id] || { name: id }).name;
 const layer = id => doc.layers.find(l => l.id === id);
 const snap = () => JSON.stringify(doc);
 function commit() { L.stampYarns(doc); hist = hist.slice(0, hi + 1); hist.push(snap()); if (hist.length > 80) hist.shift(); hi = hist.length - 1; dirty = true; changed(); }
-function restore(i) { hi = i; doc = JSON.parse(hist[i]); if (sel && !layer(sel)) sel = ''; changed(true); }
+function restore(i) { hi = i; doc = JSON.parse(hist[i]); selNode = null; if (sel && !layer(sel)) sel = ''; changed(true); }
 function changed(full) { draw2D(); schedule(); if (full !== 'live') { panelL(); panelR(); } undoBtns(); }
 function undoBtns() { const u = $('#stUndo', root), r = $('#stRedo', root); if (u) { u.disabled = hi <= 0; r.disabled = hi >= hist.length - 1; } }
 function newDoc(d) { doc = d; sel = ''; hist = []; hi = -1; hist.push(snap()); hi = 0; dirty = false; savedName = ''; cloudId = ''; changed(true); camPreset('angle'); }
@@ -26,34 +27,115 @@ function draw2D() {
   L.render(doc, c, imgs); fit(); drawOv();
 }
 function fit() {
-  const c = cv2(), box = c.closest('.v2'); if (!box || !box.clientWidth) return; const aw = box.clientWidth - 24, ah = box.clientHeight - 24, s = Math.min(aw / c.width, ah / c.height); if (s <= 0) return;
+  const c = cv2(), box = c.closest('.v2'); if (!box || !box.clientWidth) return; const aw = box.clientWidth - 24, ah = box.clientHeight - 24, s = Math.min(aw / c.width, ah / c.height) * v2.zoom; if (s <= 0) return;
   const w = Math.floor(c.width * s), h = Math.floor(c.height * s); c.style.width = ov().style.width = w + 'px'; c.style.height = ov().style.height = h + 'px'; $('.cw', root).style.width = w + 'px'; $('.cw', root).style.height = h + 'px';
 }
+const editing = () => { const l = layer(editId); return !!(l && editId === sel && l.vis && !l.lock && E.editable(l)); };
+const WH = () => [ov().width, ov().height];
+const snapN = pn => { if (!v2.snap) return pn; const st = E.gridStepCm(doc.widthCm, doc.heightCm); return [E.snap(pn[0], st / doc.widthCm), E.snap(pn[1], st / doc.heightCm)]; };
+const nodePx = l => { const [W, H] = WH(); return E.rugRings(l, W, H).map(r => r.map(p => [p[0] * W, p[1] * H])); };
+function drawGrid(x, W, H, k) {
+  const st = E.gridStepCm(doc.widthCm, doc.heightCm), sx = st / doc.widthCm * W, sy = st / doc.heightCm * H; x.save(); x.lineWidth = k; x.strokeStyle = 'rgba(57,255,20,.25)'; x.beginPath();
+  for (let i = 1; i * sx < W - 1; i++) { x.moveTo(i * sx, 0); x.lineTo(i * sx, H); } for (let j = 1; j * sy < H - 1; j++) { x.moveTo(0, j * sy); x.lineTo(W, j * sy); } x.stroke(); x.restore();
+}
+function drawRulers(x, W, H, k) {
+  const st = E.gridStepCm(doc.widthCm, doc.heightCm), fs = 10 * k, bw = 16 * k; x.save(); x.font = fs + 'px monospace'; x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(0, 0, W, bw); x.fillRect(0, 0, bw, H); x.fillStyle = x.strokeStyle = '#d8ffd0'; x.lineWidth = k;
+  E.rulerTicks(doc.widthCm, st).forEach(v => { const px = v / doc.widthCm * W; x.beginPath(); x.moveTo(px, bw - 5 * k); x.lineTo(px, bw); x.stroke(); if (v > 0) x.fillText(fmtLen(v), px + 2 * k, fs); });
+  E.rulerTicks(doc.heightCm, st).forEach(v => { const py = v / doc.heightCm * H; x.beginPath(); x.moveTo(bw - 5 * k, py); x.lineTo(bw, py); x.stroke(); if (v > 0) { x.save(); x.translate(fs, py - 2 * k); x.rotate(-Math.PI / 2); x.fillText(fmtLen(v), 0, 0); x.restore(); } });
+  x.fillText(unit, 3 * k, fs); x.restore();
+}
 function drawOv() {
-  const o = ov(), x = o.getContext('2d'); x.clearRect(0, 0, o.width, o.height); const l = layer(sel); if (!l || !l.vis) return;
-  const W = o.width, H = o.height, k = W / (parseFloat(o.style.width) || W), w = l.w * W, h = l.h * H;
-  x.save(); x.translate(l.cx * W, l.cy * H); x.rotate(l.rot * Math.PI / 180); x.lineWidth = 1.5 * k; x.setLineDash([6 * k, 4 * k]); x.strokeStyle = '#39FF14'; x.strokeRect(-w / 2, -h / 2, w, h); x.setLineDash([]);
-  x.fillStyle = '#39FF14'; const hs = 7 * k; x.fillRect(w / 2 - hs, h / 2 - hs, hs * 2, hs * 2); x.restore();
+  const o = ov(), x = o.getContext('2d'); x.clearRect(0, 0, o.width, o.height); const W = o.width, H = o.height, k = W / (parseFloat(o.style.width) || W);
+  if (v2.grid) drawGrid(x, W, H, k); if (v2.rulers) drawRulers(x, W, H, k);
+  if (pen) { x.save(); x.lineWidth = 2 * k; x.strokeStyle = '#39FF14'; x.fillStyle = '#39FF14'; const q = pen.pts.map(a => [a[0] * W, a[1] * H]); x.beginPath(); q.forEach((a, i) => i ? x.lineTo(a[0], a[1]) : x.moveTo(a[0], a[1])); if (pen.cur && q.length) x.lineTo(pen.cur[0] * W, pen.cur[1] * H); x.stroke(); q.forEach((a, i) => { x.beginPath(); x.arc(a[0], a[1], (i ? 4 : 7) * k, 0, 7); i ? x.fill() : x.stroke(); }); x.restore(); return; }
+  const l = layer(sel); if (!l || !l.vis) return; const w = l.w * W, h = l.h * H, ed = editing();
+  x.save(); x.translate(l.cx * W, l.cy * H); x.rotate(l.rot * Math.PI / 180); x.lineWidth = 1.5 * k; x.setLineDash([6 * k, 4 * k]); x.strokeStyle = ed ? 'rgba(57,255,20,.35)' : '#39FF14'; x.strokeRect(-w / 2, -h / 2, w, h); x.setLineDash([]);
+  if (!ed) { x.fillStyle = '#39FF14'; const hs = 7 * k; x.fillRect(w / 2 - hs, h / 2 - hs, hs * 2, hs * 2); x.beginPath(); x.moveTo(0, -h / 2); x.lineTo(0, -h / 2 - 26 * k); x.stroke(); x.beginPath(); x.arc(0, -h / 2 - 26 * k, 6 * k, 0, 7); x.fill(); } x.restore();
+  if (ed) { x.save(); x.lineWidth = 1.5 * k; x.strokeStyle = '#39FF14'; const rg = nodePx(l); rg.forEach(r => { x.beginPath(); r.forEach((a, i) => i ? x.lineTo(a[0], a[1]) : x.moveTo(a[0], a[1])); x.closePath(); x.stroke(); });
+    rg.forEach((r, ri) => r.forEach((a, ni) => { const on = selNode && selNode.ring === ri && selNode.node === ni; x.fillStyle = on ? '#39FF14' : '#0b0b0b'; x.strokeStyle = '#39FF14'; x.beginPath(); x.rect(a[0] - 5 * k, a[1] - 5 * k, 10 * k, 10 * k); x.fill(); x.stroke(); })); x.restore(); }
 }
 function pt(e) { const o = ov(), r = o.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * o.width, y: (e.clientY - r.top) / r.height * o.height }; }
 function local(l, p) { const W = ov().width, H = ov().height, dx = p.x - l.cx * W, dy = p.y - l.cy * H, a = -l.rot * Math.PI / 180; return { x: dx * Math.cos(a) - dy * Math.sin(a), y: dx * Math.sin(a) + dy * Math.cos(a) }; }
 function hit(p) { const W = ov().width, H = ov().height; for (let i = doc.layers.length - 1; i >= 0; i--) { const l = doc.layers[i]; if (!l.vis || l.lock) continue; const q = local(l, p); if (Math.abs(q.x) <= l.w * W / 2 && Math.abs(q.y) <= l.h * H / 2) return l; } return null; }
 function bindCanvas() {
-  const o = ov();
+  const o = ov(), sc = () => $('.sc', root);
   o.addEventListener('pointerdown', e => {
     const p = pt(e), W = o.width, H = o.height, k = W / o.getBoundingClientRect().width, cur = layer(sel);
-    if (cur && cur.vis && !cur.lock) { const q = local(cur, p); if (Math.hypot(q.x - cur.w * W / 2, q.y - cur.h * H / 2) < 16 * k) { drag = { mode: 'resize', id: cur.id, r: cur.w / cur.h, moved: false }; o.setPointerCapture(e.pointerId); return; } }
-    const l = hit(p); if (l) { sel = l.id; drag = { mode: 'move', id: l.id, ox: p.x - l.cx * W, oy: p.y - l.cy * H, moved: false }; o.setPointerCapture(e.pointerId); panelL(); panelR(); } else { sel = ''; panelL(); panelR(); }
+    if (e.button === 1 || spaceDown) { const s = sc(); drag = { mode: 'pan', x: e.clientX, y: e.clientY, sl: s.scrollLeft, st: s.scrollTop, moved: false }; o.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+    if (pen) { const f = pen.pts[0]; if (pen.pts.length >= 3 && Math.hypot(p.x - f[0] * W, p.y - f[1] * H) < 12 * k) finishPen(); else { pen.pts.push(snapN([p.x / W, p.y / H])); drawOv(); vtDraw(); } return; }
+    if (editing()) {
+      const rg = nodePx(cur), n = E.nearestNode(rg, [p.x, p.y], 11 * k);
+      if (n) { selNode = { ring: n.ring, node: n.node }; drag = { mode: 'node', id: cur.id, ring: n.ring, node: n.node, moved: false }; o.setPointerCapture(e.pointerId); drawOv(); return; }
+      const ed = E.nearestEdge(rg, [p.x, p.y], 9 * k);
+      if (ed) { E.setRings(cur, E.insertNode(E.rings(cur), ed.ring, ed.seg, E.toUnit(cur, [ed.pt[0] / W, ed.pt[1] / H], W, H))); selNode = { ring: ed.ring, node: ed.seg + 1 }; drag = { mode: 'node', id: cur.id, ring: ed.ring, node: ed.seg + 1, moved: true }; o.setPointerCapture(e.pointerId); draw2D1(); panelR(); return; }
+    }
+    if (cur && cur.vis && !cur.lock && !editing()) {
+      const q = local(cur, p);
+      if (Math.hypot(q.x, q.y + cur.h * H / 2 + 26 * k) < 14 * k) { drag = { mode: 'rotate', id: cur.id, moved: false }; o.setPointerCapture(e.pointerId); return; }
+      if (Math.hypot(q.x - cur.w * W / 2, q.y - cur.h * H / 2) < 16 * k) { drag = { mode: 'resize', id: cur.id, r: cur.w / cur.h, moved: false }; o.setPointerCapture(e.pointerId); return; }
+    }
+    const l = hit(p); if (l) { if (editId && editId !== l.id) { editId = ''; selNode = null; } sel = l.id; drag = { mode: 'move', id: l.id, ox: p.x - l.cx * W, oy: p.y - l.cy * H, moved: false }; o.setPointerCapture(e.pointerId); panelL(); panelR(); } else { sel = ''; editId = ''; selNode = null; panelL(); panelR(); }
     drawOv();
   });
   o.addEventListener('pointermove', e => {
-    if (!drag) return; const l = layer(drag.id); if (!l) return; const p = pt(e), W = o.width, H = o.height; drag.moved = true;
-    if (drag.mode === 'move') { l.cx = Math.min(1.2, Math.max(-0.2, (p.x - drag.ox) / W)); l.cy = Math.min(1.2, Math.max(-0.2, (p.y - drag.oy) / H)); }
+    if (pen && !drag) { const p = pt(e); pen.cur = [p.x / o.width, p.y / o.height]; drawOv(); return; }
+    if (!drag) return; if (drag.mode === 'pan') { const s = sc(); s.scrollLeft = drag.sl - (e.clientX - drag.x); s.scrollTop = drag.st - (e.clientY - drag.y); return; }
+    const l = layer(drag.id); if (!l) return; const p = pt(e), W = o.width, H = o.height; drag.moved = true;
+    if (drag.mode === 'move') { let nx = (p.x - drag.ox) / W, ny = (p.y - drag.oy) / H; if (v2.snap) [nx, ny] = snapN([nx, ny]); l.cx = Math.min(1.2, Math.max(-0.2, nx)); l.cy = Math.min(1.2, Math.max(-0.2, ny)); }
+    else if (drag.mode === 'rotate') l.rot = E.angleTo(l, [p.x / W, p.y / H], W, H, e.shiftKey ? 15 : 0);
+    else if (drag.mode === 'node') { const u = E.toUnit(l, snapN([p.x / W, p.y / H]), W, H); E.setRings(l, E.moveNode(E.rings(l), drag.ring, drag.node, u)); }
     else { const q = local(l, p); let nw = Math.max(0.02, 2 * Math.abs(q.x) / W), nh = Math.max(0.02, 2 * Math.abs(q.y) / H); if (e.shiftKey || l.type === 'image') { const f = Math.max(nw / l.w, nh / l.h); nw = l.w * f; nh = nw / drag.r; } l.w = Math.min(3, nw); l.h = Math.min(3, nh); }
     draw2D1(); schedule(); syncSliders();
   });
-  const up = () => { if (drag && drag.moved) commit(); drag = null; };
+  const up = () => { if (drag && drag.moved && drag.mode !== 'pan') { if (drag.mode === 'node') { const l = layer(drag.id); if (l) E.fitBox(l, E.rings(l), o.width, o.height); } commit(); } drag = null; };
   o.addEventListener('pointerup', up); o.addEventListener('pointercancel', up);
+  o.addEventListener('dblclick', e => {
+    const p = pt(e), k = o.width / o.getBoundingClientRect().width;
+    if (pen) { if (pen.pts.length > 3) pen.pts.pop(); finishPen(); return; }
+    const l = layer(sel); if (!editing()) return; const n = E.nearestNode(nodePx(l), [p.x, p.y], 11 * k); if (n) { selNode = { ring: n.ring, node: n.node }; delNode(); }
+  });
+  o.addEventListener('wheel', e => { if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault(); zoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15); }, { passive: false });
+}
+/* ---- vector editor actions ---- */
+function zoomBy(f) { v2.zoom = f ? Math.min(6, Math.max(1, v2.zoom * f)) : 1; fit(); drawOv(); vtDraw(); }
+function vtDraw() {
+  const b = $('.vt', root); if (!b) return; const t = (k, n, on) => `<button class="sb sm" data-vt="${k}" ${on == null ? '' : `aria-pressed="${on}"`}>${n}</button>`;
+  b.innerHTML = pen ? `<span class="note" style="margin:0 4px 0 0;align-self:center">${pen.pts.length} point${pen.pts.length === 1 ? '' : 's'}</span>${t('penDone', 'Finish shape')}${t('penUndo', 'Undo point')}${t('penCancel', 'Cancel')}`
+    : t('grid', 'Grid', v2.grid) + t('snap', 'Snap', v2.snap) + t('rulers', 'Rulers', v2.rulers) + t('zout', 'Zoom -') + t('zin', 'Zoom +') + (v2.zoom !== 1 ? t('zfit', 'Fit ' + Math.round(v2.zoom * 100) + '%') : '');
+}
+function startPen() { if (view === 'v3d') { view = 'v2d'; $('#stViews', root).className = 'views v2d'; $$('[data-v]', root).forEach(x => x.setAttribute('aria-pressed', x.dataset.v === 'v2d')); fit(); } pen = { pts: [], cur: null }; sel = ''; editId = ''; selNode = null; panelL(); panelR(); drawOv(); vtDraw(); toast('Click the design to place points. Click the first point or press Enter to close the shape.'); }
+function finishPen() {
+  if (!pen) return; if (pen.pts.length < 3) return toast('Place at least 3 points first.', true); const f = E.layerFromPoints(pen.pts); pen = null;
+  const l = L.layer('poly', { pts: f.pts, cx: f.cx, cy: f.cy, w: f.w, h: f.h, name: 'Drawn shape' }); doc.layers.push(l); sel = l.id; vtDraw(); commit(); toast('Shape added. Choose Edit points to refine it.');
+}
+function cancelPen() { pen = null; vtDraw(); drawOv(); }
+function delNode() {
+  const l = layer(sel); if (!l || !selNode) return; const rg = E.rings(l); if (!rg[selNode.ring] || rg[selNode.ring].length <= 3) return toast('A shape needs at least 3 points.', true);
+  const [W, H] = WH(); E.fitBox(l, E.removeNode(rg, selNode.ring, selNode.node), W, H); selNode = null; commit();
+}
+function editorClick(b) {
+  const l = layer(sel), [W, H] = WH(), id = b.id;
+  if (id === 'stPen') return startPen();
+  if (b.dataset.vt) { const a = b.dataset.vt; if (a === 'grid' || a === 'snap' || a === 'rulers') { v2[a] = !v2[a]; vtDraw(); drawOv(); } else if (a === 'zin') zoomBy(1.25); else if (a === 'zout') zoomBy(1 / 1.25); else if (a === 'zfit') zoomBy(0); else if (a === 'penDone') finishPen(); else if (a === 'penUndo') { pen.pts.pop(); drawOv(); vtDraw(); } else if (a === 'penCancel') cancelPen(); return; }
+  if (!l) return;
+  if (b.dataset.al) { if (l.lock) return toast('This layer is locked.', true); Object.assign(l, E.align(l, b.dataset.al, W, H)); return commit(); }
+  if (id === 'rEdit') { editId = editId === l.id ? '' : l.id; selNode = null; panelR(); drawOv(); return; }
+  if (id === 'rSimp') { const n0 = E.nodeCount(l), rg = E.simplify(E.rings(l), 0.01), n1 = rg.reduce((s2, r) => s2 + r.length, 0); if (n1 >= n0) return toast('Already as simple as it can get.'); E.fitBox(l, rg, W, H); selNode = null; commit(); return toast('Simplified: ' + n0 + ' points down to ' + n1 + '. Undo if it looks too rough.'); }
+  if (id === 'rSpeck') { const rg = E.rings(l), k2 = E.dropTiny(rg, 0.004); if (k2.length === rg.length) return toast('No tiny specks found.'); E.fitBox(l, k2, W, H); selNode = null; commit(); return toast('Removed ' + (rg.length - k2.length) + ' tiny piece' + (rg.length - k2.length === 1 ? '' : 's') + '.'); }
+  if (id === 'rSplit') { const gs = E.splitRings(E.rings(l)); if (gs.length < 2) return toast('This shape is a single piece already.'); const i = doc.layers.indexOf(l), parts = gs.map((g, n) => { const c = JSON.parse(JSON.stringify(l)); c.id = L.uid(); c.name = (l.name || 'Shape') + ' ' + (n + 1); E.fitBox(c, g, W, H); return c; }); doc.layers.splice(i, 1, ...parts); sel = parts[0].id; editId = ''; selNode = null; commit(); return toast('Split into ' + parts.length + ' separate shapes.'); }
+  if (id === 'rMerge') {
+    const others = doc.layers.filter(x => x !== l && x.vis && !x.lock && E.editable(x) && x.fill === l.fill); if (!others.length) return toast('No other vector shape uses the same yarn colour.', true);
+    const m = E.mergeLayers([l].concat(others), W, H, L.uid()); if (!m) return toast('Those shapes overlap, so joining them would punch holes. Move them apart first.', true);
+    doc.layers = doc.layers.filter(x => !others.includes(x)); doc.layers.splice(doc.layers.indexOf(l), 1, m); sel = m.id; editId = ''; selNode = null; commit(); toast('Merged ' + (others.length + 1) + ' shapes into one.');
+  }
+}
+function editorPanel(l) {
+  const al = [['left', 'Left'], ['hcenter', 'Centre'], ['right', 'Right'], ['top', 'Top'], ['vcenter', 'Middle'], ['bottom', 'Bottom']];
+  let h = `<h4>Align to rug</h4><div class="chips">${al.map(([k, n]) => `<button class="sb sm" data-al="${k}">${n}</button>`).join('')}</div>`;
+  if (E.editable(l)) h += `<h4>Shape points</h4><div class="chips"><button class="sb sm" id="rEdit" aria-pressed="${editId === l.id}">Edit points</button><button class="sb sm" id="rSimp">Simplify</button>${l.type === 'path' ? '<button class="sb sm" id="rSpeck">Remove specks</button><button class="sb sm" id="rSplit">Split shapes</button>' : ''}<button class="sb sm" id="rMerge">Merge same colour</button></div>
+    <p class="note">${E.nodeCount(l)} points.${editId === l.id ? ' Drag a point to move it, click an edge to add one, double-click a point (or press Delete) to remove it. Esc to finish.' : ' Rotate with the round handle above the object (hold Shift for 15 degree steps).'}</p>`;
+  else h += '<p class="note">Rotate with the round handle above the object (hold Shift for 15 degree steps).</p>';
+  return h;
 }
 const draw2D1 = () => { L.render(doc, cv2(), imgs); drawOv(); };
 
@@ -137,7 +219,8 @@ function tAdd() {
   return `<h4>Shapes</h4><div class="chips">${sh.map(([n, k]) => `<button class="sb sm" data-add="${k}">${n}</button>`).join('')}</div>
   <h4>Text</h4><div class="fld"><input type="text" id="stTx" maxlength="40" value="YOUR TEXT" aria-label="Text"></div>
   <div class="fld"><select id="stFont" aria-label="Font">${L.FONTS.map(f => `<option>${f[0]}</option>`).join('')}</select></div><button class="sb pri" data-add="text">Add text</button>
-  <p class="note">Tip: thick, simple letters tuft best. Fonts shown here are previews of the letter shapes.</p>`;
+  <p class="note">Tip: thick, simple letters tuft best. Fonts shown here are previews of the letter shapes.</p>
+  <h4>Pen</h4><button class="sb pri" id="stPen">Draw a shape with the pen</button><p class="note">Click to place points, click the first point or press Enter to close the shape. Backspace removes the last point. Esc cancels.</p>`;
 }
 function tSize() {
   const presets = [['Keyboard 44 x 16', 'rect', 44, 16], ['Compact 32 x 12', 'rect', 32, 12], ['Coaster 12 round', 'circle', 12, 12], ['Floor 60 x 90', 'rect', 60, 90], ['Logo 90 x 90', 'rect', 90, 90], ['Wall 61 x 91 framed', 'rect', 61, 91]];
@@ -177,6 +260,7 @@ function panelR() {
     ${slider('rX', 'X position', Math.round(l.cx * 100), -10, 110, 1, '%')}${slider('rY', 'Y position', Math.round(l.cy * 100), -10, 110, 1, '%')}${slider('rW', 'Width', Math.round(l.w * 100), 2, 200, 1, '%')}${slider('rH', 'Height', Math.round(l.h * 100), 2, 200, 1, '%')}${slider('rR', 'Rotation', Math.round(l.rot), -180, 180, 1, '°')}
     <div class="chips"><button class="sb sm" id="rFlip" aria-pressed="${!!l.flip}">Flip</button><button class="sb sm" id="rCol">Pick colour</button><button class="sb sm" id="rDup">Duplicate</button><button class="sb sm bad" id="rDel">Delete</button></div>
     <p class="note">Fill: <b>${esc(yname(l.fill))}</b>${l.stroke ? ' | Outline: <b>' + esc(yname(l.stroke)) + '</b>' : ''}</p>`;
+    h += editorPanel(l);
     if (l.type === 'text') h += `<div class="fld"><label for="rTx">Text</label><input type="text" id="rTx" maxlength="40" value="${esc(l.text)}"></div><div class="fld"><label for="rFont">Font</label><select id="rFont">${L.FONTS.map(f => `<option ${l.font === f[0] ? 'selected' : ''}>${f[0]}</option>`).join('')}</select></div><label class="chips"><input type="checkbox" id="rBold" ${l.bold ? 'checked' : ''} style="width:auto"> Bold</label>`;
     if (l.type === 'wave') h += slider('rAmp', 'Wave height', Math.round((l.amp == null ? 0.3 : l.amp) * 100), 5, 100, 1, '%') + slider('rFq', 'Waves', l.freq || 1.5, 0.5, 6, 0.1) + slider('rPh', 'Shift', Math.round((l.phase || 0) * 100), 0, 100, 1, '%');
     if (l.type === 'ellipse') h += `<label class="chips"><input type="checkbox" id="rHol" ${l.hollow ? 'checked' : ''} style="width:auto"> Ring (outline only)</label>`;
@@ -191,7 +275,7 @@ function panelR() {
   <h4>Estimate</h4><div id="stEst"></div>`;
   b.innerHTML = h; refreshEst();
 }
-function syncSliders() { const l = layer(sel); if (!l) return; const set = (id, v, s) => { const e = $('#' + id, root); if (e) { e.value = v; const o = $('#' + id + 'V', root); if (o) o.textContent = v + (s || ''); } }; set('rX', Math.round(l.cx * 100), '%'); set('rY', Math.round(l.cy * 100), '%'); set('rW', Math.round(l.w * 100), '%'); set('rH', Math.round(l.h * 100), '%'); }
+function syncSliders() { const l = layer(sel); if (!l) return; const set = (id, v, s) => { const e = $('#' + id, root); if (e) { e.value = v; const o = $('#' + id + 'V', root); if (o) o.textContent = v + (s || ''); } }; set('rX', Math.round(l.cx * 100), '%'); set('rY', Math.round(l.cy * 100), '%'); set('rW', Math.round(l.w * 100), '%'); set('rH', Math.round(l.h * 100), '%'); set('rR', Math.round(l.rot), '°'); }
 
 /* ---------------------------------------------------------------- actions */
 function addLayer(kind, extra) {
@@ -288,11 +372,11 @@ function build() {
     <button class="sb sm" data-v="vboth" aria-pressed="true">Both</button><button class="sb sm" data-v="v2d" aria-pressed="false">Design</button><button class="sb sm" data-v="v3d" aria-pressed="false">3D</button>
     <button class="sb" id="stClose" aria-label="Close studio">Close</button></div>
   <div class="main"><aside class="pn"><div class="tabs" role="tablist" aria-label="Design tools"></div><div class="pb" id="stL"></div></aside>
-    <section class="stage"><div class="views vboth" id="stViews"><div class="v2"><div class="cw"><canvas id="stC" aria-label="Rug design canvas"></canvas><canvas id="stO" aria-hidden="true"></canvas></div><span class="tag">Design</span></div>
+    <section class="stage"><div class="views vboth" id="stViews"><div class="v2"><div class="sc"><div class="cw"><canvas id="stC" aria-label="Rug design canvas"></canvas><canvas id="stO" aria-hidden="true"></canvas></div></div><div class="vt" role="toolbar" aria-label="Canvas tools"></div><span class="tag">Design</span></div>
       <div class="v3"><canvas id="st3" data-keep aria-label="Interactive 3D preview of your rug" tabindex="0"></canvas><span class="tag">3D preview | drag to rotate</span><div class="cam"><button class="sb sm" data-cam="angle">Angle</button><button class="sb sm" data-cam="front">Front</button><button class="sb sm" data-cam="top">Top</button><button class="sb sm" data-cam="side">Side</button><button class="sb sm" data-zoom="-1" aria-label="Zoom in">+</button><button class="sb sm" data-zoom="1" aria-label="Zoom out">−</button></div></div></div></section>
     <aside class="pn r"><div class="pb" id="stR"></div></aside></div>
   <div class="tb"><button class="sb" id="stUndo">Undo</button><button class="sb" id="stRedo">Redo</button><button class="sb" id="stReset">Reset</button><span class="sp"></span><button class="sb" id="stSave">Save</button><button class="sb" id="stMine">My designs</button><button class="sb" id="stPrev">Preview</button><button class="sb" id="stDl">Download</button><button class="sb" id="stQuote">Request quotation</button><button class="sb pri" id="stCart">Add to cart</button></div><div class="tt" role="status"></div>`;
-  document.body.appendChild(root); bindCanvas();
+  document.body.appendChild(root); bindCanvas(); vtDraw(); root.addEventListener('click', e => { const b = e.target.closest('button'); if (b && (b.id === 'stPen' || b.dataset.vt || b.dataset.al || ['rEdit', 'rSimp', 'rSpeck', 'rSplit', 'rMerge'].includes(b.id))) editorClick(b); });
   root.addEventListener('click', e => {
     const t = e.target, c = s => t.closest(s);
     let b;
@@ -354,12 +438,16 @@ function build() {
   if (window.XACCT) XACCT.mount({ $: q => $(q, root), sheet, toast, toPng: async im => { const c = document.createElement('canvas'); c.width = im.w; c.height = im.h; c.getContext('2d').drawImage(im.el, 0, 0, im.w, im.h); return c.toDataURL('image/png'); }, blobToDataUrl: b => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); }) });
   $('#stSave', root).onclick = saveDesign; $('#stMine', root).onclick = myDesigns; $('#stPrev', root).onclick = preview; $('#stDl', root).onclick = downloadDesign; $('#stQuote', root).onclick = quote; $('#stCart', root).onclick = toCart;
   addEventListener('keydown', e => {
-    if (!root.classList.contains('on')) return; const tag = (e.target.tagName || '').toLowerCase(); if (e.key === 'Escape') { if ($('.mod', root)) { $$('.mod', root).pop().remove(); } else closeStudio(); return; }
+    if (!root.classList.contains('on')) return; const tag = (e.target.tagName || '').toLowerCase(); if (e.key === 'Escape') { if ($('.mod', root)) { $$('.mod', root).pop().remove(); } else if (pen) cancelPen(); else if (editId) { editId = ''; selNode = null; panelR(); drawOv(); } else closeStudio(); return; }
     if (['input', 'textarea', 'select'].includes(tag)) return; const l = layer(sel);
+    if (e.key === ' ' && tag !== 'button') { e.preventDefault(); spaceDown = true; ov().style.cursor = 'grab'; return; }
+    if (pen) { if (e.key === 'Enter') { e.preventDefault(); finishPen(); } else if (e.key === 'Backspace') { e.preventDefault(); pen.pts.pop(); drawOv(); vtDraw(); } return; }
+    if (editing() && selNode && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); delNode(); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? hi < hist.length - 1 && restore(hi + 1) : hi > 0 && restore(hi - 1); } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); hi < hist.length - 1 && restore(hi + 1); }
     else if (l && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); del(l.id); } else if (l && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') { e.preventDefault(); dup(l.id); }
     else if (l && e.key.startsWith('Arrow') && !l.lock) { e.preventDefault(); const s = e.shiftKey ? 0.02 : 0.005; if (e.key === 'ArrowLeft') l.cx -= s; if (e.key === 'ArrowRight') l.cx += s; if (e.key === 'ArrowUp') l.cy -= s; if (e.key === 'ArrowDown') l.cy += s; commit(); }
   });
+  addEventListener('keyup', e => { if (e.key === ' ') { spaceDown = false; if (ov()) ov().style.cursor = ''; } });
   new ResizeObserver(() => fit()).observe($('.stage', root)); addEventListener('resize', () => fit());
 }
 function mv(id, dir) { const i = doc.layers.findIndex(l => l.id === id), j = i + dir; if (i < 0 || j < 0 || j >= doc.layers.length) return; const [l] = doc.layers.splice(i, 1); doc.layers.splice(j, 0, l); commit(); }

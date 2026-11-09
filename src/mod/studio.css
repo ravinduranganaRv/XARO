@@ -44,7 +44,10 @@ body.studio-open{overflow:hidden}
 #studio .views.v3d{grid-template-columns:1fr}#studio .views.v3d .v2{display:none}
 #studio .v2,#studio .v3{position:relative;background:#080a08;min-height:0;min-width:0;overflow:hidden}
 #studio .v2{display:grid;place-items:center;padding:10px;background:repeating-conic-gradient(#0d100d 0 25%,#0a0c0a 0 50%) 0 0/20px 20px}
-#studio .v2 .cw{position:relative;max-width:100%;max-height:100%}
+#studio .v2 .sc{position:absolute;inset:0;display:flex;overflow:auto;padding:10px}
+#studio .v2 .cw{position:relative;margin:auto;flex:none}
+#studio .vt{position:absolute;left:8px;top:8px;display:flex;gap:6px;flex-wrap:wrap;z-index:2;max-width:calc(100% - 110px)}
+#studio .vt .sb{background:rgba(8,10,8,.82)}
 #studio #stC{display:block;touch-action:none;cursor:default;box-shadow:0 0 0 1px rgba(255,255,255,.18),0 18px 50px rgba(0,0,0,.6)}
 #studio #stO{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 #studio #st3{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
