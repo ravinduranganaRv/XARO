@@ -65,3 +65,12 @@ test('reports: money per currency, rates, yarn estimate vs actual, top customers
   assert.deepStrictEqual(r.money.find(m => m.currency === 'USD'), { currency: 'USD', orders: 2, total: 150, paid: 90, outstanding: 60 }); assert.strictEqual(r.acceptRate, 50); assert.strictEqual(r.yarn[0].difference_kg, 0.5); assert.strictEqual(r.lowStock, 1); assert.strictEqual(r.topCustomers[0].name, 'Ann');
   assert.match(W.reportCsv(r), /money USD/);
 });
+test('custom outlines: area share and edge length drive the calculator', () => {
+  const doc = { shape: 'custom', widthCm: 100, heightCm: 50, outline: [[0, 0], [1, 0], [1, 1], [0, 1]] };
+  assert.deepStrictEqual(W.shapeFacts(doc), { areaFraction: 1, perimeterM: 3 });
+  const tri = { shape: 'custom', widthCm: 100, heightCm: 100, outline: [[0, 1], [0.5, 0], [1, 1]] }, f = W.shapeFacts(tri); assert.strictEqual(f.areaFraction, 0.5); assert.ok(Math.abs(f.perimeterM - (1 + 2 * Math.hypot(0.5, 1))) < 1e-3);
+  assert.deepStrictEqual(W.shapeFacts({ shape: 'rect' }), {}); assert.deepStrictEqual(W.shapeFacts({ shape: 'custom', outline: [[0, 0]] }), {});
+  const rates = { currency: 'USD', pileKgPerM2: { standard: 2 }, wastePct: 0 };
+  const a = W.calc({ widthCm: 100, heightCm: 100, shape: 'custom', areaFraction: 0.5, perimeterM: 2.4, pile: 'standard', colours: [] }, rates, []);
+  assert.strictEqual(a.areaM2, 0.5); assert.strictEqual(a.perimeterM, 2.4);
+});

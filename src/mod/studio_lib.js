@@ -46,6 +46,7 @@ L.FONTS = [['Anton', 'Anton, Impact, "Arial Narrow", sans-serif'], ['Archivo', '
 function shapePath(c, doc, W, H) {
   c.beginPath();
   if (doc.shape === 'circle' || doc.shape === 'oval') c.ellipse(W / 2, H / 2, W / 2, H / 2, 0, 0, Math.PI * 2);
+  else if (doc.shape === 'custom' && doc.outline && doc.outline.length >= 3) { doc.outline.forEach((p, i) => i ? c.lineTo(p[0] * W, p[1] * H) : c.moveTo(p[0] * W, p[1] * H)); c.closePath(); }
   else { const r = Math.max(0, Math.min(50, doc.radius || 0)) / 100 * Math.min(W, H); if (c.roundRect && r > 0) c.roundRect(0, 0, W, H, r); else c.rect(0, 0, W, H); }
 }
 L.shapePath = shapePath;

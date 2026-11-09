@@ -88,6 +88,12 @@ W.areaM2 = (widthCm, heightCm, shape, radiusPct, areaFraction) => {
   if (shape === 'circle' || shape === 'oval') return round(Math.PI / 4 * w * h, 4);
   const r = Math.min(50, Math.max(0, radiusPct || 0)) / 100 * Math.min(w, h); return round(w * h - (4 - Math.PI) * r * r, 4);
 };
+/** area share and edge length of a custom outline (unit-square points, y down); {} for ordinary shapes */
+W.shapeFacts = doc => {
+  if (!doc || doc.shape !== 'custom' || !Array.isArray(doc.outline) || doc.outline.length < 3) return {};
+  const P = doc.outline; let a = 0, per = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length]; a += p[0] * q[1] - q[0] * p[1]; per += Math.hypot((q[0] - p[0]) * doc.widthCm, (q[1] - p[1]) * doc.heightCm); }
+  return { areaFraction: round(Math.min(1, Math.abs(a) / 2), 5), perimeterM: round(per / 100, 4) };
+};
 W.perimeterM = (widthCm, heightCm, shape) => { const w = widthCm / 100, h = heightCm / 100; return round(shape === 'circle' || shape === 'oval' ? Math.PI * (3 * (w / 2 + h / 2) - Math.sqrt((3 * w / 2 + h / 2) * (w / 2 + 3 * h / 2))) : 2 * (w + h), 4); };
 /**
  * input: {widthCm,heightCm,shape,radius,areaFraction,pile,binding(bool), colours:[{yarnId,pct}]}  rates: from ratesFromForm / biz_rates.rates  yarns: biz_yarns rows
@@ -97,7 +103,7 @@ W.calc = (input, rates, yarns) => {
   rates = rates || {}; yarns = yarns || []; const errs = [];
   const w = +input.widthCm, h = +input.heightCm; if (!(w >= 5 && h >= 5)) errs.push('Width and height must be at least 5 cm.'); if (w > 2000 || h > 2000) errs.push('Maximum size is 2000 cm.');
   if (errs.length) return { ok: false, errors: errs };
-  const area = W.areaM2(w, h, input.shape, input.radius, input.areaFraction), perim = W.perimeterM(w, h, input.shape), pile = input.pile || 'standard', ym = {}; yarns.forEach(y => { ym[y.id] = y; });
+  const area = W.areaM2(w, h, input.shape, input.radius, input.areaFraction), perim = isNum(input.perimeterM) && input.perimeterM > 0 ? +input.perimeterM : W.perimeterM(w, h, input.shape), pile = input.pile || 'standard', ym = {}; yarns.forEach(y => { ym[y.id] = y; });
   const missing = [], lines = [], need = (key, label) => { if (!missing.some(m => m.key === key)) missing.push({ key, label }); };
   const kgM2 = getP(rates, 'pileKgPerM2.' + pile), waste = isNum(rates.wastePct) ? +rates.wastePct : null;
   // yarn

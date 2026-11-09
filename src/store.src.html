@@ -405,7 +405,7 @@ varying vec3 vN;varying vec3 vW;varying vec2 vUV;
 void main(){vec4 w=uModel*vec4(aPos,1.0);vW=w.xyz;vN=(uModel*vec4(aN,0.0)).xyz;vUV=aUV;gl_Position=uVP*w;}`;
 const FS_SOLID = `precision highp float;varying vec3 vN;varying vec3 vW;varying vec2 vUV;
 uniform vec3 uColor,uEmis,uCam,uKeyDir,uKeyCol,uFillDir,uFillCol,uAmb,uPt,uPtCol,uFogCol;
-uniform float uSpec,uUseTex,uLit,uAlpha,uFogK;uniform sampler2D uTex;
+uniform float uSpec,uUseTex,uLit,uAlpha,uFogK,uTexAlpha;uniform sampler2D uTex;
 void main(){
  vec3 N=normalize(vN);vec3 Vv=normalize(uCam-vW);
  vec3 base=uColor;if(uUseTex>0.5)base*=texture2D(uTex,vUV).rgb;
@@ -416,18 +416,19 @@ void main(){
  vec3 lit=base*(uAmb+uKeyCol*d1+uFillCol*d2+uPtCol*d3)+uKeyCol*sp+uPtCol*rim;
  vec3 col=mix(base,lit,uLit)+uEmis;
  float fog=1.0-exp(-uFogK*length(uCam-vW));col=mix(col,uFogCol,fog);
- gl_FragColor=vec4(col,uAlpha);}`;
+ float al=uAlpha;if(uTexAlpha>0.5)al*=texture2D(uTex,vUV).r;gl_FragColor=vec4(col,al);}`;
 const VS_PILE = `attribute vec3 aPos;attribute vec2 aUV;attribute float aShell;uniform mat4 uVP;uniform mat4 uModel;uniform vec3 uN;uniform float uPile;
 varying vec2 vUV;varying float vF;varying vec3 vW;
 void main(){vec4 w=uModel*vec4(aPos,1.0);w.xyz+=uN*aShell*uPile;vW=w.xyz;vUV=aUV;vF=aShell;gl_Position=uVP*w;}`;
 const FS_PILE = `precision highp float;varying vec2 vUV;varying float vF;varying vec3 vW;
 uniform sampler2D uCol;uniform sampler2D uHgt;
+uniform sampler2D uMask;uniform float uUseMask,uMaskR,uLoop,uEdgeFade,uSheenK,uSpecK;
 uniform vec2 uSize,uTexel;uniform float uDens,uRad,uCircle,uBorder,uCarve,uLod,uTime,uSway,uPile,uFogK;
 uniform vec3 uTape,uCam,uT,uB,uN,uKeyDir,uKeyCol,uFillDir,uFillCol,uAmb,uPt,uPtCol,uFogCol;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}
 void main(){
  float f=vF;vec2 q=(vUV-0.5)*uSize;vec2 hs=0.5*uSize;float d;
- if(uCircle>0.5){d=length(q)-hs.x;}else{vec2 r=abs(q)-hs+vec2(uRad);d=length(max(r,0.0))+min(max(r.x,r.y),0.0)-uRad;}
+ if(uUseMask>0.5){d=(0.5-texture2D(uMask,vUV).r)*2.0*uMaskR;}else if(uCircle>0.5){d=length(q)-hs.x;}else{vec2 r=abs(q)-hs+vec2(uRad);d=length(max(r,0.0))+min(max(r.x,r.y),0.0)-uRad;}
  if(d>0.0)discard;
  float inside=-d;vec3 col;
  if(inside<uBorder){
@@ -440,11 +441,13 @@ void main(){
   float rnd=hash(id);
   vec2 cuv=clamp((id+0.5)/(uSize*uDens),0.0,1.0);
   float hh=texture2D(uHgt,cuv).r;vec3 base=texture2D(uCol,cuv).rgb;
+  if(uEdgeFade>0.0)hh*=mix(0.3,1.0,smoothstep(0.0,uEdgeFade,inside-uBorder));
   if(f>0.001){
    if(f>hh*(0.82+0.18*rnd))discard;
-   vec2 jit=(vec2(hash(id+1.7),hash(id+9.3))-0.5)*0.55*f*(1.0-uLod);
-   float rad=mix(0.44*(1.0-0.4*f)+0.05,0.84,uLod);
-   if(length(fr-jit)>rad)discard;
+   vec2 jit=(vec2(hash(id+1.7),hash(id+9.3))-0.5)*mix(0.55,0.12,uLoop)*f*(1.0-uLod);
+   float rad=mix(mix(0.44*(1.0-0.4*f)+0.05,0.47*sqrt(1.0-0.55*f*f),uLoop),0.84,uLod);
+   float dl=length(fr-jit);if(dl>rad)discard;
+   if(uLoop>0.5&&f>0.55&&dl<0.2*(f-0.45))discard;
   }
   float hl=texture2D(uHgt,vUV-vec2(uTexel.x,0.0)).r,hr=texture2D(uHgt,vUV+vec2(uTexel.x,0.0)).r;
   float hd=texture2D(uHgt,vUV-vec2(0.0,uTexel.y)).r,hu=texture2D(uHgt,vUV+vec2(0.0,uTexel.y)).r;
@@ -457,7 +460,7 @@ void main(){
   vec3 Lp=uPt-vW;float dist=length(Lp);float dp=max(dot(Nw,Lp/dist),0.0)/(1.0+0.2*dist*dist);
   float ao=mix(0.24,1.0,pow(f,0.75));ao=mix(ao,0.86,uLod*0.6);
   float sheen=pow(1.0-max(dot(Nw,Vv),0.0),3.0);
-  col=base*(uAmb+uKeyCol*dk+uFillCol*df+uPtCol*dp)*ao*(0.86+0.28*rnd)+base*sheen*0.3*f+uKeyCol*pow(max(dot(Nw,normalize(uKeyDir+Vv)),0.0),28.0)*0.05*f;
+  col=base*(uAmb+uKeyCol*dk+uFillCol*df+uPtCol*dp)*ao*(0.86+0.28*rnd)+base*sheen*uSheenK*f+uKeyCol*pow(max(dot(Nw,normalize(uKeyDir+Vv)),0.0),28.0)*uSpecK*f;
   if(f<0.001)col*=0.42;
  }
  float fog=1.0-exp(-uFogK*length(uCam-vW));col=mix(col,uFogCol,fog);
@@ -473,7 +476,7 @@ class Engine {
   constructor(canvas) {
     const gl = canvas.getContext('webgl', { antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: canvas.hasAttribute('data-keep') }) || canvas.getContext('experimental-webgl');
     if (!gl) throw new Error('WebGL unavailable');
-    this.gl = gl; this.canvas = canvas; this.cache = new Map(); this.meshes = {}; this.shellGeo = {};
+    this.gl = gl; this.canvas = canvas; this.cache = new Map(); this.meshes = {}; this.shellGeo = {}; this.dprCap = 1.75;
     this.pSolid = this.prog(VS_SOLID, FS_SOLID);
     this.pPile = this.prog(VS_PILE, FS_PILE);
     this.pPts = this.prog(VS_PTS, FS_PTS);
@@ -498,6 +501,9 @@ class Engine {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, d.i, gl.STATIC_DRAW);
     return { vb, ib, n: d.i.length, type: d.i instanceof Uint32Array ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT };
   }
+  meshFromData(key, d) { return this.meshes[key] || (this.meshes[key] = this.mkMesh(d)); }
+  dropMesh(key) { const m = this.meshes[key]; if (m) { this.gl.deleteBuffer(m.vb); this.gl.deleteBuffer(m.ib); delete this.meshes[key]; } }
+  dropTex(cv) { const t = this.cache.get(cv); if (t) { this.gl.deleteTexture(t); this.cache.delete(cv); } }
   shells(n) {
     if (this.shellGeo[n]) return this.shellGeo[n];
     const v = new Float32Array(n * 4 * 6), idx = new Uint16Array(n * 6);
@@ -524,7 +530,7 @@ class Engine {
     t.w = cv.width; t.h = cv.height; this.cache.set(key, t); return t;
   }
   resize() {
-    const c = this.canvas, dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    const c = this.canvas, dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
     const w = Math.max(2, Math.floor(c.clientWidth * dpr)), h = Math.max(2, Math.floor(c.clientHeight * dpr));
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
     return w / h;
@@ -546,9 +552,9 @@ class Engine {
     gl.useProgram(p); this.lights(p, S);
     gl.uniformMatrix4fv(u.uModel, false, model);
     gl.uniform3fv(u.uColor, o.color || [1,1,1]); gl.uniform3fv(u.uEmis, o.emis || [0,0,0]);
-    gl.uniform1f(u.uSpec, o.spec || 0); gl.uniform1f(u.uLit, o.lit === undefined ? 1 : o.lit); gl.uniform1f(u.uAlpha, o.alpha === undefined ? 1 : o.alpha);
+    gl.uniform1f(u.uSpec, o.spec || 0); gl.uniform1f(u.uLit, o.lit === undefined ? 1 : o.lit); gl.uniform1f(u.uAlpha, o.alpha === undefined ? 1 : o.alpha); gl.uniform1f(u.uTexAlpha, o.texAlpha ? 1 : 0);
     if (o.tex) { gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, o.tex); gl.uniform1i(u.uTex, 0); gl.uniform1f(u.uUseTex, 1); } else gl.uniform1f(u.uUseTex, 0);
-    if (o.additive) { gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE); gl.depthMask(false); } else { gl.disable(gl.BLEND); gl.depthMask(true); }
+    if (o.additive) { gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE); gl.depthMask(false); } else if (o.blend) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false); } else { gl.disable(gl.BLEND); gl.depthMask(true); }
     gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vb); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.ib);
     const a = p.a; gl.enableVertexAttribArray(a.aPos); gl.vertexAttribPointer(a.aPos, 3, gl.FLOAT, false, 32, 0);
     gl.enableVertexAttribArray(a.aN); gl.vertexAttribPointer(a.aN, 3, gl.FLOAT, false, 32, 12);
@@ -569,6 +575,9 @@ class Engine {
     gl.uniform1f(u.uPile, o.pile); gl.uniform3fv(u.uTape, o.tape || [0.07, 0.07, 0.075]);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, o.col); gl.uniform1i(u.uCol, 0);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, o.hgt); gl.uniform1i(u.uHgt, 1);
+    gl.uniform1f(u.uUseMask, o.mask ? 1 : 0); gl.uniform1f(u.uMaskR, o.maskR || 0.3); gl.uniform1f(u.uLoop, o.loop ? 1 : 0); gl.uniform1f(u.uEdgeFade, o.edgeFade || 0);
+    gl.uniform1f(u.uSheenK, o.sheen === undefined ? 0.3 : o.sheen); gl.uniform1f(u.uSpecK, o.spec === undefined ? 0.05 : o.spec); gl.uniform1i(u.uMask, o.mask ? 2 : 0);
+    if (o.mask) { gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, o.mask); }
     gl.disable(gl.BLEND); gl.depthMask(true);
     gl.bindBuffer(gl.ARRAY_BUFFER, geo.vb); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, geo.ib);
     const a = p.a; gl.enableVertexAttribArray(a.aPos); gl.vertexAttribPointer(a.aPos, 3, gl.FLOAT, false, 24, 0);
@@ -808,7 +817,7 @@ class Viewer {
     c.addEventListener('pointerdown', e => { this.drag = { x: e.clientX, y: e.clientY }; c.setPointerCapture(e.pointerId); c.style.cursor = 'grabbing'; });
     c.addEventListener('pointermove', e => { if (!this.drag) return; this.yaw += (e.clientX-this.drag.x)*0.008; this.tilt = Math.max(-1.3, Math.min(0.5, this.tilt+(e.clientY-this.drag.y)*0.006)); this.drag = { x: e.clientX, y: e.clientY }; this.idle = performance.now(); });
     const up = () => { this.drag = null; c.style.cursor = 'grab'; }; c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
-    c.addEventListener('wheel', e => { e.preventDefault(); this.dist = Math.max(4.2, Math.min(13, this.dist+e.deltaY*0.006)); }, { passive: false });
+    c.addEventListener('wheel', e => { e.preventDefault(); this.dist = Math.max(4.2, Math.min(this.maxDist || 13, this.dist+e.deltaY*0.006)); }, { passive: false });
     c.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') this.yaw -= .1; if (e.key === 'ArrowRight') this.yaw += .1; if (e.key === 'ArrowUp') this.tilt = Math.max(-1.3, this.tilt-.08); if (e.key === 'ArrowDown') this.tilt = Math.min(.5, this.tilt+.08); });
     c.tabIndex = 0;
     new IntersectionObserver(en => { this.vis = en[0].isIntersecting; }).observe(c);
@@ -823,6 +832,26 @@ class Viewer {
     const a = buildArt(this.img ? 'placeholder' : id, w/h, this.img || null), e = this.eng;
     return { col: e.tex(a.color, { key: a.color }), hgt: e.tex(a.hgt, { key: a.hgt }) };
   }
+  /* room scene for the studio: floor, walls, a sofa, a table and a plant, sized in real centimetres (g.room.s = world units per cm) */
+  drawRoom(e, base, g) {
+    const r = g.room, s = r.s, z = -r.drop - 0.002, R = r.cm, wy = R.wallY * s, hw = R.halfW * s, wh = R.wallH * s;
+    const box = (x, y, zc, w, d, h, col, sp) => e.solid(e.cube, M.mul(base, M.chain(M.T(x * s, y * s, z + zc * s), M.S(w * s, d * s, h * s))), { color: col, spec: sp || 0.05 });
+    e.solid(e.plane, M.mul(base, M.chain(M.T(0, 0, z), M.S(2 * hw, 2 * wy + 4, 1))), { tex: e.tex(r.floorCv, { key: r.floorCv }), color: [1, 1, 1], spec: r.floorSpec || 0.05 });
+    const wall = [0.84, 0.82, 0.78];
+    e.solid(e.plane, M.mul(base, M.chain(M.T(0, wy, z + wh/2), M.Rx(Math.PI/2), M.S(2 * hw, wh, 1))), { color: wall });
+    e.solid(e.plane, M.mul(base, M.chain(M.T(-hw, 0, z + wh/2), M.Rz(Math.PI/2), M.Rx(Math.PI/2), M.S(2 * wy, wh, 1))), { color: wall.map(v => v*0.92) });
+    e.solid(e.plane, M.mul(base, M.chain(M.T(hw, 0, z + wh/2), M.Rz(-Math.PI/2), M.Rx(Math.PI/2), M.S(2 * wy, wh, 1))), { color: wall.map(v => v*0.92) });
+    box(0, R.wallY - 1, 5, 2 * R.halfW, 2, 10, [0.95, 0.94, 0.9]);
+    if (r.furn) {
+      const so = R.sofa, ta = R.table, pl = R.plant, fab = [0.2, 0.23, 0.3];
+      box(so.x, so.y, 22, so.w, so.d, 44, fab, 0.04); box(so.x, so.y + so.d/2 - 10, 62, so.w, 20, 36, fab, 0.04);
+      box(so.x - so.w/2 + 11, so.y, 50, 22, so.d, 30, fab, 0.04); box(so.x + so.w/2 - 11, so.y, 50, 22, so.d, 30, fab, 0.04);
+      box(ta.x, ta.y, ta.h - 2, ta.w, ta.d, 4, [0.3, 0.2, 0.12], 0.25); box(ta.x - ta.w/2 + 6, ta.y, ta.h/2 - 2, 5, ta.d - 10, ta.h - 4, [0.2, 0.13, 0.08]); box(ta.x + ta.w/2 - 6, ta.y, ta.h/2 - 2, 5, ta.d - 10, ta.h - 4, [0.2, 0.13, 0.08]);
+      box(pl.x, pl.y, 15, pl.r * 1.5, pl.r * 1.5, 30, [0.55, 0.3, 0.2]);
+      e.solid(e.sphere, M.mul(base, M.chain(M.T(pl.x * s, pl.y * s, z + (30 + pl.h * 0.45) * s), M.S(pl.r * 2.4 * s, pl.r * 2.4 * s, pl.h * 0.9 * s))), { color: [0.12, 0.35, 0.14], spec: 0.1 });
+    }
+    if (r.shadowCv) e.solid(e.plane, M.mul(base, M.chain(M.T(0, 0, z + 0.003), M.S(g.w * 1.2, g.h * 1.2, 1))), { tex: e.tex(r.shadowCv, { key: r.shadowCv }), color: [0, 0, 0], lit: 0, alpha: 0.65, texAlpha: true, blend: true });
+  }
   loop(ms) {
     requestAnimationFrame(this.loop);
     if (!this.vis || !this.prod || document.hidden) return;
@@ -831,23 +860,27 @@ class Viewer {
     const cam = [0, 0.6, this.dist], vp = M.mul(M.persp(34*Math.PI/180, asp, 0.1, 60), M.look(cam, [0, 0, 0], [0, 1, 0]));
     const wall = g.k === 'wall', la = t*0.5, rgb = hsl(0.36 + 0.2*Math.sin(t*0.3), 1, .5);
     const S = { vp, cam, time: t, fogCol: [0.02, 0.025, 0.02], fogK: 0.0, amb: [0.2, 0.22, 0.2], keyDir: wall ? V.norm([Math.sin(la)*1.2, 0.4, 0.6]) : V.norm([-0.4+Math.sin(la)*0.3, 0.8, 0.6]), keyCol: [1.1, 1.08, 1.0], fillDir: V.norm([0.7, 0.2, 0.3]), fillCol: [0.3, 0.25, 0.5], pt: [0, -1, 2], ptCol: rgb.map(v => v*1.2) };
+    if (g.room) S.ptCol = S.ptCol.map(v => v * 0.1);
+    if (g.light) { const L = g.light; S.amb = L.amb; S.keyCol = L.keyCol; S.fillCol = L.fillCol; S.ptCol = L.ptCol; S.keyDir = V.norm(L.keyDir); }
     e.begin(S);
     e.solid(e.plane, M.chain(M.T(0, 0.3, -3.5), M.S(16, 12, 1)), { tex: this.tglow, color: [0.03, 0.13, 0.03], lit: 0, additive: true });
-    const base = M.chain(M.Rx(this.tilt), M.Ry(this.yaw)), lod = 0.0;
-    const rug = (m, w, h, o) => { const A = this.art(w, h, o.defd); e.pile(M.mul(base, M.mul(m, M.S(w, h, 1))), Object.assign({ col: A.col, hgt: A.hgt, size: [w, h], shells: 34, lod: lod, carve: g.carveK || .8, rad: g.rad || .15 }, o)); };
+    const base = M.chain(M.Rx(this.tilt), M.Ry(this.yaw)), lod = g.lod || 0;
+    const rug = (m, w, h, o) => { const A = this.art(w, h, o.defd); e.pile(M.mul(base, M.mul(m, M.S(w, h, 1))), Object.assign({ col: A.col, hgt: A.hgt, size: [w, h], shells: g.shells || 34, lod: lod, carve: g.carveK || .8, rad: g.rad || .15 }, o)); };
     if (g.k === 'set') {
       const aw = this.img ? 4.4 : 4.4; rug(M.T(-0.7, 0.45, 0), 4.0, 1.46, { dens: 60, pile: .075, rad: .18 });
       const Ac = this.art(1.5, 1.5, 'mono'), cm = M.mul(base, M.mul(M.T(2.15, -0.95, 0.1), M.S(1.5, 1.5, 1)));
       e.pile(cm, { col: Ac.col, hgt: Ac.hgt, size: [1.5, 1.5], dens: 60, pile: .07, circle: true, shells: 30, lod: lod, carve: .8 });
     } else if (g.k === 'rug') {
-      rug(M.ident(), g.w, g.h, { dens: g.dens, pile: g.pile, circle: g.circle, rad: g.rad, defd: g.defd });
+      if (g.room) this.drawRoom(e, base, g);
+      if (g.wall3d) e.solid(e.meshFromData(g.wall3d.key, g.wall3d.data), base, { color: g.wall3d.color, spec: 0.08 });
+      rug(M.ident(), g.w, g.h, { dens: g.dens, pile: g.pile, circle: g.circle, rad: g.rad, defd: g.defd, mask: g.maskCv ? e.tex(g.maskCv, { key: g.maskCv }) : null, maskR: g.maskR, loop: g.loop, edgeFade: g.edgeFade, sheen: g.sheen, spec: g.specK, border: g.border, tape: g.tape });
     } else {
       const fw = g.w, fh = g.h, ft = 0.2, fd = 0.36, bd = M.T(0, 0, -0.04);
       [[0, fh/2+ft/2, fw+ft*2, ft], [0, -fh/2-ft/2, fw+ft*2, ft], [fw/2+ft/2, 0, ft, fh], [-fw/2-ft/2, 0, ft, fh]].forEach(f => e.solid(e.cube, M.mul(base, M.chain(M.T(f[0], f[1], fd/2-0.1), M.S(f[2], f[3], fd))), { color: [0.035, 0.037, 0.035], spec: 0.15 }));
       e.solid(e.cube, M.mul(base, M.chain(M.T(0, 0, -0.14), M.S(fw+0.02, fh+0.02, 0.04))), { color: [0.01, 0.01, 0.01] });
       rug(bd, fw, fh, { dens: g.dens, pile: g.pile, border: 0, rad: 0.01, defd: g.defd, shells: 40, sway: 0.0003 });
     }
-    if (!RM) e.points(rgb.map(v => v*0.4), 90);
+    if (!RM && !g.room) e.points(rgb.map(v => v*0.4), 90);
   }
 }
 

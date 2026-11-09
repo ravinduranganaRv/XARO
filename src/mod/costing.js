@@ -35,8 +35,9 @@ function estimate(inp, rates) {
   const dest = inp.dest === 'local' ? 'local' : 'export';
   if (errs.length) return { ok: false, errors: errs };
   const shape = inp.shape || 'rect';
-  const areaFactor = shape === 'circle' || shape === 'oval' ? Math.PI / 4 : 1;
-  const area = (w / 100) * (h / 100) * areaFactor, perim = shape === 'circle' || shape === 'oval' ? Math.PI * ((w + h) / 2) / 100 : 2 * (w + h) / 100;
+  const custom = shape === 'custom', fr = num(inp.areaFraction, 0);   // a custom outline brings its own measured area share and edge length
+  const areaFactor = custom ? (fr > 0 && fr <= 1 ? fr : 1) : shape === 'circle' || shape === 'oval' ? Math.PI / 4 : 1;
+  const area = (w / 100) * (h / 100) * areaFactor, perim = custom && num(inp.perimeterM, 0) > 0 ? num(inp.perimeterM, 0) : shape === 'circle' || shape === 'oval' ? Math.PI * ((w + h) / 2) / 100 : 2 * (w + h) / 100;
   const P = R.pileTypes[pile];
   const material = area * P.matPerM2 + area * R.backing[backing].perM2 + perim * R.border[border].perM;
   const extra = Math.max(0, colours - R.colourFreeCount);

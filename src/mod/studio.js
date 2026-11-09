@@ -4,7 +4,7 @@
 const L = window.XSTUDIO_LIB, esc = XD.esc, $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
 const IN = 2.54, RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let root, doc = L.newDoc(), imgs = {}, sel = '', hist = [], hi = -1, unit = 'cm', view = '', ltab = 'art', target = 'fill', viewer = null, dirty = false, an = null, seq = 0, t3 = 0, tA = 0, prevCv = null, prevRatio = 1, filt = { cat: '', q: '', tcat: '' }, drag = null, savedName = '', cloudId = '', editId = '', selNode = null, pen = null, spaceDown = false, v2 = { zoom: 1, grid: false, snap: false, rulers: false };
-const E = window.XEDIT;
+const E = window.XEDIT, D3 = window.XS3D, ROOM_S = 0.0225;
 const cv2 = () => $('#stC', root), ov = () => $('#stO', root);
 
 /* ---------------------------------------------------------------- tiny helpers */
@@ -103,9 +103,9 @@ function vtDraw() {
   b.innerHTML = pen ? `<span class="note" style="margin:0 4px 0 0;align-self:center">${pen.pts.length} point${pen.pts.length === 1 ? '' : 's'}</span>${t('penDone', 'Finish shape')}${t('penUndo', 'Undo point')}${t('penCancel', 'Cancel')}`
     : t('grid', 'Grid', v2.grid) + t('snap', 'Snap', v2.snap) + t('rulers', 'Rulers', v2.rulers) + t('zout', 'Zoom -') + t('zin', 'Zoom +') + (v2.zoom !== 1 ? t('zfit', 'Fit ' + Math.round(v2.zoom * 100) + '%') : '');
 }
-function startPen() { if (view === 'v3d') { view = 'v2d'; $('#stViews', root).className = 'views v2d'; $$('[data-v]', root).forEach(x => x.setAttribute('aria-pressed', x.dataset.v === 'v2d')); fit(); } pen = { pts: [], cur: null }; sel = ''; editId = ''; selNode = null; panelL(); panelR(); drawOv(); vtDraw(); toast('Click the design to place points. Click the first point or press Enter to close the shape.'); }
+function startPen(outline) { if (view === 'v3d') { view = 'v2d'; $('#stViews', root).className = 'views v2d'; $$('[data-v]', root).forEach(x => x.setAttribute('aria-pressed', x.dataset.v === 'v2d')); fit(); } pen = { pts: [], cur: null, outline: !!outline }; sel = ''; editId = ''; selNode = null; panelL(); panelR(); drawOv(); vtDraw(); toast('Click the design to place points. Click the first point or press Enter to close the shape.'); }
 function finishPen() {
-  if (!pen) return; if (pen.pts.length < 3) return toast('Place at least 3 points first.', true); const f = E.layerFromPoints(pen.pts); pen = null;
+  if (!pen) return; if (pen.pts.length < 3) return toast('Place at least 3 points first.', true); if (pen.outline) { const pts = pen.pts; pen = null; vtDraw(); setOutline(pts); return toast('Rug outline set. Use Smooth corners or Fewer points to refine it.'); } const f = E.layerFromPoints(pen.pts); pen = null;
   const l = L.layer('poly', { pts: f.pts, cx: f.cx, cy: f.cy, w: f.w, h: f.h, name: 'Drawn shape' }); doc.layers.push(l); sel = l.id; vtDraw(); commit(); toast('Shape added. Choose Edit points to refine it.');
 }
 function cancelPen() { pen = null; vtDraw(); drawOv(); }
@@ -141,25 +141,52 @@ const draw2D1 = () => { L.render(doc, cv2(), imgs); drawOv(); };
 
 /* ---------------------------------------------------------------- 3D */
 const PILE = { low: [0.05, 0.9], standard: [0.08, 1.2], high: [0.14, 1.4], carved: [0.13, 2.1] };
+const envQ = () => ({ coarse: matchMedia('(pointer: coarse)').matches, width: innerWidth, cores: navigator.hardwareConcurrency });
 function geo() {
-  const ar = doc.widthCm / doc.heightCm, wall = !!doc.frame, m = wall ? 4 : 4.4; let w, h; if (ar >= 1) { w = m; h = m / ar; } else { h = m; w = m * ar; }
-  const circ = doc.shape === 'circle' || doc.shape === 'oval'; if (doc.shape === 'circle') { w = h = Math.min(w, h) * (wall ? 1 : 1); }
-  const P = PILE[doc.pile] || PILE.standard;
-  return { k: wall ? 'wall' : 'rug', w: +w.toFixed(2), h: +h.toFixed(2), dens: 52, pile: wall ? P[0] * 1.6 : P[0], carveK: P[1], rad: circ ? 0.15 : Math.max(0.02, (doc.radius || 0) / 100 * Math.min(w, h)), circle: circ };
+  const d = D3.d3(doc), q = D3.quality(d.quality, envQ()), ar = doc.widthCm / doc.heightCm, wall = !!doc.frame, room = d.scene === 'room' && !wall; let w, h;
+  if (room) { w = doc.widthCm * ROOM_S; h = doc.heightCm * ROOM_S; } else { const m = wall ? 4 : 4.4; if (ar >= 1) { w = m; h = m / ar; } else { h = m; w = m * ar; } }
+  const circ = doc.shape === 'circle' || doc.shape === 'oval'; if (doc.shape === 'circle') { w = h = Math.min(w, h); }
+  const P = PILE[doc.pile] || PILE.standard, mat = D3.MATERIALS[d.mat], bound = doc.borderType === 'bound', carvedEdge = doc.borderType === 'carved';
+  return { k: wall ? 'wall' : 'rug', w: +w.toFixed(3), h: +h.toFixed(3), dens: 52, pile: wall ? P[0] * 1.6 : +D3.pileWorld(doc, w).toFixed(4), carveK: P[1], rad: circ ? 0.15 : Math.max(0.02, (doc.radius || 0) / 100 * Math.min(w, h)), circle: circ,
+    shells: q.shells, lod: q.lod, dpr: q.dpr, loop: d.style === 'loop', sheen: mat.sheen, specK: mat.spec, light: d.light === 'studio' ? null : D3.LIGHTS[d.light],
+    border: bound ? undefined : 0, edgeFade: carvedEdge ? 0.2 : 0, room: room, scene: d.scene };
+}
+/* heavy 3D assets (outline mask, edge wall, room textures) are rebuilt only when their inputs change */
+let mCache = { key: '', cv: null }, wCache = { key: '' }, shCache = { key: '', cv: null }; const flCache = {};
+function floorTex(kind) {
+  if (flCache[kind]) return flCache[kind]; const c = document.createElement('canvas'); c.width = c.height = 1024; const x = c.getContext('2d'); let sd = 11; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  if (kind === 'wood') { x.fillStyle = '#9b6e44'; x.fillRect(0, 0, 1024, 1024); const rows = 26, rh = 1024 / rows; for (let r = 0; r < rows; r++) { let px = -rnd() * 300; while (px < 1024) { const len = 200 + rnd() * 240, tone = 0.82 + rnd() * 0.3; x.fillStyle = `rgb(${Math.round(176 * tone)},${Math.round(124 * tone)},${Math.round(78 * tone)})`; x.fillRect(px + 1, r * rh + 1, len - 2, rh - 2); x.strokeStyle = 'rgba(70,40,18,.22)'; x.lineWidth = 1; for (let g = 0; g < 4; g++) { const gy = r * rh + 3 + rnd() * (rh - 6); x.beginPath(); x.moveTo(px + 2, gy); x.lineTo(px + len - 2, gy + (rnd() - 0.5) * 3); x.stroke(); } px += len; } } }
+  else if (kind === 'tile') { x.fillStyle = '#4a4d4f'; x.fillRect(0, 0, 1024, 1024); const nx = 13, ny = 9, tw = 1024 / nx, th = 1024 / ny; for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const t = 150 + Math.round(rnd() * 24); x.fillStyle = `rgb(${t},${t + 2},${t + 4})`; x.fillRect(i * tw + 3, j * th + 3, tw - 6, th - 6); } }
+  else if (kind === 'concrete') { x.fillStyle = '#8e908e'; x.fillRect(0, 0, 1024, 1024); for (let n = 0; n < 900; n++) { x.fillStyle = `rgba(${rnd() < 0.5 ? '60,62,60' : '190,192,188'},${0.03 + rnd() * 0.05})`; x.beginPath(); x.arc(rnd() * 1024, rnd() * 1024, 8 + rnd() * 60, 0, 7); x.fill(); } }
+  else { x.fillStyle = '#6c7078'; x.fillRect(0, 0, 1024, 1024); for (let n = 0; n < 9000; n++) { const t = rnd() < 0.5 ? 0 : 255; x.fillStyle = `rgba(${t},${t},${t},0.045)`; x.fillRect(rnd() * 1024, rnd() * 1024, 2, 2); } }
+  return (flCache[kind] = c);
+}
+function shadowTex(poly, key) {
+  if (shCache.key === key) return shCache.cv; if (shCache.cv && viewer) viewer.eng.dropTex(shCache.cv); const N = 256, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, N, N);
+  const k = 1 / 1.2, off = 4000; x.shadowColor = '#fff'; x.shadowBlur = 16; x.shadowOffsetX = off + 3; x.shadowOffsetY = 4; x.fillStyle = '#fff'; x.beginPath(); poly.forEach((p, i) => { const px = (0.5 + (p[0] - 0.5) * k) * N - off, py = (0.5 + (p[1] - 0.5) * k) * N; i ? x.lineTo(px, py) : x.moveTo(px, py); }); x.closePath(); x.fill();
+  shCache = { key, cv: c }; return c;
+}
+function assets3(g) {
+  const out = {}; if (doc.frame || g.k !== 'rug') return out; const d = D3.d3(doc), poly = E.outline(doc, 96), geoKey = JSON.stringify([doc.shape, doc.outline || 0, doc.radius, doc.widthCm, doc.heightCm, g.w, g.h]);
+  if (doc.shape === 'custom') { if (mCache.key !== geoKey) { if (mCache.cv && viewer) viewer.eng.dropTex(mCache.cv); mCache = { key: geoKey, cv: D3.sdfCanvas(poly, 256, g.w, g.h, 0.3) }; } out.maskCv = mCache.cv; out.maskR = 0.3; }
+  const th = D3.thickWorld(doc, g.w);
+  if (th > 0.002) { const key = 'w3|' + geoKey + '|' + th.toFixed(4); if (wCache.key !== key) { if (wCache.key && viewer) viewer.eng.dropMesh(wCache.key); wCache = { key, data: D3.wallMesh(poly, g.w, g.h, th) }; } out.wall3d = { key, data: wCache.data, color: doc.borderType === 'bound' ? [0.07, 0.07, 0.075] : D3.backingRgb(doc.backing) }; }
+  if (g.room) out.room = { s: ROOM_S, drop: th, cm: D3.ROOM, furn: d.furn, floorCv: floorTex(d.floor), floorSpec: d.floor === 'tile' ? 0.25 : d.floor === 'wood' ? 0.12 : 0.04, shadowCv: shadowTex(poly, geoKey) };
+  return out;
 }
 function schedule() { clearTimeout(t3); t3 = setTimeout(update3D, 160); clearTimeout(tA); tA = setTimeout(() => { an = L.analyse(doc, imgs); refreshEst(); refreshUsage(); }, 120); }
-let stale3 = false;
+let stale3 = false, lastScene = '';
 function update3D() {
   if (!root || !root.classList.contains('on')) return; if (view === 'v2d') { stale3 = true; refreshEst(); return; } stale3 = false; ensureViewer(); if (!viewer) return;
   const aa = an = L.analyse(doc, imgs); let c = L.makeCanvas(doc, 640); L.render(doc, c, imgs); if (aa.sepOn) c = L.separate(c, aa.list); c.__id = ++seq;
-  const g = geo(), pp = { sku: 'STUDIO', kind: 'custom', cat: 'custom', shape: g.circle ? 'round' : 'rug', w: doc.widthCm, h: doc.heightCm };
-  const first = !viewer.prod; const old = viewer.img, oldRatio = prevRatio; viewer.prod = pp; viewer.img = c; viewer.design = ''; viewer.g = g; prevRatio = g.w / g.h;
-  if (first) { viewer.tilt = -0.85; viewer.yaw = 0; viewer.dist = baseDist(); } else if (Math.abs(oldRatio - prevRatio) > 0.01) viewer.dist = baseDist();
+  const g = Object.assign(geo(), assets3(geo())), pp = { sku: 'STUDIO', kind: 'custom', cat: 'custom', shape: g.circle ? 'round' : 'rug', w: doc.widthCm, h: doc.heightCm };
+  const first = !viewer.prod; const old = viewer.img, oldRatio = prevRatio; viewer.prod = pp; viewer.img = c; viewer.design = ''; viewer.g = g; viewer.eng.dprCap = g.dpr; prevRatio = g.w / g.h; const sceneChanged = lastScene !== g.scene; lastScene = g.scene;
+  if (first) { viewer.tilt = -0.85; viewer.yaw = 0; viewer.dist = baseDist(); } else if (sceneChanged || Math.abs(oldRatio - prevRatio) > 0.01) viewer.dist = baseDist();
   if (old && old.__id) XARO.dropArt(viewer, old, oldRatio);
   refreshEst();
 }
-function ensureViewer() { if (viewer) return; try { viewer = XARO.newViewer($('#st3', root)); } catch (e) { viewer = null; $('.v3', root).insertAdjacentHTML('beforeend', '<p class="note" style="position:absolute;inset:auto 12px 50px 12px">3D preview needs WebGL, which is not available here. The 2D design and price estimate still work.</p>'); } }
-function baseDist() { const c = $('#st3', root), asp = c && c.clientHeight ? c.clientWidth / c.clientHeight : 1.6, g = geo(), need = Math.max(g.w * 0.62 / (0.3057 * Math.max(0.3, asp)), g.h * 0.62 / 0.3057 * (g.k === 'wall' ? 1.1 : 1)); return Math.min(26, Math.max(8.6, need)); }
+function ensureViewer() { if (viewer) return; try { viewer = XARO.newViewer($('#st3', root)); viewer.maxDist = 34; } catch (e) { viewer = null; $('.v3', root).insertAdjacentHTML('beforeend', '<p class="note" style="position:absolute;inset:auto 12px 50px 12px">3D preview needs WebGL, which is not available here. The 2D design and price estimate still work.</p>'); } }
+function baseDist() { const g0 = geo(); if (g0.room) return Math.min(28, Math.max(12, Math.max(g0.w, g0.h) * 1.8 + 9)); const c = $('#st3', root), asp = c && c.clientHeight ? c.clientWidth / c.clientHeight : 1.6, g = geo(), need = Math.max(g.w * 0.62 / (0.3057 * Math.max(0.3, asp)), g.h * 0.62 / 0.3057 * (g.k === 'wall' ? 1.1 : 1)); return Math.min(26, Math.max(8.6, need)); }
 function camPreset(n) {
   if (!viewer) return; const d = baseDist(), P = { angle: [0, -0.85, d], front: [0, -0.04, d], top: [0, -1.3, d], side: [1.15, -0.25, d] }[n]; if (!P) return; viewer.yaw = P[0]; viewer.tilt = P[1]; viewer.dist = P[2]; viewer.idle = n === 'angle' ? performance.now() : Infinity;
 }
@@ -167,7 +194,7 @@ function camPreset(n) {
 /* ---------------------------------------------------------------- estimate */
 const catalogSku = () => { if (doc.frame) return 'CW'; const a = doc.widthCm * doc.heightCm; return a <= 1000 ? 'CK' : a <= 6500 ? 'CF' : 'CL'; };
 function rates() { const r = XCOST.mergeRates(XCOST.DEFAULT_RATES, XD.costRates()); r.fx = Object.assign({}, r.fx, XD.fxTable()); return r; }
-function inputs(d, cur) { const a = an || L.analyse(doc, imgs); return { widthCm: d.widthCm, heightCm: d.heightCm, shape: d.shape === 'circle' || d.shape === 'oval' ? 'oval' : 'rect', colours: a.colours, pile: d.pile, backing: d.backing, border: d.borderCm > 0 ? (d.borderType === 'none' ? 'bound' : d.borderType) : 'none', frame: d.frame, dest: XARO.region().country === 'LK' ? 'local' : 'export', currency: cur }; }
+function inputs(d, cur) { const a = an || L.analyse(doc, imgs); return { widthCm: d.widthCm, heightCm: d.heightCm, shape: d.shape === 'circle' || d.shape === 'oval' ? 'oval' : d.shape === 'custom' && d.outline ? 'custom' : 'rect', areaFraction: d.shape === 'custom' && d.outline ? E.polyArea(d.outline) : undefined, perimeterM: d.shape === 'custom' && d.outline ? E.perimeterCm(d.outline, d.widthCm, d.heightCm) / 100 : undefined, colours: a.colours, pile: d.pile, backing: d.backing, border: d.borderCm > 0 ? (d.borderType === 'none' ? 'bound' : d.borderType) : 'none', frame: d.frame, dest: XARO.region().country === 'LK' ? 'local' : 'export', currency: cur }; }
 function estimate() {
   const r = rates(), reg = XARO.region(), raw = XCOST.estimate(inputs(doc, reg.cur), r); if (!raw.ok) return { raw };
   const sku = catalogSku(), p = XARO.byId()[sku]; let cust = null, std = null;
@@ -186,11 +213,11 @@ function refreshEst() {
 function refreshUsage() { const b = $('#stUse', root); if (!b || !an) return; b.innerHTML = an.rows.map(r => `<div class="yl"><i style="background:${r.yarn.hex}"></i><span>${esc(r.yarn.name)} <small>${esc(r.yarn.id)}</small></span><small>${r.pct.toFixed(1)}%</small></div>`).join(''); }
 
 /* ---------------------------------------------------------------- panels */
-const TABS = [['art', 'Artwork'], ['tpl', 'Templates'], ['add', 'Shapes'], ['size', 'Size'], ['col', 'Colours'], ['lay', 'Layers']];
+const TABS = [['art', 'Artwork'], ['tpl', 'Templates'], ['add', 'Shapes'], ['size', 'Size'], ['col', 'Colours'], ['d3', '3D'], ['lay', 'Layers']];
 function panelL() {
   const t = $('.tabs', root); t.innerHTML = TABS.map(([k, n]) => `<button role="tab" data-lt="${k}" aria-selected="${ltab === k}">${n}</button>`).join('');
   const b = $('#stL', root);
-  b.innerHTML = ({ art: tArt, tpl: tTpl, add: tAdd, size: tSize, col: tCol, lay: tLay }[ltab])();
+  b.innerHTML = ({ art: tArt, tpl: tTpl, add: tAdd, size: tSize, col: tCol, d3: t3d, lay: tLay }[ltab])();
   if (ltab === 'tpl') paintTemplates();
   if (ltab === 'col') { if (!an) an = L.analyse(doc, imgs); refreshUsage(); }
 }
@@ -222,16 +249,32 @@ function tAdd() {
   <p class="note">Tip: thick, simple letters tuft best. Fonts shown here are previews of the letter shapes.</p>
   <h4>Pen</h4><button class="sb pri" id="stPen">Draw a shape with the pen</button><p class="note">Click to place points, click the first point or press Enter to close the shape. Backspace removes the last point. Esc cancels.</p>`;
 }
+const OL = ['heart', 'star', 'hexagon', 'diamond', 'arch', 'crown', 'arrow', 'triangle'];
+function outlinePanel() {
+  const ed = layer(sel), can = ed && E.editable(ed);
+  return `<h4>Outline</h4><div class="chips">${OL.filter(n => L.POLY[n]).map(n => `<button class="sb sm" data-ol="${n}">${n[0].toUpperCase() + n.slice(1)}</button>`).join('')}<button class="sb sm" data-ol="blob">Freeform blob</button></div>
+  <div class="chips"><button class="sb sm" id="olPen">Draw with pen</button><button class="sb sm" id="olSel" ${can ? '' : 'disabled'}>Use selected shape</button><button class="sb sm" id="olSmooth">Smooth corners</button><button class="sb sm" id="olSimp">Fewer points</button></div>
+  <p class="note">${(doc.outline || []).length} points. The outline stretches to the width and height. Artwork, border and exports are cut to it.${can ? '' : ' Select a vector shape to use it as the outline.'}</p>`;
+}
+function setOutline(pts) { if (!pts || pts.length < 3) return toast('An outline needs at least 3 points.', true); let o = E.fitUnit(pts); if (o.length > 400) o = E.fitUnit(E.simplifyRing(o, 0.002)); doc.shape = 'custom'; doc.outline = o; commit(); }
+function outlineAction(b) {
+  if (b.dataset.ol) { const n = b.dataset.ol; return setOutline(n === 'blob' ? E.presetOutline('blob') : L.POLY[n]); }
+  if (b.id === 'olPen') return startPen(true);
+  if (b.id === 'olSel') { const l = layer(sel); if (!l || !E.editable(l)) return; const [W, H] = WH(); return setOutline(E.rugRings(l, W, H)[0]); }
+  if (b.id === 'olSmooth') { if (!doc.outline) return; if (doc.outline.length > 120) return toast('Already smooth.'); return setOutline(E.smoothClosed(doc.outline, 1)); }
+  if (b.id === 'olSimp') { if (!doc.outline || doc.outline.length <= 4) return toast('Already as simple as it can get.'); const n = E.simplifyRing(doc.outline, 0.01); if (n.length >= doc.outline.length) return toast('Already as simple as it can get.'); return setOutline(n); }
+}
 function tSize() {
   const presets = [['Keyboard 44 x 16', 'rect', 44, 16], ['Compact 32 x 12', 'rect', 32, 12], ['Coaster 12 round', 'circle', 12, 12], ['Floor 60 x 90', 'rect', 60, 90], ['Logo 90 x 90', 'rect', 90, 90], ['Wall 61 x 91 framed', 'rect', 61, 91]];
-  return `<div class="fld"><label for="stShape">Rug shape</label><select id="stShape">${[['rect', 'Rectangle'], ['square', 'Square'], ['circle', 'Circle'], ['oval', 'Oval']].map(([k, n]) => `<option value="${k}" ${doc.shape === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+  return `<div class="fld"><label for="stShape">Rug shape</label><select id="stShape">${[['rect', 'Rectangle'], ['square', 'Square'], ['circle', 'Circle'], ['oval', 'Oval'], ['custom', 'Custom outline']].map(([k, n]) => `<option value="${k}" ${doc.shape === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
   <div class="row2"><div class="fld"><label for="stW">Width (${unit})</label><input type="number" id="stW" step="any" min="1" value="${fmtLen(doc.widthCm)}"></div><div class="fld"><label for="stH">Height (${unit})</label><input type="number" id="stH" step="any" min="1" value="${fmtLen(doc.heightCm)}" ${doc.shape === 'square' || doc.shape === 'circle' ? 'disabled' : ''}></div></div>
   <div class="err" id="stSzErr" role="alert"></div>
   ${doc.shape === 'rect' || doc.shape === 'square' ? `<div class="fld"><label for="stRad">Corner radius: <b id="stRadV">${doc.radius}%</b></label><input type="range" id="stRad" min="0" max="50" value="${doc.radius}"></div>` : ''}
   <div class="fld"><label for="stBd">Border width: <b id="stBdV">${fmtLen(doc.borderCm)} ${unit}</b></label><input type="range" id="stBd" min="0" max="${unit === 'cm' ? 8 : 20}" step="${unit === 'cm' ? 0.5 : 1}" value="${unit === 'cm' ? doc.borderCm : Math.round(doc.borderCm / IN * 4) / 4}"></div>
   ${doc.borderCm > 0 ? `<h4>Border colour</h4><div class="sw">${L.yarnList().map(y => swatchBtn(y, doc.borderYarn === y.id).replace('data-y=', 'data-by=')).join('')}</div>` : ''}
+  ${doc.shape === 'custom' ? outlinePanel() : ''}
   <h4>Quick sizes</h4><div class="chips">${presets.map((p, i) => `<button class="sb sm" data-pre="${i}">${p[0]}</button>`).join('')}</div>
-  <p class="note">Custom outline and freeform shapes are not available yet. Rectangles (with rounded corners), squares, circles and ovals are.</p>`;
+  <p class="note">Choose Custom outline for heart, star, freeform or hand-drawn rug shapes. The width and height above are the size of the box around the outline.</p>`;
 }
 const hue = h => { const c = XD.hex2rgb(h), mx = Math.max(...c), mn = Math.min(...c), d = mx - mn; if (d < 28) return 'Neutrals'; let hh = mx === c[0] ? ((c[1] - c[2]) / d) % 6 : mx === c[1] ? (c[2] - c[0]) / d + 2 : (c[0] - c[1]) / d + 4; hh = (hh * 60 + 360) % 360; return hh < 20 || hh >= 330 ? 'Reds and pinks' : hh < 70 ? 'Oranges and yellows' : hh < 170 ? 'Greens' : hh < 260 ? 'Blues' : 'Purples'; };
 function tCol() {
@@ -248,6 +291,21 @@ function tCol() {
   <h4>Replace a colour everywhere</h4><div class="row2"><select id="stRf" aria-label="Replace">${used.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select><select id="stRt" aria-label="With">${all.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select></div><button class="sb sm" id="stRep" style="margin-top:6px">Replace</button>
   <h4>Saved palettes</h4>${pals.map((p, i) => `<div class="fld"><div class="lb">${esc(p.name)} <button class="sb sm bad" data-pdel="${i}">x</button></div><div class="sw">${p.ids.filter(id => ym()[id]).map(id => swatchBtn(ym()[id], false)).join('')}</div></div>`).join('') || '<p class="note">None yet.</p>'}<button class="sb sm" id="stPal">Save this design's colours as a palette</button>`;
 }
+function t3d() {
+  const d = D3.d3(doc), pm = D3.pileMm(doc), opt = (o, v) => Object.entries(o).map(([k, n]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(typeof n === 'string' ? n : n.label)}</option>`).join(''), sel3 = (k, label, o, v) => `<div class="fld"><label for="d3${k}">${label}</label><select id="d3${k}" data-d3="${k}">${opt(o, v)}</select></div>`;
+  return `${view === 'v2d' ? '<div class="warn">Switch to Both or 3D (top right) to see these changes.</div>' : ''}
+  <h4>Pile and rug body</h4>${sel3('style', 'Pile style', D3.PILE_STYLES, d.style)}
+  <div class="fld"><label for="d3pileMm">Pile height: <b id="d3pileMmV">${pm} mm${d.pileMm == null ? ' (from pile type)' : ''}</b></label><input type="range" id="d3pileMm" data-d3="pileMm" data-n="1" min="2" max="30" step="1" value="${pm}" data-live="1"></div>
+  ${d.pileMm == null ? '' : '<button class="sb sm" id="d3pileAuto">Use the pile type height</button>'}
+  <div class="fld"><label for="d3thickMm">Rug thickness (edge): <b id="d3thickMmV">${d.thickMm} mm</b></label><input type="range" id="d3thickMm" data-d3="thickMm" data-n="1" min="0" max="25" step="1" value="${d.thickMm}" data-live="1"></div>
+  ${sel3('mat', 'Yarn look', D3.MATERIALS, d.mat)}
+  <p class="note">Edge finish follows Border finish on the right: twill binding shows a dark tape edge, carved lowers the pile at the edge, no border shows the backing. The edge colour is your Backing choice.</p>
+  <h4>Light and scene</h4>${sel3('light', 'Lighting', D3.LIGHTS, d.light)}${sel3('scene', 'Scene', { studio: 'Studio (floating)', room: 'Living room at true size' }, d.scene)}
+  ${d.scene === 'room' ? sel3('floor', 'Floor', D3.FLOORS, d.floor) + `<label class="chips"><input type="checkbox" id="d3furn" data-d3="furn" ${d.furn ? 'checked' : ''} style="width:auto"> Show sofa, table and plant</label><p class="note">The sofa is 210 cm wide, so you can judge the rug size. A rug over ${Math.round(2 * D3.ROOM.halfW)} cm wide will not fit this room.</p>` : ''}
+  <h4>Performance</h4>${sel3('quality', 'Quality', { auto: 'Automatic (lighter on phones)', high: 'High', low: 'Light (older phones)' }, d.quality)}
+  <p class="note">These settings change the preview only and are saved with the design. They do not change the price. The yarn look adjusts shine; this is a visual preview, not a physical simulation of loops or yarn.</p>`;
+}
+function setD3(k, v) { doc.d3 = Object.assign({}, doc.d3 || {}, { [k]: v }); commit(); }
 function tLay() {
   const rows = doc.layers.slice().reverse().map(l => `<div class="ly" data-sel="${l.id}" aria-current="${sel === l.id}"><i style="background:${(ym()[l.fill] || { hex: '#444' }).hex}"></i><span>${esc(l.name || L.TYPE_NAMES[l.type])}${l.type === 'text' ? ': ' + esc(l.text) : ''}</span><div class="ac"><button data-lv="${l.id}" aria-label="${l.vis ? 'Hide' : 'Show'}">${l.vis ? '◉' : '○'}</button><button data-ll="${l.id}" aria-label="Lock">${l.lock ? '\u{1F512}' : '\u{1F513}'}</button><button data-lu="${l.id}" aria-label="Move up">↑</button><button data-ld="${l.id}" aria-label="Move down">↓</button><button data-lc="${l.id}" aria-label="Duplicate">⧉</button><button data-lx="${l.id}" aria-label="Delete">✕</button></div></div>`).join('');
   return `${rows || '<p class="note">No layers. Add shapes, text or artwork.</p>'}<p class="note">Top of the list is the front. Drag objects on the canvas to move them; drag the green square to resize.</p>`;
@@ -376,7 +434,7 @@ function build() {
       <div class="v3"><canvas id="st3" data-keep aria-label="Interactive 3D preview of your rug" tabindex="0"></canvas><span class="tag">3D preview | drag to rotate</span><div class="cam"><button class="sb sm" data-cam="angle">Angle</button><button class="sb sm" data-cam="front">Front</button><button class="sb sm" data-cam="top">Top</button><button class="sb sm" data-cam="side">Side</button><button class="sb sm" data-zoom="-1" aria-label="Zoom in">+</button><button class="sb sm" data-zoom="1" aria-label="Zoom out">−</button></div></div></div></section>
     <aside class="pn r"><div class="pb" id="stR"></div></aside></div>
   <div class="tb"><button class="sb" id="stUndo">Undo</button><button class="sb" id="stRedo">Redo</button><button class="sb" id="stReset">Reset</button><span class="sp"></span><button class="sb" id="stSave">Save</button><button class="sb" id="stMine">My designs</button><button class="sb" id="stPrev">Preview</button><button class="sb" id="stDl">Download</button><button class="sb" id="stQuote">Request quotation</button><button class="sb pri" id="stCart">Add to cart</button></div><div class="tt" role="status"></div>`;
-  document.body.appendChild(root); bindCanvas(); vtDraw(); root.addEventListener('click', e => { const b = e.target.closest('button'); if (b && (b.id === 'stPen' || b.dataset.vt || b.dataset.al || ['rEdit', 'rSimp', 'rSpeck', 'rSplit', 'rMerge'].includes(b.id))) editorClick(b); });
+  document.body.appendChild(root); bindCanvas(); vtDraw(); root.addEventListener('click', e => { const b = e.target.closest('button'); if (b && (b.dataset.ol || ['olPen', 'olSel', 'olSmooth', 'olSimp'].includes(b.id))) outlineAction(b); else if (b && b.id === 'd3pileAuto') setD3('pileMm', null); else if (b && (b.id === 'stPen' || b.dataset.vt || b.dataset.al || ['rEdit', 'rSimp', 'rSpeck', 'rSplit', 'rMerge'].includes(b.id))) editorClick(b); });
   root.addEventListener('click', e => {
     const t = e.target, c = s => t.closest(s);
     let b;
@@ -400,6 +458,7 @@ function build() {
   });
   root.addEventListener('input', e => {
     const t = e.target, l = layer(sel), live = id => { const o = $('#' + id + 'V', root); return o; };
+    if (t.dataset && t.dataset.d3 && t.dataset.n) { const k = t.dataset.d3; doc.d3 = Object.assign({}, doc.d3 || {}, { [k]: +t.value }); const o = $('#' + t.id + 'V', root); if (o) o.textContent = t.value + ' mm'; changed('live'); return; }
     if (t.id === 'stMax') { doc.maxColours = +t.value; $('#stMaxV', root).textContent = t.value; changed('live'); return; }
     if (t.id === 'stRad') { doc.radius = +t.value; $('#stRadV', root).textContent = t.value + '%'; changed('live'); return; }
     if (t.id === 'stBd') { doc.borderCm = unit === 'cm' ? +t.value : +t.value * IN; $('#stBdV', root).textContent = fmtLen(doc.borderCm) + ' ' + unit; changed('live'); return; }
@@ -417,7 +476,8 @@ function build() {
     if (t.id === 'stTc') { filt.tcat = t.value; panelL(); return; }
     if (t.id === 'stCt') { target = t.value; panelL(); return; }
     if (t.id === 'stCc') { filt.cat = t.value; panelL(); return; }
-    if (t.id === 'stShape') { const v = t.value; if (v === 'square' || v === 'circle') setSize(doc.widthCm, doc.widthCm, v); else { doc.shape = v; commit(); } return; }
+    if (t.dataset && t.dataset.d3) { const k = t.dataset.d3; setD3(k, t.type === 'checkbox' ? t.checked : t.dataset.n ? +t.value : t.value); return; }
+    if (t.id === 'stShape') { const v = t.value; if (v === 'custom') { if (!doc.outline) doc.outline = E.presetOutline('blob'); doc.shape = 'custom'; commit(); return; } if (v === 'square' || v === 'circle') setSize(doc.widthCm, doc.widthCm, v); else { doc.shape = v; commit(); } return; }
     if (t.id === 'stW' || t.id === 'stH') { let w = parseLen($('#stW', root).value), h = parseLen($('#stH', root).value); if (doc.shape === 'square' || doc.shape === 'circle') h = w; if (!isFinite(w) || !isFinite(h)) return; if (!setSize(w, h)) { const msg = szMsg; panelL(); const e2 = $('#stSzErr', root); if (e2) e2.textContent = msg; } return; }
     if (t.id === 'mPile') { doc.pile = t.value; commit(); return; } if (t.id === 'mBack') { doc.backing = t.value; commit(); return; } if (t.id === 'mBord') { doc.borderType = t.value; commit(); return; } if (t.id === 'mFrame') { doc.frame = t.checked; commit(); return; }
     if (!l) return;
@@ -465,7 +525,7 @@ function openStudio(opts) {
 function closeStudio() { if (dirty && doc.layers.length && !confirm('Close the studio? Unsaved changes will be lost. Use Save to keep this design.')) return; root.classList.remove('on'); document.body.classList.remove('studio-open'); if (location.hash === '#studio') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; } } }
 /* hooks used by the rug-maker workspace: load a design into the editor, read the current one */
 function loadDoc(d, o) { o = o || {}; openStudio(); imgs = {}; Object.entries(o.images || {}).forEach(([k, v]) => { if (v && v.el) imgs[k] = v; }); newDoc(JSON.parse(JSON.stringify(d))); savedName = o.name || ''; cloudId = o.cloudId || ''; if (o.view) { view = o.view; $('#stViews', root).className = 'views ' + view; $$('[data-v]', root).forEach(x => x.setAttribute('aria-pressed', x.dataset.v === view)); setTimeout(() => { fit(); update3D(); }, 60); } }
-window.XSTUDIO = { open: openStudio, close: closeStudio, loadDoc, getDoc: () => ({ doc: JSON.parse(JSON.stringify(doc)), imgs, name: savedName, cloudId }), setCloudId: id => { cloudId = id || ''; } };
+window.XSTUDIO = { viewer: () => viewer, open: openStudio, close: closeStudio, loadDoc, getDoc: () => ({ doc: JSON.parse(JSON.stringify(doc)), imgs, name: savedName, cloudId }), setCloudId: id => { cloudId = id || ''; } };
 document.addEventListener('click', e => { const b = e.target.closest('[data-open-studio]'); if (b) { e.preventDefault(); openStudio(); } });
 addEventListener('hashchange', () => { if (location.hash === '#studio') openStudio(); });
 if (location.hash === '#studio') setTimeout(openStudio, 400);

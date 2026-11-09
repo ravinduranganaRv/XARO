@@ -44,3 +44,8 @@ test('mergeRates does not mutate defaults', () => {
 });
 test('friendly rounding', () => { assert.equal(C.friendly(9504.8, 'LKR'), 9600); assert.equal(C.friendly(97.17, 'USD'), 98); assert.equal(C.friendly(371.2, 'AED'), 375); });
 test('estimate is labelled as an estimate', () => { const r = C.estimate(base); assert.equal(r.estimate, true); assert.match(r.notes[0], /Estimate only/); });
+test('custom outline uses its own area share and edge length', () => {
+  const C = require('../src/mod/costing.js'), base = { widthCm: 100, heightCm: 100, colours: 3, pile: 'standard', backing: 'standard', border: 'bound', currency: 'USD' };
+  const rect = C.estimate(Object.assign({ shape: 'rect' }, base)), half = C.estimate(Object.assign({ shape: 'custom', areaFraction: 0.5, perimeterM: 3 }, base)), bad = C.estimate(Object.assign({ shape: 'custom', areaFraction: 7 }, base));
+  assert.strictEqual(half.areaM2, 0.5); assert.strictEqual(half.perimeterM, 3); assert.ok(half.usd.material < rect.usd.material); assert.strictEqual(bad.areaM2, 1, 'an impossible share falls back to the full box');
+});

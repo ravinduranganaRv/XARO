@@ -46,8 +46,8 @@ function layerSvg(l, W, H, ym, imgs) {
 function svg(doc, yarns, opts) {
   opts = opts || {}; const ym = {}; (yarns || []).forEach(y => { ym[y.id] = y; });
   const W = +doc.widthCm, H = +doc.heightCm; if (!(W > 0 && H > 0)) throw new Error('Design has no size');
-  const rx = doc.shape === 'circle' || doc.shape === 'oval' ? null : Math.max(0, Math.min(50, doc.radius || 0)) / 100 * Math.min(W, H);
-  const shape = rx === null ? `<ellipse cx="${n2(W / 2)}" cy="${n2(H / 2)}" rx="${n2(W / 2)}" ry="${n2(H / 2)}"` : `<rect x="0" y="0" width="${n2(W)}" height="${n2(H)}" rx="${n2(rx)}"`;
+  const custom = doc.shape === 'custom' && doc.outline && doc.outline.length >= 3, rx = custom || doc.shape === 'circle' || doc.shape === 'oval' ? null : Math.max(0, Math.min(50, doc.radius || 0)) / 100 * Math.min(W, H);
+  const shape = custom ? `<polygon points="${doc.outline.map(p => n2(p[0] * W) + ',' + n2(p[1] * H)).join(' ')}"` : rx === null ? `<ellipse cx="${n2(W / 2)}" cy="${n2(H / 2)}" rx="${n2(W / 2)}" ry="${n2(H / 2)}"` : `<rect x="0" y="0" width="${n2(W)}" height="${n2(H)}" rx="${n2(rx)}"`;
   const bg = opts.transparent ? '' : `<rect width="${n2(W)}" height="${n2(H)}" fill="${hexOf(ym, doc.bg, '#2A2D2A')}"/>`;
   const layers = (doc.layers || []).map(l => layerSvg(l, W, H, ym, opts.images)).join('');
   const bw = doc.borderCm > 0 ? doc.borderCm * 2 : 0, border = bw ? `${shape} fill="none" stroke="${hexOf(ym, doc.borderYarn, '#0B0B0B')}" stroke-width="${n2(bw)}" clip-path="url(#xshape)"/>` : '';

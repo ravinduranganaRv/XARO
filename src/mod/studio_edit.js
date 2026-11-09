@@ -61,6 +61,29 @@ E.layerFromPoints = pts => {
 E.toRug = (l, u, W, H) => { const x = (u[0] - 0.5) * l.w * W, y = (u[1] - 0.5) * l.h * H, a = (l.rot || 0) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), fx = l.flip ? -x : x; return [(l.cx * W + fx * c - y * s) / W, (l.cy * H + fx * s + y * c) / H]; };
 E.toUnit = (l, p, W, H) => { const dx = p[0] * W - l.cx * W, dy = p[1] * H - l.cy * H, a = -(l.rot || 0) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); let x = dx * c - dy * s; const y = dx * s + dy * c; if (l.flip) x = -x; return [x / (l.w * W) + 0.5, y / (l.h * H) + 0.5]; };
 
+/* ---- rug outline (any shape as one closed polygon in the unit square, y down like the canvas) ---- */
+E.polyArea = r => E.ringArea(r);
+/** the outline of the rug: custom outline points, an ellipse, or a rounded rectangle (n = points per full turn) */
+E.outline = (doc, n) => {
+  n = Math.max(16, n || 96);
+  if (doc.shape === 'custom' && doc.outline && doc.outline.length >= 3) return doc.outline.map(p => [p[0], p[1]]);
+  if (doc.shape === 'circle' || doc.shape === 'oval') { const o = []; for (let i = 0; i < n; i++) { const t = i / n * Math.PI * 2; o.push([0.5 + 0.5 * Math.cos(t), 0.5 + 0.5 * Math.sin(t)]); } return o; }
+  const W = doc.widthCm || 1, H = doc.heightCm || 1, rc = Math.min(50, Math.max(0, doc.radius || 0)) / 100 * Math.min(W, H), rx = rc / W, ry = rc / H;
+  if (rc <= 0) return [[0, 0], [1, 0], [1, 1], [0, 1]];
+  const k = Math.max(3, Math.round(n / 4)), o = [], corners = [[1 - rx, ry, -Math.PI / 2], [1 - rx, 1 - ry, 0], [rx, 1 - ry, Math.PI / 2], [rx, ry, Math.PI]];
+  corners.forEach(c => { for (let i = 0; i <= k; i++) { const t = c[2] + i / k * Math.PI / 2; o.push([c[0] + rx * Math.cos(t), c[1] + ry * Math.sin(t)]); } }); return o;
+};
+E.perimeterCm = (poly, wCm, hCm) => { let s = 0; for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; s += Math.hypot((b[0] - a[0]) * wCm, (b[1] - a[1]) * hCm); } return s; };
+/** Chaikin corner cutting on a closed ring: rounds corners, keeps the shape close to the original */
+E.smoothClosed = (poly, rounds) => { let r = poly.map(p => p.slice()); for (let k = 0; k < (rounds == null ? 2 : rounds); k++) { const o = []; for (let i = 0; i < r.length; i++) { const a = r[i], b = r[(i + 1) % r.length]; o.push([0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]], [0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]); } r = o; } return r; };
+/** scales a ring so its bounding box is exactly the unit square */
+E.fitUnit = poly => { const xs = poly.map(p => p[0]), ys = poly.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), w = Math.max(x1 - x0, 1e-6), h = Math.max(y1 - y0, 1e-6); return poly.map(p => [r5((p[0] - x0) / w), r5((p[1] - y0) / h)]); };
+/** a few ready-made outlines (unit square). 'blob' is a soft freeform shape */
+E.presetOutline = name => {
+  if (name === 'blob') { const o = []; for (let i = 0; i < 72; i++) { const t = i / 72 * Math.PI * 2, r = 0.42 + 0.05 * Math.sin(3 * t + 0.5) + 0.035 * Math.sin(5 * t + 1.3) + 0.02 * Math.sin(2 * t + 2.1); o.push([0.5 + r * Math.cos(t) * 1.1, 0.5 + r * Math.sin(t)]); } return E.fitUnit(o); }
+  return null;
+};
+
 /* ---- keeping the layer box tight around its points, merging ---- */
 /** rewrites the layer's rings (given in its own unit square) and shrinks/grows its box so the points span exactly 0..1; position, rotation and flip are preserved */
 E.fitBox = (l, rings, W, H) => {
