@@ -1,5 +1,11 @@
 # DEVELOPMENT_PROGRESS
 
+## CURRENT STATUS (2026-11-10) - supersedes the older phase notes below where they differ
+- Final state, per item and with the five status labels: `docs/ACCEPTANCE_REPORT.md`. Security: `docs/SECURITY_AUDIT.md`. Undo steps: `docs/ROLLBACK.md`.
+- Built since the Phase 0-6 notes below: Supabase client + accounts, rug-maker workspace (14 screens), image-to-vector, 100 templates, export engine, vector editor, advanced 3D, security hardening, storefront visual regression (CI).
+- Older lines below that say a screen, client or owner claim is "not yet done" describe the state at that date and are no longer accurate: the owner email is now configured (see "Update 2026-11-10"), and the Studio screens and Supabase client exist (mock-tested).
+- Still needed from the owner: real-Supabase live test (checklist in the acceptance report), approval for edge-function deployment and the catalogue seed, and explicit approval before any merge to `main`.
+
 Branch: `dev/studio-pro` (never merged to `main` without the owner's explicit approval).
 Scope (V5.0): (A) security of the existing site, (B) upgrade of the existing 3D Studio. The rest of the site stays as it was.
 Status labels: COMPLETE AND TESTED | IMPLEMENTED BUT NOT FULLY TESTED | REQUIRES EXTERNAL CONNECTION | NOT IMPLEMENTED | BLOCKED

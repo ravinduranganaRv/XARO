@@ -47,7 +47,7 @@ Test totals at this commit: 137 unit tests pass; browser suites with 0 failures:
 | Product catalogue seed (products/prices tables are empty) | NOT IMPLEMENTED | Waits for your approval to write to the real project. |
 | Admin on Supabase Auth | BLOCKED | See A. |
 | Deploy to production / merge to `main` | BLOCKED | Needs your explicit approval; nothing was merged. |
-| Rollback procedure | COMPLETE AND TESTED | `docs/ROLLBACK.md` (documented; the revert itself not exercised because nothing is merged). |
+| Rollback procedure | IMPLEMENTED BUT NOT FULLY TESTED | `docs/ROLLBACK.md`. Documented only; the revert was not exercised because nothing is merged. |
 
 ## Live test checklist (needs you, about 15 minutes, after the preview is published from the branch)
 1. Supabase > Authentication > Providers > Email: "Confirm email" is ON.
