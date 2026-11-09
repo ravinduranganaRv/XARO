@@ -119,6 +119,10 @@ begin
   got := (select role from profiles where email = 'boss@x.test'); if got <> 'owner' then raise exception 'FAIL verified owner not promoted: %', got; end if; n := n + 1;
   insert into auth.users (id, email, raw_user_meta_data, email_confirmed_at) values ('00000000-0000-0000-0000-00000000f0b1', 'Boss@X.test', '{}', now());
   got := (select count(*)::text from profiles where role = 'owner'); if got <> '1' then raise exception 'FAIL more than one owner claimed: %', got; end if; n := n + 1;
+  -- the store owner may also run a rug-making business (regression: found in the first live test)
+  got := pg_temp.as_user('00000000-0000-0000-0000-00000000f0b0', 'select public.become_rugmaker()', true); if got like 'err:%' then raise exception 'FAIL owner become_rugmaker: %', got; end if;
+  got := (select account_type || '/' || role from profiles where id = '00000000-0000-0000-0000-00000000f0b0'); if got <> 'rugmaker/owner' then raise exception 'FAIL owner account type/role: %', got; end if; n := n + 1;
+  got := pg_temp.as_user('00000000-0000-0000-0000-00000000f0b0', $q$select public.create_business('Owner Rugs','Boss','+94000','LK','LKR')$q$, true); if got like 'err:%' then raise exception 'FAIL owner create_business: %', got; end if; n := n + 1;
 
   -- 10. storage
   got := pg_temp.as_user(alice, format($q$insert into storage.objects (bucket_id, name) values ('design-originals', '%s/a.png')$q$, alice)); if got <> 'ok:1' then raise exception 'FAIL own personal upload: %', got; end if; n := n + 1;
