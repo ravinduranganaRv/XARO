@@ -271,24 +271,32 @@ function tSize() {
   <div class="err" id="stSzErr" role="alert"></div>
   ${doc.shape === 'rect' || doc.shape === 'square' ? `<div class="fld"><label for="stRad">Corner radius: <b id="stRadV">${doc.radius}%</b></label><input type="range" id="stRad" min="0" max="50" value="${doc.radius}"></div>` : ''}
   <div class="fld"><label for="stBd">Border width: <b id="stBdV">${fmtLen(doc.borderCm)} ${unit}</b></label><input type="range" id="stBd" min="0" max="${unit === 'cm' ? 8 : 20}" step="${unit === 'cm' ? 0.5 : 1}" value="${unit === 'cm' ? doc.borderCm : Math.round(doc.borderCm / IN * 4) / 4}"></div>
-  ${doc.borderCm > 0 ? `<h4>Border colour</h4><div class="sw">${L.yarnList().map(y => swatchBtn(y, doc.borderYarn === y.id).replace('data-y=', 'data-by=')).join('')}</div>` : ''}
+  ${doc.borderCm > 0 ? `<h4>Border colour</h4>${colourPicker(L.yarnList(), doc.borderYarn, y => swatchBtn(y, doc.borderYarn === y.id).replace('data-y=', 'data-by='))}` : ''}
   ${doc.shape === 'custom' ? outlinePanel() : ''}
   <h4>Quick sizes</h4><div class="chips">${presets.map((p, i) => `<button class="sb sm" data-pre="${i}">${p[0]}</button>`).join('')}</div>
   <p class="note">Choose Custom outline for heart, star, freeform or hand-drawn rug shapes. The width and height above are the size of the box around the outline.</p>`;
 }
-const hue = h => { const c = XD.hex2rgb(h), mx = Math.max(...c), mn = Math.min(...c), d = mx - mn; if (d < 28) return 'Neutrals'; let hh = mx === c[0] ? ((c[1] - c[2]) / d) % 6 : mx === c[1] ? (c[2] - c[0]) / d + 2 : (c[0] - c[1]) / d + 4; hh = (hh * 60 + 360) % 360; return hh < 20 || hh >= 330 ? 'Reds and pinks' : hh < 70 ? 'Oranges and yellows' : hh < 170 ? 'Greens' : hh < 260 ? 'Blues' : 'Purples'; };
+const XCOL = () => window.XCOLOUR, PREVIEW_N = 30;
+/* colour picker grouped into families (Reds, Blues, Browns ...); a family chip shows all of that family, "All" shows the first shades of each */
+function colourPicker(list, cur, btn) {
+  const groups = XCOL().groupYarns(list), fc = filt.q ? '' : filt.cat, shown = fc ? groups.filter(g => g.key === fc) : groups;   // a search looks through every family
+  const chips = `<div class="fam" role="group" aria-label="Colour families"><button type="button" class="sb sm" data-fam="" aria-pressed="${!fc}">All <small>${list.length}</small></button>${groups.map(g => `<button type="button" class="sb sm" data-fam="${g.key}" aria-pressed="${fc === g.key}"><i style="background:${g.hex}"></i>${esc(g.label)} <small>${g.items.length}</small></button>`).join('')}</div>`;
+  const body = shown.map(g => { const part = fc ? g.items : g.items.slice(0, PREVIEW_N); const more = !fc && g.items.length > PREVIEW_N, hid = more && cur && !part.some(y => y.id === cur) ? g.items.find(y => y.id === cur) : null;
+    return `<div class="cg"><div class="cgh"><b>${esc(g.label)}</b><small>${g.items.length} shade${g.items.length === 1 ? '' : 's'}</small></div><div class="sw">${part.concat(hid ? [hid] : []).map(btn).join('')}</div>${more ? `<button type="button" class="sb sm" data-fam="${g.key}">Show all ${g.items.length} ${esc(g.label.toLowerCase())}</button>` : ''}</div>`; }).join('') || '<p class="note">No colours match.</p>';
+  return chips + body;
+}
+const yarnOptions = (list, selId) => XCOL().groupYarns(list).map(g => `<optgroup label="${esc(g.label)}">${g.items.map(y => `<option value="${esc(y.id)}"${y.id === selId ? ' selected' : ''}>${esc(y.name)} (${esc(y.id)})</option>`).join('')}</optgroup>`).join('');
 function tCol() {
-  const all = L.yarnList(), cats = ['', 'Neutrals', 'Reds and pinks', 'Oranges and yellows', 'Greens', 'Blues', 'Purples'], q = filt.q.toLowerCase(), list = all.filter(y => (!filt.cat || hue(y.hex) === filt.cat) && (!q || (y.name + y.id).toLowerCase().includes(q))), l = layer(sel), pals = XD.g('palettes', []);
+  const all = L.yarnList(), q = filt.q.toLowerCase(), list = all.filter(y => !q || (y.name + y.id).toLowerCase().includes(q)), l = layer(sel), pals = XD.g('palettes', []);
   const cur = target === 'fill' ? (l && l.fill) : target === 'stroke' ? (l && l.stroke) : target === 'bg' ? doc.bg : doc.borderYarn;
   const used = an ? an.rows.map(r => r.yarn) : [];
   return `<div class="row2"><div class="fld"><label for="stCt">Apply colour to</label><select id="stCt"><option value="fill" ${target === 'fill' ? 'selected' : ''}>Selected object</option><option value="stroke" ${target === 'stroke' ? 'selected' : ''}>Object outline</option><option value="bg" ${target === 'bg' ? 'selected' : ''}>Background</option><option value="border" ${target === 'border' ? 'selected' : ''}>Rug border</option></select></div>
-  <div class="fld"><label for="stCc">Filter</label><select id="stCc">${cats.map(c => `<option value="${c}" ${filt.cat === c ? 'selected' : ''}>${c || 'All colours'}</option>`).join('')}</select></div></div>
-  <div class="fld"><input type="text" id="stCq" placeholder="Search colour or yarn ID" value="${esc(filt.q)}" aria-label="Search colours"></div>
+  <div class="fld"><label for="stCq">Search</label><input type="text" id="stCq" placeholder="Colour name or yarn ID" value="${esc(filt.q)}" aria-label="Search colours"></div></div>
   ${(target === 'fill' || target === 'stroke') && !l ? '<div class="warn">Select an object first, or choose Background.</div>' : ''}
-  <div class="sw">${list.map(y => swatchBtn(y, cur === y.id)).join('')}</div>
+  ${colourPicker(list, cur, y => swatchBtn(y, cur === y.id))}
   ${cur && ym()[cur] ? `<p class="note"><b>${esc(ym()[cur].name)}</b> | ${esc(ym()[cur].id)} | ${esc(ym()[cur].hex)} | rgb ${XD.hex2rgb(ym()[cur].hex).join(', ')} | ${esc(ym()[cur].material)}${ym()[cur].availability && ym()[cur].availability !== 'unknown' ? ' | ' + esc(ym()[cur].availability) : ''}</p>` : ''}
   <h4>Yarns used in this design</h4><div id="stUse"></div>
-  <h4>Replace a colour everywhere</h4><div class="row2"><select id="stRf" aria-label="Replace">${used.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select><select id="stRt" aria-label="With">${all.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select></div><button class="sb sm" id="stRep" style="margin-top:6px">Replace</button>
+  <h4>Replace a colour everywhere</h4><div class="row2"><select id="stRf" aria-label="Replace">${used.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select><select id="stRt" aria-label="With">${yarnOptions(all)}</select></div><button class="sb sm" id="stRep" style="margin-top:6px">Replace</button>
   <h4>Saved palettes</h4>${pals.map((p, i) => `<div class="fld"><div class="lb">${esc(p.name)} <button class="sb sm bad" data-pdel="${i}">x</button></div><div class="sw">${p.ids.filter(id => ym()[id]).map(id => swatchBtn(ym()[id], false)).join('')}</div></div>`).join('') || '<p class="note">None yet.</p>'}<button class="sb sm" id="stPal">Save this design's colours as a palette</button>`;
 }
 function t3d() {
@@ -446,6 +454,7 @@ function build() {
     else if (b = c('[data-add]')) addLayer(b.dataset.add);
     else if (b = c('[data-pre]')) { const p = [['rect', 44, 16], ['rect', 32, 12], ['circle', 12, 12], ['rect', 60, 90], ['rect', 90, 90], ['rect', 61, 91]][+b.dataset.pre]; doc.frame = +b.dataset.pre === 5; setSize(p[1], p[2], p[0]); }
     else if (b = c('[data-by]')) { doc.borderYarn = b.dataset.by; commit(); }
+    else if (b = c('[data-fam]')) { filt.cat = b.dataset.fam; panelL(); e.stopPropagation(); }
     else if (b = c('[data-y]')) { const id = b.dataset.y, l = layer(sel); if (target === 'bg') doc.bg = id; else if (target === 'border') doc.borderYarn = id; else if (!l) return toast('Select an object first, or apply to Background.', true); else if (target === 'stroke') { l.stroke = id; if (!l.sw) l.sw = 0.015; } else l.fill = id; commit(); }
     else if (b = c('[data-pdel]')) { const p = XD.g('palettes', []); p.splice(+b.dataset.pdel, 1); XD.s('palettes', p); panelL(); }
     else if (b = c('[data-lv]')) { const l = layer(b.dataset.lv); l.vis = !l.vis; commit(); e.stopPropagation(); }

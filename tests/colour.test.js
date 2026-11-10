@@ -45,3 +45,16 @@ test('yarn mapping picks nearest usable yarn and skips out-of-stock when alterna
   const m = C.mapYarns(r, yarns, 1000); assert.ok(m.every(x => x.yarn.id !== 'A')); near(m.reduce((s, x) => s + x.areaCm2, 0), 1000, 1e-6);
   assert.equal(C.mapYarns(r, [{ id: 'A', hex: red, availability: 'out' }], 100)[0].yarn.id, 'A'); // only choice: still returned, caller shows the warning
 });
+test('colour families: shelf grouping of yarns', () => {
+  const exp = { '#FF0000': 'reds', '#FFC0CB': 'pinks', '#8B4513': 'browns', '#F5DEB3': 'beiges', '#808080': 'greys', '#000000': 'blacks', '#FFFFFF': 'whites', '#00C000': 'greens', '#008080': 'teals', '#0000FF': 'blues', '#800080': 'purples', '#FFFF00': 'yellows', '#FFA500': 'oranges', '#FF00FF': 'pinks' };
+  for (const [h, f] of Object.entries(exp)) assert.strictEqual(C.family(h), f, h);
+  const ys = Object.keys(exp).map((h, i) => ({ id: 'Y' + i, hex: h })), g = C.groupYarns(ys);
+  assert.deepStrictEqual(g.map(x => x.key), C.FAMILIES.map(f => f.key).filter(k => g.some(x => x.key === k)), 'families come in shelf order');
+  assert.strictEqual(g.reduce((n, x) => n + x.items.length, 0), ys.length, 'every yarn lands in exactly one family');
+  const reds = C.groupYarns([{ id: 'a', hex: '#FF6666' }, { id: 'b', hex: '#660000' }, { id: 'c', hex: '#CC0000' }])[0].items.map(y => y.id); assert.deepStrictEqual(reds, ['b', 'c', 'a'], 'dark to light inside a family');
+});
+test('colour families: the 1000-shade starter library is spread across every family', () => {
+  const W = require('../src/mod/workspace_core.js'), rows = W.parseYarnCsv(require('fs').readFileSync(require('path').join(__dirname, '..', 'tools', 'default_yarns_1000.csv'), 'utf8')).rows;
+  const g = C.groupYarns(rows.map(y => ({ id: y.code, hex: y.hex }))); assert.strictEqual(rows.length, 1000); assert.strictEqual(g.length, C.FAMILIES.length);
+  assert.strictEqual(g.reduce((n, x) => n + x.items.length, 0), 1000); assert.ok(g.every(x => x.items.length >= 5), g.map(x => x.key + x.items.length).join());
+});

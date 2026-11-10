@@ -59,6 +59,14 @@ body.studio-open{overflow:hidden}
 #studio .sw button{aspect-ratio:1;border-radius:7px;border:2px solid rgba(255,255,255,.14);cursor:pointer;padding:0;position:relative}
 #studio .sw button[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 2px var(--neon)}
 #studio .sw button:hover{transform:scale(1.08)}
+#studio .fam{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+#studio .fam .sb{display:inline-flex;align-items:center;gap:6px}
+#studio .fam .sb i{width:11px;height:11px;border-radius:50%;border:1px solid rgba(255,255,255,.35);flex:none}
+#studio .fam .sb small,#studio .cgh small{opacity:.65;font-size:11px}
+#studio .fam .sb[aria-pressed=true]{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon)}
+#studio .cg{margin:0 0 14px}
+#studio .cgh{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid #1a201a;font-size:12.5px}
+#studio .cg>.sb{margin-top:6px}
 #studio .yl{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #1a201a;font-size:12.5px}
 #studio .yl i{width:22px;height:22px;border-radius:5px;border:1px solid rgba(255,255,255,.2)}
 #studio .yl small{color:var(--mute);font-family:var(--mono);font-size:11px}

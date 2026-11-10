@@ -122,5 +122,29 @@ C.mapYarns = (red, yarns, areaCm2) => {
 };
 C.describeDelta = d => d == null ? 'no yarn' : d <= 2 ? 'near identical' : d <= 6 ? 'close match' : d <= 12 ? 'noticeable difference' : 'different colour';
 
+
+/* ---- colour families: a shelf-style grouping for large yarn libraries (1000+ shades) ---- */
+C.FAMILIES = [
+  { key: 'whites', label: 'Whites and creams', hex: '#F4F1E8' }, { key: 'greys', label: 'Greys', hex: '#8A8A8A' }, { key: 'blacks', label: 'Blacks', hex: '#161616' },
+  { key: 'reds', label: 'Reds', hex: '#D62828' }, { key: 'pinks', label: 'Pinks and magentas', hex: '#E86AA6' }, { key: 'oranges', label: 'Oranges', hex: '#F28C28' },
+  { key: 'yellows', label: 'Yellows', hex: '#F2D027' }, { key: 'browns', label: 'Browns', hex: '#7A4A2A' }, { key: 'beiges', label: 'Beige and skin tones', hex: '#DDB892' },
+  { key: 'greens', label: 'Greens', hex: '#3FA34D' }, { key: 'teals', label: 'Teals and aqua', hex: '#1FA5A0' }, { key: 'blues', label: 'Blues', hex: '#2F6FDB' },
+  { key: 'purples', label: 'Purples', hex: '#7B4BC2' }
+];
+C.hsl = hex => { const [r, g, b] = C.hex2rgb(hex).map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, l = (mx + mn) / 2;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1)); let h = d === 0 ? 0 : mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; return { h, s, l }; };
+C.family = hex => { const { h, s, l } = C.hsl(hex);
+  if (s < 0.14 || l < 0.1 || l > 0.95) return l < 0.16 ? 'blacks' : l > 0.86 ? 'whites' : 'greys';
+  if (h >= 8 && h < 52 && l < 0.42 && s < 0.92) return 'browns';
+  if (h >= 14 && h < 52 && l >= 0.5 && s >= 0.2 && s < 0.7) return 'beiges';
+  if (h >= 345 || h < 12) return l > 0.72 ? 'pinks' : 'reds';
+  if (h < 40) return l > 0.8 ? 'beiges' : 'oranges';
+  if (h < 70) return 'yellows'; if (h < 160) return 'greens'; if (h < 200) return 'teals'; if (h < 255) return 'blues'; if (h < 295) return 'purples'; if (h < 320) return l < 0.35 ? 'purples' : 'pinks'; return 'pinks'; };
+/* shade order inside a family: by hue band, then dark to light (neutrals: dark to light only) */
+C.shadeKey = hex => { const { h, l } = C.hsl(hex), f = C.family(hex); return (f === 'whites' || f === 'greys' || f === 'blacks' ? 0 : Math.round(h / 8) * 8) * 10 + l; };
+C.sortYarns = list => list.slice().sort((a, b) => C.shadeKey(a.hex) - C.shadeKey(b.hex) || String(a.id || a.code).localeCompare(String(b.id || b.code)));
+/** [{key,label,hex,items}] for the families that have at least one yarn, in shelf order, each sorted by shade */
+C.groupYarns = list => { const m = {}; C.FAMILIES.forEach(f => { m[f.key] = []; }); (list || []).forEach(y => { m[C.family(y.hex)].push(y); });
+  return C.FAMILIES.filter(f => m[f.key].length).map(f => ({ key: f.key, label: f.label, hex: f.hex, items: C.sortYarns(m[f.key]) })); };
 if (typeof module !== 'undefined' && module.exports) module.exports = C; else root.XCOLOUR = C;
 })(typeof window !== 'undefined' ? window : globalThis);

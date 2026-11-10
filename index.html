@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QsBgi87bjUCGii/xK3BPk0A8fu3dUyvpof0HWS8hJN8=' 'sha256-XS6vz+E7g/+buR6qponWuuigOY0v9OQYHaohaD8m0xc=' 'sha256-3Q9wGTjV7tBaTsFVSo/LpnQSJ60Zi1ec2Lh19+zV3tE=' 'sha256-UcB7KBqRY6t1Aww8OzIVNhhd4N5fjdeml4zktkVC0SQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://mlrydpclqokizsqmigen.supabase.co https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://mlrydpclqokizsqmigen.supabase.co https://wa.me">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QsBgi87bjUCGii/xK3BPk0A8fu3dUyvpof0HWS8hJN8=' 'sha256-XS6vz+E7g/+buR6qponWuuigOY0v9OQYHaohaD8m0xc=' 'sha256-3Q9wGTjV7tBaTsFVSo/LpnQSJ60Zi1ec2Lh19+zV3tE=' 'sha256-F5yp6g9p8CHfFo1Zh6H1o7Ll/kVxa9mWsf/p1yissxs='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://mlrydpclqokizsqmigen.supabase.co https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://mlrydpclqokizsqmigen.supabase.co https://wa.me">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>XARO Industries | Custom hand-tufted rugs designed in 3D</title>
@@ -534,6 +534,14 @@ body.studio-open{overflow:hidden}
 #studio .sw button{aspect-ratio:1;border-radius:7px;border:2px solid rgba(255,255,255,.14);cursor:pointer;padding:0;position:relative}
 #studio .sw button[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 2px var(--neon)}
 #studio .sw button:hover{transform:scale(1.08)}
+#studio .fam{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+#studio .fam .sb{display:inline-flex;align-items:center;gap:6px}
+#studio .fam .sb i{width:11px;height:11px;border-radius:50%;border:1px solid rgba(255,255,255,.35);flex:none}
+#studio .fam .sb small,#studio .cgh small{opacity:.65;font-size:11px}
+#studio .fam .sb[aria-pressed=true]{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon)}
+#studio .cg{margin:0 0 14px}
+#studio .cgh{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid #1a201a;font-size:12.5px}
+#studio .cg>.sb{margin-top:6px}
 #studio .yl{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #1a201a;font-size:12.5px}
 #studio .yl i{width:22px;height:22px;border-radius:5px;border:1px solid rgba(255,255,255,.2)}
 #studio .yl small{color:var(--mute);font-family:var(--mono);font-size:11px}
@@ -2165,6 +2173,30 @@ C.mapYarns = (red, yarns, areaCm2) => {
 };
 C.describeDelta = d => d == null ? 'no yarn' : d <= 2 ? 'near identical' : d <= 6 ? 'close match' : d <= 12 ? 'noticeable difference' : 'different colour';
 
+
+/* ---- colour families: a shelf-style grouping for large yarn libraries (1000+ shades) ---- */
+C.FAMILIES = [
+  { key: 'whites', label: 'Whites and creams', hex: '#F4F1E8' }, { key: 'greys', label: 'Greys', hex: '#8A8A8A' }, { key: 'blacks', label: 'Blacks', hex: '#161616' },
+  { key: 'reds', label: 'Reds', hex: '#D62828' }, { key: 'pinks', label: 'Pinks and magentas', hex: '#E86AA6' }, { key: 'oranges', label: 'Oranges', hex: '#F28C28' },
+  { key: 'yellows', label: 'Yellows', hex: '#F2D027' }, { key: 'browns', label: 'Browns', hex: '#7A4A2A' }, { key: 'beiges', label: 'Beige and skin tones', hex: '#DDB892' },
+  { key: 'greens', label: 'Greens', hex: '#3FA34D' }, { key: 'teals', label: 'Teals and aqua', hex: '#1FA5A0' }, { key: 'blues', label: 'Blues', hex: '#2F6FDB' },
+  { key: 'purples', label: 'Purples', hex: '#7B4BC2' }
+];
+C.hsl = hex => { const [r, g, b] = C.hex2rgb(hex).map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, l = (mx + mn) / 2;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1)); let h = d === 0 ? 0 : mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; return { h, s, l }; };
+C.family = hex => { const { h, s, l } = C.hsl(hex);
+  if (s < 0.14 || l < 0.1 || l > 0.95) return l < 0.16 ? 'blacks' : l > 0.86 ? 'whites' : 'greys';
+  if (h >= 8 && h < 52 && l < 0.42 && s < 0.92) return 'browns';
+  if (h >= 14 && h < 52 && l >= 0.5 && s >= 0.2 && s < 0.7) return 'beiges';
+  if (h >= 345 || h < 12) return l > 0.72 ? 'pinks' : 'reds';
+  if (h < 40) return l > 0.8 ? 'beiges' : 'oranges';
+  if (h < 70) return 'yellows'; if (h < 160) return 'greens'; if (h < 200) return 'teals'; if (h < 255) return 'blues'; if (h < 295) return 'purples'; if (h < 320) return l < 0.35 ? 'purples' : 'pinks'; return 'pinks'; };
+/* shade order inside a family: by hue band, then dark to light (neutrals: dark to light only) */
+C.shadeKey = hex => { const { h, l } = C.hsl(hex), f = C.family(hex); return (f === 'whites' || f === 'greys' || f === 'blacks' ? 0 : Math.round(h / 8) * 8) * 10 + l; };
+C.sortYarns = list => list.slice().sort((a, b) => C.shadeKey(a.hex) - C.shadeKey(b.hex) || String(a.id || a.code).localeCompare(String(b.id || b.code)));
+/** [{key,label,hex,items}] for the families that have at least one yarn, in shelf order, each sorted by shade */
+C.groupYarns = list => { const m = {}; C.FAMILIES.forEach(f => { m[f.key] = []; }); (list || []).forEach(y => { m[C.family(y.hex)].push(y); });
+  return C.FAMILIES.filter(f => m[f.key].length).map(f => ({ key: f.key, label: f.label, hex: f.hex, items: C.sortYarns(m[f.key]) })); };
 if (typeof module !== 'undefined' && module.exports) module.exports = C; else root.XCOLOUR = C;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -4942,16 +4974,16 @@ H.movementDialog = async (yarnId, after) => {
 
 /* ---------------------------------------------------------------- Yarn Manager */
 WS.register('yarns', 'Yarn Manager', async (b) => {
-  let q = '', av = '', sel = new Set(); const mayEdit = H.canWrite();
+  let q = '', av = '', fam = '', srt = 'code', sel = new Set(); const mayEdit = H.canWrite();
   const palettes = () => db.sel('biz_palettes', { select: 'id,name,colours', order: 'name.asc', limit: 100 });
-  const rows = () => H.yarns().filter(y => (!av || y.availability === av) && (!q || (y.code + ' ' + y.name + ' ' + (y.manufacturer || '')).toLowerCase().includes(q)));
+  const CX = () => window.XCOLOUR, rows = () => { const r = H.yarns().filter(y => (!av || y.availability === av) && (!fam || CX().family(y.hex) === fam) && (!q || (y.code + ' ' + y.name + ' ' + (y.manufacturer || '')).toLowerCase().includes(q))); return srt === 'colour' ? CX().groupYarns(r).flatMap(g => g.items) : r; };
   const reload = async () => { await H.loadYarns(); H.applyYarnSource(true); draw(); };
   const draw = () => {
     const list = rows(), low = W.lowStock(H.yarns());
     b.innerHTML = `${H.readOnlyNote()}${low.length ? `<p class="xw-note warn" role="status"><b>${low.length} yarn${low.length > 1 ? 's' : ''} at or below the reorder level:</b> ${low.slice(0, 8).map(y => esc(y.code)).join(', ')}${low.length > 8 ? '...' : ''}</p>` : ''}
-    <div class="xw-bar"><input type="search" id="yq" placeholder="Search code, name or brand" value="${esc(q)}" aria-label="Search yarns"><select id="ya" aria-label="Availability"><option value="">Any availability</option>${AVAIL.map(a => `<option value="${a[0]}"${av === a[0] ? ' selected' : ''}>${a[1]}</option>`).join('')}</select><span class="xw-sp"></span>
+    <div class="xw-bar"><input type="search" id="yq" placeholder="Search code, name or brand" value="${esc(q)}" aria-label="Search yarns"><select id="yf" aria-label="Colour family"><option value="">All colour families</option>${CX().FAMILIES.map(f => `<option value="${f.key}"${fam === f.key ? ' selected' : ''}>${f.label}</option>`).join('')}</select><select id="ys" aria-label="Sort"><option value="code"${srt === 'code' ? ' selected' : ''}>Sort by code</option><option value="colour"${srt === 'colour' ? ' selected' : ''}>Sort by colour family</option></select><select id="ya" aria-label="Availability"><option value="">Any availability</option>${AVAIL.map(a => `<option value="${a[0]}"${av === a[0] ? ' selected' : ''}>${a[1]}</option>`).join('')}</select><span class="xw-sp"></span>
       <button class="xw-b" id="yPal"${sel.size && mayEdit ? '' : ' disabled'}>Save selected as palette</button><button class="xw-b" id="yPals">Palettes</button><button class="xw-b" id="yExp"${H.yarns().length ? '' : ' disabled'}>Export CSV</button><label class="xw-b" style="cursor:pointer">Import CSV<input type="file" id="yImp" accept=".csv,text/csv" hidden${mayEdit ? '' : ' disabled'}></label><button class="xw-b pri" id="yAdd"${mayEdit ? '' : ' disabled'}>Add yarn</button></div>
-    ${list.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th></th><th>Code</th><th>Name</th><th>Brand</th><th>Material</th><th class="num">Price/kg</th><th class="num">Stock kg</th><th class="num">Reorder</th><th>Supplier</th><th>Status</th><th></th></tr></thead><tbody>${list.map(y => `<tr class="${W.lowStock([y]).length ? 'low' : ''}"><td><input type="checkbox" data-sel="${esc(y.id)}" aria-label="Select ${esc(y.code)}"${sel.has(y.id) ? ' checked' : ''} style="width:auto"></td><td>${sw(y.hex)}</td><td><b>${esc(y.code)}</b></td><td>${esc(y.name)}${y.active === false ? ' ' + badge('inactive') : ''}</td><td>${esc(y.manufacturer || '')}</td><td>${esc(y.material || '')}</td><td class="num">${y.price_per_kg == null ? '-' : Number(y.price_per_kg).toFixed(2)}</td><td class="num">${Number(y.stock_kg)}</td><td class="num">${y.reorder_kg == null ? '-' : Number(y.reorder_kg)}</td><td>${esc(y.supplier || '')}</td><td>${badge(y.availability)}</td>
+    ${list.length > 300 ? `<p class="xw-note">Showing the first 300 of ${list.length} yarns. Pick a colour family or search to narrow the list.</p>` : ''}${list.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th></th><th>Code</th><th>Name</th><th>Brand</th><th>Material</th><th class="num">Price/kg</th><th class="num">Stock kg</th><th class="num">Reorder</th><th>Supplier</th><th>Status</th><th></th></tr></thead><tbody>${list.slice(0, 300).map(y => `<tr class="${W.lowStock([y]).length ? 'low' : ''}"><td><input type="checkbox" data-sel="${esc(y.id)}" aria-label="Select ${esc(y.code)}"${sel.has(y.id) ? ' checked' : ''} style="width:auto"></td><td>${sw(y.hex)}</td><td><b>${esc(y.code)}</b></td><td>${esc(y.name)}${y.active === false ? ' ' + badge('inactive') : ''}</td><td>${esc(y.manufacturer || '')}</td><td>${esc(y.material || '')}</td><td class="num">${y.price_per_kg == null ? '-' : Number(y.price_per_kg).toFixed(2)}</td><td class="num">${Number(y.stock_kg)}</td><td class="num">${y.reorder_kg == null ? '-' : Number(y.reorder_kg)}</td><td>${esc(y.supplier || '')}</td><td>${badge(y.availability)}</td>
       <td style="white-space:nowrap"><button class="xw-b sm" data-mov="${esc(y.id)}"${mayEdit ? '' : ' disabled'}>Stock</button> <button class="xw-b sm" data-edit="${esc(y.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm bad" data-del="${esc(y.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`).join('')}</tbody></table></div>`
       : empty(H.yarns().length ? 'No yarns match.' : 'Your yarn library is empty. Add yarns one by one, or import a CSV (columns: code, name, hex, brand, material, price, stock, reorder, supplier).')}`;
   };
@@ -4961,7 +4993,7 @@ WS.register('yarns', 'Yarn Manager', async (b) => {
   const bindColor = d => { const c = d.m.querySelector('#yHc'), t = d.m.querySelector('#yH'); c.oninput = () => { t.value = c.value.toUpperCase(); }; t.oninput = () => { const h = W.normHex(t.value); if (h) c.value = h.toLowerCase(); }; };
   b.addEventListener('input', e => { if (e.target.id === 'yq') { q = e.target.value.trim().toLowerCase(); draw(); const i = b.querySelector('#yq'); i.focus(); i.setSelectionRange(q.length, q.length); } });
   b.addEventListener('change', guard(async e => {
-    const t = e.target; if (t.id === 'ya') { av = t.value; draw(); } else if (t.dataset.sel) { t.checked ? sel.add(t.dataset.sel) : sel.delete(t.dataset.sel); b.querySelector('#yPal').disabled = !sel.size || !mayEdit; }
+    const t = e.target; if (t.id === 'ya') { av = t.value; draw(); } else if (t.id === 'yf') { fam = t.value; draw(); } else if (t.id === 'ys') { srt = t.value; draw(); } else if (t.dataset.sel) { t.checked ? sel.add(t.dataset.sel) : sel.delete(t.dataset.sel); b.querySelector('#yPal').disabled = !sel.size || !mayEdit; }
     else if (t.id === 'yImp') { const f = t.files[0]; if (!f) return; if (f.size > 2 * 1048576) return toast('That file is over 2 MB.', true); const res = W.parseYarnCsv(await f.text()), have = new Map(H.yarns().map(y => [y.code.toLowerCase(), y])), news = res.rows.filter(r => !have.has(r.code.toLowerCase())), upd = res.rows.filter(r => have.has(r.code.toLowerCase()));
       const d = dlg('Import yarns', `<p><b>${news.length}</b> new, <b>${upd.length}</b> existing (details are updated; stock is not overwritten), <b>${res.errors.length}</b> row${res.errors.length === 1 ? '' : 's'} with problems.</p>${res.errors.length ? `<ul class="xw-list">${res.errors.slice(0, 12).map(x => `<li>${x.line ? 'Line ' + x.line + ': ' : ''}${esc(x.msg)}</li>`).join('')}</ul>${res.errors.length > 12 ? '<p class="xw-note">...and more.</p>' : ''}<p class="xw-note">Rows with problems are skipped.</p>` : ''}`,
         [{ label: 'Cancel', run: c => c() }, { label: 'Import ' + (news.length + upd.length) + ' yarns', cls: 'pri', run: async c => { if (!news.length && !upd.length) return c(); let opening = [];
@@ -5826,24 +5858,32 @@ function tSize() {
   <div class="err" id="stSzErr" role="alert"></div>
   ${doc.shape === 'rect' || doc.shape === 'square' ? `<div class="fld"><label for="stRad">Corner radius: <b id="stRadV">${doc.radius}%</b></label><input type="range" id="stRad" min="0" max="50" value="${doc.radius}"></div>` : ''}
   <div class="fld"><label for="stBd">Border width: <b id="stBdV">${fmtLen(doc.borderCm)} ${unit}</b></label><input type="range" id="stBd" min="0" max="${unit === 'cm' ? 8 : 20}" step="${unit === 'cm' ? 0.5 : 1}" value="${unit === 'cm' ? doc.borderCm : Math.round(doc.borderCm / IN * 4) / 4}"></div>
-  ${doc.borderCm > 0 ? `<h4>Border colour</h4><div class="sw">${L.yarnList().map(y => swatchBtn(y, doc.borderYarn === y.id).replace('data-y=', 'data-by=')).join('')}</div>` : ''}
+  ${doc.borderCm > 0 ? `<h4>Border colour</h4>${colourPicker(L.yarnList(), doc.borderYarn, y => swatchBtn(y, doc.borderYarn === y.id).replace('data-y=', 'data-by='))}` : ''}
   ${doc.shape === 'custom' ? outlinePanel() : ''}
   <h4>Quick sizes</h4><div class="chips">${presets.map((p, i) => `<button class="sb sm" data-pre="${i}">${p[0]}</button>`).join('')}</div>
   <p class="note">Choose Custom outline for heart, star, freeform or hand-drawn rug shapes. The width and height above are the size of the box around the outline.</p>`;
 }
-const hue = h => { const c = XD.hex2rgb(h), mx = Math.max(...c), mn = Math.min(...c), d = mx - mn; if (d < 28) return 'Neutrals'; let hh = mx === c[0] ? ((c[1] - c[2]) / d) % 6 : mx === c[1] ? (c[2] - c[0]) / d + 2 : (c[0] - c[1]) / d + 4; hh = (hh * 60 + 360) % 360; return hh < 20 || hh >= 330 ? 'Reds and pinks' : hh < 70 ? 'Oranges and yellows' : hh < 170 ? 'Greens' : hh < 260 ? 'Blues' : 'Purples'; };
+const XCOL = () => window.XCOLOUR, PREVIEW_N = 30;
+/* colour picker grouped into families (Reds, Blues, Browns ...); a family chip shows all of that family, "All" shows the first shades of each */
+function colourPicker(list, cur, btn) {
+  const groups = XCOL().groupYarns(list), fc = filt.q ? '' : filt.cat, shown = fc ? groups.filter(g => g.key === fc) : groups;   // a search looks through every family
+  const chips = `<div class="fam" role="group" aria-label="Colour families"><button type="button" class="sb sm" data-fam="" aria-pressed="${!fc}">All <small>${list.length}</small></button>${groups.map(g => `<button type="button" class="sb sm" data-fam="${g.key}" aria-pressed="${fc === g.key}"><i style="background:${g.hex}"></i>${esc(g.label)} <small>${g.items.length}</small></button>`).join('')}</div>`;
+  const body = shown.map(g => { const part = fc ? g.items : g.items.slice(0, PREVIEW_N); const more = !fc && g.items.length > PREVIEW_N, hid = more && cur && !part.some(y => y.id === cur) ? g.items.find(y => y.id === cur) : null;
+    return `<div class="cg"><div class="cgh"><b>${esc(g.label)}</b><small>${g.items.length} shade${g.items.length === 1 ? '' : 's'}</small></div><div class="sw">${part.concat(hid ? [hid] : []).map(btn).join('')}</div>${more ? `<button type="button" class="sb sm" data-fam="${g.key}">Show all ${g.items.length} ${esc(g.label.toLowerCase())}</button>` : ''}</div>`; }).join('') || '<p class="note">No colours match.</p>';
+  return chips + body;
+}
+const yarnOptions = (list, selId) => XCOL().groupYarns(list).map(g => `<optgroup label="${esc(g.label)}">${g.items.map(y => `<option value="${esc(y.id)}"${y.id === selId ? ' selected' : ''}>${esc(y.name)} (${esc(y.id)})</option>`).join('')}</optgroup>`).join('');
 function tCol() {
-  const all = L.yarnList(), cats = ['', 'Neutrals', 'Reds and pinks', 'Oranges and yellows', 'Greens', 'Blues', 'Purples'], q = filt.q.toLowerCase(), list = all.filter(y => (!filt.cat || hue(y.hex) === filt.cat) && (!q || (y.name + y.id).toLowerCase().includes(q))), l = layer(sel), pals = XD.g('palettes', []);
+  const all = L.yarnList(), q = filt.q.toLowerCase(), list = all.filter(y => !q || (y.name + y.id).toLowerCase().includes(q)), l = layer(sel), pals = XD.g('palettes', []);
   const cur = target === 'fill' ? (l && l.fill) : target === 'stroke' ? (l && l.stroke) : target === 'bg' ? doc.bg : doc.borderYarn;
   const used = an ? an.rows.map(r => r.yarn) : [];
   return `<div class="row2"><div class="fld"><label for="stCt">Apply colour to</label><select id="stCt"><option value="fill" ${target === 'fill' ? 'selected' : ''}>Selected object</option><option value="stroke" ${target === 'stroke' ? 'selected' : ''}>Object outline</option><option value="bg" ${target === 'bg' ? 'selected' : ''}>Background</option><option value="border" ${target === 'border' ? 'selected' : ''}>Rug border</option></select></div>
-  <div class="fld"><label for="stCc">Filter</label><select id="stCc">${cats.map(c => `<option value="${c}" ${filt.cat === c ? 'selected' : ''}>${c || 'All colours'}</option>`).join('')}</select></div></div>
-  <div class="fld"><input type="text" id="stCq" placeholder="Search colour or yarn ID" value="${esc(filt.q)}" aria-label="Search colours"></div>
+  <div class="fld"><label for="stCq">Search</label><input type="text" id="stCq" placeholder="Colour name or yarn ID" value="${esc(filt.q)}" aria-label="Search colours"></div></div>
   ${(target === 'fill' || target === 'stroke') && !l ? '<div class="warn">Select an object first, or choose Background.</div>' : ''}
-  <div class="sw">${list.map(y => swatchBtn(y, cur === y.id)).join('')}</div>
+  ${colourPicker(list, cur, y => swatchBtn(y, cur === y.id))}
   ${cur && ym()[cur] ? `<p class="note"><b>${esc(ym()[cur].name)}</b> | ${esc(ym()[cur].id)} | ${esc(ym()[cur].hex)} | rgb ${XD.hex2rgb(ym()[cur].hex).join(', ')} | ${esc(ym()[cur].material)}${ym()[cur].availability && ym()[cur].availability !== 'unknown' ? ' | ' + esc(ym()[cur].availability) : ''}</p>` : ''}
   <h4>Yarns used in this design</h4><div id="stUse"></div>
-  <h4>Replace a colour everywhere</h4><div class="row2"><select id="stRf" aria-label="Replace">${used.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select><select id="stRt" aria-label="With">${all.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select></div><button class="sb sm" id="stRep" style="margin-top:6px">Replace</button>
+  <h4>Replace a colour everywhere</h4><div class="row2"><select id="stRf" aria-label="Replace">${used.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}</select><select id="stRt" aria-label="With">${yarnOptions(all)}</select></div><button class="sb sm" id="stRep" style="margin-top:6px">Replace</button>
   <h4>Saved palettes</h4>${pals.map((p, i) => `<div class="fld"><div class="lb">${esc(p.name)} <button class="sb sm bad" data-pdel="${i}">x</button></div><div class="sw">${p.ids.filter(id => ym()[id]).map(id => swatchBtn(ym()[id], false)).join('')}</div></div>`).join('') || '<p class="note">None yet.</p>'}<button class="sb sm" id="stPal">Save this design's colours as a palette</button>`;
 }
 function t3d() {
@@ -6001,6 +6041,7 @@ function build() {
     else if (b = c('[data-add]')) addLayer(b.dataset.add);
     else if (b = c('[data-pre]')) { const p = [['rect', 44, 16], ['rect', 32, 12], ['circle', 12, 12], ['rect', 60, 90], ['rect', 90, 90], ['rect', 61, 91]][+b.dataset.pre]; doc.frame = +b.dataset.pre === 5; setSize(p[1], p[2], p[0]); }
     else if (b = c('[data-by]')) { doc.borderYarn = b.dataset.by; commit(); }
+    else if (b = c('[data-fam]')) { filt.cat = b.dataset.fam; panelL(); e.stopPropagation(); }
     else if (b = c('[data-y]')) { const id = b.dataset.y, l = layer(sel); if (target === 'bg') doc.bg = id; else if (target === 'border') doc.borderYarn = id; else if (!l) return toast('Select an object first, or apply to Background.', true); else if (target === 'stroke') { l.stroke = id; if (!l.sw) l.sw = 0.015; } else l.fill = id; commit(); }
     else if (b = c('[data-pdel]')) { const p = XD.g('palettes', []); p.splice(+b.dataset.pdel, 1); XD.s('palettes', p); panelL(); }
     else if (b = c('[data-lv]')) { const l = layer(b.dataset.lv); l.vis = !l.vis; commit(); e.stopPropagation(); }
