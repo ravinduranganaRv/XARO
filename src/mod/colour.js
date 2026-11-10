@@ -65,8 +65,8 @@ C.extract = (data, opt) => {
 /* ---- reduce the palette to `target` colours. Agglomerative merging (Ward-style cost, weighted by coverage, measured in Lab with deltaE),
    so rare, similar colours merge first and a large distinctive colour is never "just deleted".
    locked: array of original ids whose colour must survive exactly (they may absorb others but never move). */
-C.reduce = (palette, target, locked) => {
-  const lock = new Set(locked || []);
+C.reduce = (palette, target, locked, o) => {
+  const lock = new Set(locked || []), pw = o && o.power > 0 ? o.power : 1;   // power < 1 compresses coverage so small but distinct accent colours survive (tufting)
   let cl = palette.colours.map(c => ({ id: c.id, members: [c.id], n: c.n, lab: c.lab.slice(), rgb: c.rgb.slice(), locked: lock.has(c.id) }));
   target = Math.max(1, Math.floor(target) || 1);
   const minAllowed = Math.max(1, cl.filter(c => c.locked).length); target = Math.max(target, minAllowed);
@@ -74,7 +74,7 @@ C.reduce = (palette, target, locked) => {
     let bi = -1, bj = -1, bc = Infinity;
     for (let i = 0; i < cl.length; i++) for (let j = i + 1; j < cl.length; j++) {
       if (cl[i].locked && cl[j].locked) continue;
-      const d = C.deltaE(cl[i].lab, cl[j].lab), cost = (cl[i].n * cl[j].n) / (cl[i].n + cl[j].n) * d * d;
+      const d = C.deltaE(cl[i].lab, cl[j].lab), wi = Math.pow(cl[i].n, pw), wj = Math.pow(cl[j].n, pw), cost = (wi * wj) / (wi + wj) * d * d;
       if (cost < bc) { bc = cost; bi = i; bj = j; }
     }
     if (bi < 0) break;

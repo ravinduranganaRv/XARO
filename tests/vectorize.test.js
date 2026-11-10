@@ -58,3 +58,19 @@ test('large input is downscaled and coordinates map back to the original size', 
   const img = mk(2400, 1800, (x, y) => (x > 600 && x < 1800 && y > 450 && y < 1350) ? RED : WHITE), r = V.vectorize(img, { level: 2 }); const red = r.shapes.find(s => s.fill === hex(RED));
   assert.ok(Math.abs(red.area - 1200 * 900) / (1200 * 900) < 0.02, 'area ' + red.area); assert.match(r.svg, /viewBox="0 0 2400 1800"/);
 });
+
+// ---- tufting method: details survive a small colour budget ----
+const YELLOW = [250, 205, 40], SKIN = [235, 185, 145], NAVY = [40, 30, 110];
+const fuzz = f => (x, y) => { const c = f(x, y), n = ((x * 7 + y * 13) % 5) - 2; return c.map(v => Math.min(255, Math.max(0, v + n * 2))); };   // fake JPEG noise
+const scene = fuzz((x, y) => { if (x >= 60 && x < 68 && y >= 20 && y < 28) return YELLOW; const dx = x - 100, dy = y - 100; if (dx * dx + dy * dy < 55 * 55) return SKIN; return NAVY; });
+test('tufting: a small distinct accent colour is kept when the budget is tight, and noise does not add colours', () => {
+  const img = mk(200, 200, scene), r = V.vectorize(img, { level: 2, colours: 3, method: 'tufting' });
+  assert.ok(r.stats.colours <= 3, 'colour budget respected: ' + r.stats.colours);
+  const near = (a, b) => Math.hypot(...a.map((v, i) => v - b[i])) < 40, rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  assert.ok(r.palette.some(h => near(rgb(h), YELLOW)), 'yellow accent survives: ' + r.palette.join());
+  const f = raster(r); assert.equal(f(63, 24), r.palette.find(h => near(rgb(h), YELLOW)), 'accent square is drawn in the accent colour');
+});
+test('tufting: result is deterministic and has no gaps between neighbouring colours', () => {
+  const img = mk(120, 90, fuzz((x, y) => x < 60 ? RED : BLUE)), a = V.vectorize(img, { level: 2, colours: 2, method: 'tufting' }), b = V.vectorize(img, { level: 2, colours: 2, method: 'tufting' });
+  assert.equal(a.svg, b.svg); const f = raster(a); let blank = 0; for (let y = 0; y < 90; y++) for (let x = 0; x < 120; x++) if (!f(x, y)) blank++; assert.equal(blank, 0);
+});

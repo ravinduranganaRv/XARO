@@ -71,6 +71,19 @@ W.RATE_FIELDS = [
   ['backingPerM2', 'Backing cloth + latex per m2', 'num'], ['bindingPerM', 'Binding / edging per metre', 'num'], ['finishingFlat', 'Finishing per rug (flat)', 'num'], ['packagingFlat', 'Packaging per rug (flat)', 'num'],
   ['overheadPct', 'Overhead %', 'num'], ['marginPct', 'Profit margin % of selling price', 'num'], ['taxPct', 'Tax %', 'num']
 ];
+/** Typical STARTING values so the calculator works on day one. They are examples, not the maker's real costs: the screens say so and every number is editable.
+ *  Unit-free values (yarn per m2, waste, hours, percentages) apply to every currency; money values only exist for currencies listed here. */
+W.STARTER_MONEY = {   // labour/hour, backing per m2, binding per m, finishing, packaging
+  USD: { hourly: 4, backing: 6, binding: 1.5, finishing: 3, packaging: 2 }, LKR: { hourly: 600, backing: 1800, binding: 450, finishing: 900, packaging: 600 },
+  AED: { hourly: 15, backing: 22, binding: 5.5, finishing: 11, packaging: 7 }
+};
+W.defaultRates = currency => {
+  const cur = /^[A-Za-z]{3}$/.test(String(currency || '')) ? String(currency).toUpperCase() : '', m = W.STARTER_MONEY[cur];
+  const r = { pileKgPerM2: { low: 1.8, standard: 2.5, high: 3.5 }, wastePct: 8, labour: { hoursPerM2: 3, setupHours: 1 }, overheadPct: 10, marginPct: 30, taxPct: 0 };
+  if (cur) r.currency = cur;
+  if (m) { r.labour.hourlyRate = m.hourly; r.backingPerM2 = m.backing; r.bindingPerM = m.binding; r.finishingFlat = m.finishing; r.packagingFlat = m.packaging; }
+  return r;
+};
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
 const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => { a[k] = a[k] && typeof a[k] === 'object' ? a[k] : {}; a = a[k]; }); a[ks[ks.length - 1]] = v; };
 W.getRate = getP;

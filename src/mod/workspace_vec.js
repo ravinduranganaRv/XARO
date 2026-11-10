@@ -19,11 +19,11 @@ const wireDrop = (b, id, fn) => { const z = b.querySelector('#' + id + 'Z'); if 
 /* ---------------------------------------------------------------- Image to Vector */
 const LEVEL_NAMES = ['', 'Most detail', 'Detailed', 'Balanced', 'Simple', 'Simplest'];
 WS.register('vector', 'Image to Vector', async (b) => {
-  let src = handoff.canvas, name = handoff.name || '', res = null, level = 3, colours = 0, bg = '', pal = handoff.palette; handoff.canvas = null; handoff.palette = null;
+  let src = handoff.canvas, name = handoff.name || '', res = null, level = 2, colours = 8, bg = '', pal = handoff.palette; handoff.canvas = null; handoff.palette = null;
   const run = async () => {
     if (!src) return; const out = b.querySelector('#vOut'); out.innerHTML = '<p class="xw-note" role="status">Vectorising...</p>'; await new Promise(r => setTimeout(r, 30));
     const id = src.getContext('2d').getImageData(0, 0, src.width, src.height), t0 = performance.now();
-    res = V().vectorize({ width: id.width, height: id.height, data: id.data }, { level, colours: pal ? 0 : colours, palette: pal || undefined, background: bg || undefined }); res.ms = Math.round(performance.now() - t0); show();
+    res = V().vectorize({ width: id.width, height: id.height, data: id.data }, { level, colours: pal ? 0 : colours, palette: pal || undefined, background: bg || undefined, method: 'tufting' }); res.ms = Math.round(performance.now() - t0); show();
   };
   const show = () => {
     const out = b.querySelector('#vOut'); if (!res) { out.innerHTML = ''; return; }
@@ -33,8 +33,8 @@ WS.register('vector', 'Image to Vector', async (b) => {
     const before = canvasToImg(src), after = new Image(); after.alt = ''; after.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(V().toSvg(res, { scale: 1 })); H.baSlider(out.querySelector('#vBA'), before, after);
   };
   b.innerHTML = `<div class="xw-split"><div>${dropZone('vFile', 'Drop a PNG, JPG, WebP or SVG here, or click to choose (max 8 MB)')}<div id="vView" style="margin-top:12px"></div><div id="vOut"></div></div>
-  <section class="xw-sec"><h3>Settings</h3><div class="xw-f"><label for="vLv">Simplification: <b id="vLvN">${LEVEL_NAMES[level]}</b></label><input type="range" id="vLv" min="1" max="5" value="${level}"><small>Low = follows every detail. High = fewer, smoother shapes that are easier to tuft.</small></div>
-  ${field('vCol', 'Number of colours', '0', { type: 'select', options: [['0', 'Automatic'], ...[2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24].map(n => [String(n), String(n)])] })}
+  <section class="xw-sec"><h3>Settings</h3><div class="xw-f"><label for="vLv">Simplification: <b id="vLvN">${LEVEL_NAMES[level]}</b></label><input type="range" id="vLv" min="1" max="5" value="${level}"><small>Low = keeps small details. High = fewer, smoother shapes that are easier to tuft. Details and small accent colours are kept, up to the number of yarn colours you choose.</small></div>
+  ${field('vCol', 'Number of colours', String(colours), { type: 'select', options: [['0', 'Automatic'], ...[2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24].map(n => [String(n), String(n)])] })}
   <div class="xw-f"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="vBgOn" style="width:auto"> Leave one background colour out</label><input type="color" id="vBg" value="#ffffff" style="width:60px;height:34px;padding:2px" disabled></div>
   <p class="xw-note" id="vPal">${pal ? 'Using the ' + pal.length + ' colours from Colour Separation.' : ''}</p><button class="xw-b pri" id="vGo" disabled>Vectorise</button></section></div>`;
   const setSrc = (c, n) => { src = c; name = n; res = null; b.querySelector('#vView').innerHTML = ''; b.querySelector('#vGo').disabled = false; b.querySelector('#vOut').innerHTML = '<p class="xw-note">Image loaded (' + c.width + ' x ' + c.height + ' px). Adjust the settings, then press Vectorise.</p>'; };

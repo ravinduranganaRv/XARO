@@ -74,3 +74,14 @@ test('custom outlines: area share and edge length drive the calculator', () => {
   const a = W.calc({ widthCm: 100, heightCm: 100, shape: 'custom', areaFraction: 0.5, perimeterM: 2.4, pile: 'standard', colours: [] }, rates, []);
   assert.strictEqual(a.areaM2, 0.5); assert.strictEqual(a.perimeterM, 2.4);
 });
+
+test('starter rates: a new business can calculate on day one; unknown currencies get no invented money values', () => {
+  for (const cur of ['LKR', 'USD', 'AED']) {
+    const d = W.defaultRates(cur), vals = {}; W.RATE_FIELDS.forEach(([p]) => { const v = W.getRate(d, p); if (v != null) vals[p] = String(v); });
+    const back = W.ratesFromForm(vals); assert.deepEqual(back.errors, [], cur); assert.deepEqual(back.rates, d, cur + ' survives the form round trip');
+    const r = W.calc({ widthCm: 100, heightCm: 150, shape: 'rect', pile: 'standard', binding: true, colours: [{ yarnId: 'y1', pct: 100 }] }, d, [{ id: 'y1', code: 'A', name: 'A', price_per_kg: 10, hex: '#112233' }]);
+    assert.ok(r.ok && r.complete && r.price > 0, cur + ' estimate is complete: ' + JSON.stringify(r.missing));
+  }
+  const o = W.defaultRates('EUR'); assert.equal(o.currency, 'EUR'); assert.equal(o.backingPerM2, undefined); assert.equal(o.labour.hourlyRate, undefined); assert.ok(o.marginPct > 0 && o.pileKgPerM2.standard > 0);
+  assert.equal(W.defaultRates('').currency, undefined);
+});

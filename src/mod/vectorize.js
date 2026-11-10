@@ -30,10 +30,10 @@ function downscale(img) {
 }
 // palette extraction compares every colour bucket with every kept colour; on photos/noise that is slow. Rare buckets (a few pixels) are noise,
 // so build a thinned sample of the colours that actually cover area and extract from that.
-function paletteSample(d) {
+function paletteSample(d, rare) {
   if (d.w * d.h < 40000) return d.data; const m = new Map(); let tot = 0;
   for (let i = 0; i < d.data.length; i += 4) { if (d.data[i + 3] < 128) continue; const k = ((d.data[i] >> 3) << 10) | ((d.data[i + 1] >> 3) << 5) | (d.data[i + 2] >> 3); let b = m.get(k); if (!b) m.set(k, b = { n: 0, r: 0, g: 0, b: 0 }); b.n++; b.r += d.data[i]; b.g += d.data[i + 1]; b.b += d.data[i + 2]; tot++; }
-  let keep = [...m.values()].filter(b => b.n >= Math.max(2, tot * 5e-5)).sort((a, b) => b.n - a.n).slice(0, 600); if (!keep.length) return d.data;
+  let keep = [...m.values()].filter(b => b.n >= Math.max(2, tot * (rare || 5e-5))).sort((a, b) => b.n - a.n).slice(0, 600); if (!keep.length) return d.data;
   const kt = keep.reduce((s, b) => s + b.n, 0), stride = Math.max(1, Math.ceil(kt / 150000)), out = [];
   for (const b of keep) { const reps = Math.max(1, Math.round(b.n / stride)), r = b.r / b.n, g = b.g / b.n, bl = b.b / b.n; for (let k = 0; k < reps; k++) out.push(r, g, bl, 255); }
   return out;
@@ -43,8 +43,8 @@ function buildPalette(d, opts, lv) {
   if (opts.palette && opts.palette.length) { list = opts.palette.filter(h => HEX.test(h)).map(h => { const rgb = C.hex2rgb(h); return { rgb, lab: C.rgb2lab(rgb[0], rgb[1], rgb[2]) }; }); if (!list.length) throw new Error('Palette has no valid #RRGGBB colours'); }
   else {
     const n = opts.colours > 0 ? Math.min(64, Math.max(2, opts.colours | 0)) : 0;
-    let pal = C.extract(paletteSample(d), { tol: n ? 2 : lv.ctol, max: n ? 64 : 24 });
-    if (n && pal.colours.length > n) { const red = C.reduce(pal, n); list = red.colours.map(c => ({ rgb: c.rgb, lab: C.rgb2lab(c.rgb[0], c.rgb[1], c.rgb[2]) })); } else list = pal.colours.map(c => ({ rgb: c.rgb, lab: c.lab }));
+    let pal = C.extract(opts.method === 'tufting' ? paletteSample(d, 1e-5) : paletteSample(d), { tol: n ? 2 : lv.ctol, max: n ? 64 : 24 });
+    if (n && pal.colours.length > n) { const red = C.reduce(pal, n, [], opts.method === 'tufting' ? { power: 0.5 } : undefined); list = red.colours.map(c => ({ rgb: c.rgb, lab: C.rgb2lab(c.rgb[0], c.rgb[1], c.rgb[2]) })); } else list = pal.colours.map(c => ({ rgb: c.rgb, lab: c.lab }));
   }
   if (HEX.test(opts.background || '')) { const rgb = C.hex2rgb(opts.background); list.push({ rgb, lab: C.rgb2lab(rgb[0], rgb[1], rgb[2]), bg: true }); }
   return list;
@@ -150,10 +150,42 @@ V.pathToRings = d => { const out = []; String(d || '').split('M').slice(1).forEa
 const pointsOf = d => V.pathToRings(d).reduce((s, r) => s + r.length, 0);
 const areaOf = d => Math.abs(V.pathToRings(d).reduce((s, r) => s + area2(r), 0)) / 2;
 
+
+/* ---- tufting method: clean the picture, keep small distinct accents, tidy the boundaries ---- */
+function median3(d) {   // 3x3 median per channel: removes JPEG noise and anti-alias fringes, keeps edges and lines 2 px wide or more
+  const w = d.w, h = d.h, src = d.data, out = new Uint8ClampedArray(src.length), win = new Array(9);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = (y * w + x) * 4; out[o + 3] = src[o + 3];
+    if (x === 0 || y === 0 || x === w - 1 || y === h - 1) { out[o] = src[o]; out[o + 1] = src[o + 1]; out[o + 2] = src[o + 2]; continue; }
+    for (let c = 0; c < 3; c++) { let k = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) win[k++] = src[((y + dy) * w + x + dx) * 4 + c]; win.sort((a, b) => a - b); out[o + c] = win[4]; }
+  }
+  return { w, h, data: out, s: d.s };
+}
+function tidyLabels(lab, w, h, bgIdx) {   // a pixel whose neighbours (>= 6 of 8) all agree on another colour joins them: removes isolated jaggies and dots
+  const out = lab.slice(), cnt = new Map();
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = y * w + x, me = lab[i]; cnt.clear(); let best = -1, bc = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const l = lab[i + dy * w + dx], c = (cnt.get(l) || 0) + 1; cnt.set(l, c); if (c > bc) { bc = c; best = l; } }
+    if (best !== me && bc >= 6 && best !== bgIdx) out[i] = best;
+  }
+  return out;
+}
+
+function mergeFragments(lab, w, h, maxFrag) {   // touching tiny pieces of different colours are one small detail seen through blur (a star, a thin line): give it one colour
+  const { rid, sizes, R } = components(lab, w, h), par = new Int32Array(R).map((_, i) => i), find = a => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+  const tiny = r => sizes[r] <= maxFrag; let any = false;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x, a = rid[i]; if (!tiny(a)) continue;
+    for (const j of [x + 1 < w ? i + 1 : -1, y + 1 < h ? i + w : -1]) { if (j < 0) continue; const b = rid[j]; if (b !== a && tiny(b)) { const ra = find(a), rb = find(b); if (ra !== rb) { par[ra] = rb; any = true; } } } }
+  if (!any) return lab; const per = new Map();
+  for (let i = 0; i < w * h; i++) { if (!tiny(rid[i])) continue; const c = find(rid[i]); let m = per.get(c); if (!m) per.set(c, m = new Map()); m.set(lab[i], (m.get(lab[i]) || 0) + 1); }
+  const win = new Map(); for (const [c, m] of per) { let best = -1, bn = 0; for (const [l, n] of m) if (n > bn) { bn = n; best = l; } win.set(c, best); }
+  const out = lab.slice(); for (let i = 0; i < w * h; i++) if (tiny(rid[i])) out[i] = win.get(find(rid[i])); return out;
+}
 V.vectorize = (img, opts) => {
   opts = opts || {}; checkImg(img); const level = Math.min(5, Math.max(1, Math.round(opts.level || 3))), lv = LEVELS[level];
-  const d = downscale(img), pal = buildPalette(d, opts, lv), bgIdx = pal.findIndex(p => p.bg) >= 0 ? pal.findIndex(p => p.bg) : -1;
-  const lab = labelMap(d, pal, bgIdx); removeSpeckles(lab, d.w, d.h, Math.floor(d.w * d.h * lv.speck), bgIdx);
+  const tuft = opts.method === 'tufting'; let d = downscale(img); if (tuft) d = median3(d);
+  const pal = buildPalette(d, opts, lv), bgIdx = pal.findIndex(p => p.bg) >= 0 ? pal.findIndex(p => p.bg) : -1;
+  let lab = labelMap(d, pal, bgIdx); if (tuft) { lab = tidyLabels(lab, d.w, d.h, bgIdx); lab = mergeFragments(lab, d.w, d.h, Math.max(6, Math.round(d.w * d.h * 4.5e-5))); } removeSpeckles(lab, d.w, d.h, Math.floor(d.w * d.h * (tuft ? Math.min(lv.speck, 4e-5) : lv.speck)), bgIdx);
   const tol = lv.tol * Math.max(d.w, d.h) / 1000, arcs = trace(lab, d.w, d.h, tol, bgIdx), shapes = [];
   const present = new Set(); for (let i = 0; i < lab.length; i++) present.add(lab[i]);
   for (const li of present) { if (li < 0) continue; const rings = ringsFor(arcs, li); if (!rings.length) continue;

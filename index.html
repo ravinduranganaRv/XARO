@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QsBgi87bjUCGii/xK3BPk0A8fu3dUyvpof0HWS8hJN8=' 'sha256-XS6vz+E7g/+buR6qponWuuigOY0v9OQYHaohaD8m0xc=' 'sha256-3Q9wGTjV7tBaTsFVSo/LpnQSJ60Zi1ec2Lh19+zV3tE=' 'sha256-F5yp6g9p8CHfFo1Zh6H1o7Ll/kVxa9mWsf/p1yissxs='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://mlrydpclqokizsqmigen.supabase.co https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://mlrydpclqokizsqmigen.supabase.co https://wa.me">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QsBgi87bjUCGii/xK3BPk0A8fu3dUyvpof0HWS8hJN8=' 'sha256-XS6vz+E7g/+buR6qponWuuigOY0v9OQYHaohaD8m0xc=' 'sha256-3Q9wGTjV7tBaTsFVSo/LpnQSJ60Zi1ec2Lh19+zV3tE=' 'sha256-wIBYn881EBdlPhgfm9YuvCRdpNcvTAXXAJy2gnuf5T8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' data: blob: https://mlrydpclqokizsqmigen.supabase.co https://script.google.com https://script.googleusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://mlrydpclqokizsqmigen.supabase.co https://wa.me">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>XARO Industries | Custom hand-tufted rugs designed in 3D</title>
@@ -2116,8 +2116,8 @@ C.extract = (data, opt) => {
 /* ---- reduce the palette to `target` colours. Agglomerative merging (Ward-style cost, weighted by coverage, measured in Lab with deltaE),
    so rare, similar colours merge first and a large distinctive colour is never "just deleted".
    locked: array of original ids whose colour must survive exactly (they may absorb others but never move). */
-C.reduce = (palette, target, locked) => {
-  const lock = new Set(locked || []);
+C.reduce = (palette, target, locked, o) => {
+  const lock = new Set(locked || []), pw = o && o.power > 0 ? o.power : 1;   // power < 1 compresses coverage so small but distinct accent colours survive (tufting)
   let cl = palette.colours.map(c => ({ id: c.id, members: [c.id], n: c.n, lab: c.lab.slice(), rgb: c.rgb.slice(), locked: lock.has(c.id) }));
   target = Math.max(1, Math.floor(target) || 1);
   const minAllowed = Math.max(1, cl.filter(c => c.locked).length); target = Math.max(target, minAllowed);
@@ -2125,7 +2125,7 @@ C.reduce = (palette, target, locked) => {
     let bi = -1, bj = -1, bc = Infinity;
     for (let i = 0; i < cl.length; i++) for (let j = i + 1; j < cl.length; j++) {
       if (cl[i].locked && cl[j].locked) continue;
-      const d = C.deltaE(cl[i].lab, cl[j].lab), cost = (cl[i].n * cl[j].n) / (cl[i].n + cl[j].n) * d * d;
+      const d = C.deltaE(cl[i].lab, cl[j].lab), wi = Math.pow(cl[i].n, pw), wj = Math.pow(cl[j].n, pw), cost = (wi * wj) / (wi + wj) * d * d;
       if (cost < bc) { bc = cost; bi = i; bj = j; }
     }
     if (bi < 0) break;
@@ -2232,10 +2232,10 @@ function downscale(img) {
 }
 // palette extraction compares every colour bucket with every kept colour; on photos/noise that is slow. Rare buckets (a few pixels) are noise,
 // so build a thinned sample of the colours that actually cover area and extract from that.
-function paletteSample(d) {
+function paletteSample(d, rare) {
   if (d.w * d.h < 40000) return d.data; const m = new Map(); let tot = 0;
   for (let i = 0; i < d.data.length; i += 4) { if (d.data[i + 3] < 128) continue; const k = ((d.data[i] >> 3) << 10) | ((d.data[i + 1] >> 3) << 5) | (d.data[i + 2] >> 3); let b = m.get(k); if (!b) m.set(k, b = { n: 0, r: 0, g: 0, b: 0 }); b.n++; b.r += d.data[i]; b.g += d.data[i + 1]; b.b += d.data[i + 2]; tot++; }
-  let keep = [...m.values()].filter(b => b.n >= Math.max(2, tot * 5e-5)).sort((a, b) => b.n - a.n).slice(0, 600); if (!keep.length) return d.data;
+  let keep = [...m.values()].filter(b => b.n >= Math.max(2, tot * (rare || 5e-5))).sort((a, b) => b.n - a.n).slice(0, 600); if (!keep.length) return d.data;
   const kt = keep.reduce((s, b) => s + b.n, 0), stride = Math.max(1, Math.ceil(kt / 150000)), out = [];
   for (const b of keep) { const reps = Math.max(1, Math.round(b.n / stride)), r = b.r / b.n, g = b.g / b.n, bl = b.b / b.n; for (let k = 0; k < reps; k++) out.push(r, g, bl, 255); }
   return out;
@@ -2245,8 +2245,8 @@ function buildPalette(d, opts, lv) {
   if (opts.palette && opts.palette.length) { list = opts.palette.filter(h => HEX.test(h)).map(h => { const rgb = C.hex2rgb(h); return { rgb, lab: C.rgb2lab(rgb[0], rgb[1], rgb[2]) }; }); if (!list.length) throw new Error('Palette has no valid #RRGGBB colours'); }
   else {
     const n = opts.colours > 0 ? Math.min(64, Math.max(2, opts.colours | 0)) : 0;
-    let pal = C.extract(paletteSample(d), { tol: n ? 2 : lv.ctol, max: n ? 64 : 24 });
-    if (n && pal.colours.length > n) { const red = C.reduce(pal, n); list = red.colours.map(c => ({ rgb: c.rgb, lab: C.rgb2lab(c.rgb[0], c.rgb[1], c.rgb[2]) })); } else list = pal.colours.map(c => ({ rgb: c.rgb, lab: c.lab }));
+    let pal = C.extract(opts.method === 'tufting' ? paletteSample(d, 1e-5) : paletteSample(d), { tol: n ? 2 : lv.ctol, max: n ? 64 : 24 });
+    if (n && pal.colours.length > n) { const red = C.reduce(pal, n, [], opts.method === 'tufting' ? { power: 0.5 } : undefined); list = red.colours.map(c => ({ rgb: c.rgb, lab: C.rgb2lab(c.rgb[0], c.rgb[1], c.rgb[2]) })); } else list = pal.colours.map(c => ({ rgb: c.rgb, lab: c.lab }));
   }
   if (HEX.test(opts.background || '')) { const rgb = C.hex2rgb(opts.background); list.push({ rgb, lab: C.rgb2lab(rgb[0], rgb[1], rgb[2]), bg: true }); }
   return list;
@@ -2352,10 +2352,42 @@ V.pathToRings = d => { const out = []; String(d || '').split('M').slice(1).forEa
 const pointsOf = d => V.pathToRings(d).reduce((s, r) => s + r.length, 0);
 const areaOf = d => Math.abs(V.pathToRings(d).reduce((s, r) => s + area2(r), 0)) / 2;
 
+
+/* ---- tufting method: clean the picture, keep small distinct accents, tidy the boundaries ---- */
+function median3(d) {   // 3x3 median per channel: removes JPEG noise and anti-alias fringes, keeps edges and lines 2 px wide or more
+  const w = d.w, h = d.h, src = d.data, out = new Uint8ClampedArray(src.length), win = new Array(9);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = (y * w + x) * 4; out[o + 3] = src[o + 3];
+    if (x === 0 || y === 0 || x === w - 1 || y === h - 1) { out[o] = src[o]; out[o + 1] = src[o + 1]; out[o + 2] = src[o + 2]; continue; }
+    for (let c = 0; c < 3; c++) { let k = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) win[k++] = src[((y + dy) * w + x + dx) * 4 + c]; win.sort((a, b) => a - b); out[o + c] = win[4]; }
+  }
+  return { w, h, data: out, s: d.s };
+}
+function tidyLabels(lab, w, h, bgIdx) {   // a pixel whose neighbours (>= 6 of 8) all agree on another colour joins them: removes isolated jaggies and dots
+  const out = lab.slice(), cnt = new Map();
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = y * w + x, me = lab[i]; cnt.clear(); let best = -1, bc = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const l = lab[i + dy * w + dx], c = (cnt.get(l) || 0) + 1; cnt.set(l, c); if (c > bc) { bc = c; best = l; } }
+    if (best !== me && bc >= 6 && best !== bgIdx) out[i] = best;
+  }
+  return out;
+}
+
+function mergeFragments(lab, w, h, maxFrag) {   // touching tiny pieces of different colours are one small detail seen through blur (a star, a thin line): give it one colour
+  const { rid, sizes, R } = components(lab, w, h), par = new Int32Array(R).map((_, i) => i), find = a => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+  const tiny = r => sizes[r] <= maxFrag; let any = false;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x, a = rid[i]; if (!tiny(a)) continue;
+    for (const j of [x + 1 < w ? i + 1 : -1, y + 1 < h ? i + w : -1]) { if (j < 0) continue; const b = rid[j]; if (b !== a && tiny(b)) { const ra = find(a), rb = find(b); if (ra !== rb) { par[ra] = rb; any = true; } } } }
+  if (!any) return lab; const per = new Map();
+  for (let i = 0; i < w * h; i++) { if (!tiny(rid[i])) continue; const c = find(rid[i]); let m = per.get(c); if (!m) per.set(c, m = new Map()); m.set(lab[i], (m.get(lab[i]) || 0) + 1); }
+  const win = new Map(); for (const [c, m] of per) { let best = -1, bn = 0; for (const [l, n] of m) if (n > bn) { bn = n; best = l; } win.set(c, best); }
+  const out = lab.slice(); for (let i = 0; i < w * h; i++) if (tiny(rid[i])) out[i] = win.get(find(rid[i])); return out;
+}
 V.vectorize = (img, opts) => {
   opts = opts || {}; checkImg(img); const level = Math.min(5, Math.max(1, Math.round(opts.level || 3))), lv = LEVELS[level];
-  const d = downscale(img), pal = buildPalette(d, opts, lv), bgIdx = pal.findIndex(p => p.bg) >= 0 ? pal.findIndex(p => p.bg) : -1;
-  const lab = labelMap(d, pal, bgIdx); removeSpeckles(lab, d.w, d.h, Math.floor(d.w * d.h * lv.speck), bgIdx);
+  const tuft = opts.method === 'tufting'; let d = downscale(img); if (tuft) d = median3(d);
+  const pal = buildPalette(d, opts, lv), bgIdx = pal.findIndex(p => p.bg) >= 0 ? pal.findIndex(p => p.bg) : -1;
+  let lab = labelMap(d, pal, bgIdx); if (tuft) { lab = tidyLabels(lab, d.w, d.h, bgIdx); lab = mergeFragments(lab, d.w, d.h, Math.max(6, Math.round(d.w * d.h * 4.5e-5))); } removeSpeckles(lab, d.w, d.h, Math.floor(d.w * d.h * (tuft ? Math.min(lv.speck, 4e-5) : lv.speck)), bgIdx);
   const tol = lv.tol * Math.max(d.w, d.h) / 1000, arcs = trace(lab, d.w, d.h, tol, bgIdx), shapes = [];
   const present = new Set(); for (let i = 0; i < lab.length; i++) present.add(lab[i]);
   for (const li of present) { if (li < 0) continue; const rings = ringsFor(arcs, li); if (!rings.length) continue;
@@ -4700,6 +4732,19 @@ W.RATE_FIELDS = [
   ['backingPerM2', 'Backing cloth + latex per m2', 'num'], ['bindingPerM', 'Binding / edging per metre', 'num'], ['finishingFlat', 'Finishing per rug (flat)', 'num'], ['packagingFlat', 'Packaging per rug (flat)', 'num'],
   ['overheadPct', 'Overhead %', 'num'], ['marginPct', 'Profit margin % of selling price', 'num'], ['taxPct', 'Tax %', 'num']
 ];
+/** Typical STARTING values so the calculator works on day one. They are examples, not the maker's real costs: the screens say so and every number is editable.
+ *  Unit-free values (yarn per m2, waste, hours, percentages) apply to every currency; money values only exist for currencies listed here. */
+W.STARTER_MONEY = {   // labour/hour, backing per m2, binding per m, finishing, packaging
+  USD: { hourly: 4, backing: 6, binding: 1.5, finishing: 3, packaging: 2 }, LKR: { hourly: 600, backing: 1800, binding: 450, finishing: 900, packaging: 600 },
+  AED: { hourly: 15, backing: 22, binding: 5.5, finishing: 11, packaging: 7 }
+};
+W.defaultRates = currency => {
+  const cur = /^[A-Za-z]{3}$/.test(String(currency || '')) ? String(currency).toUpperCase() : '', m = W.STARTER_MONEY[cur];
+  const r = { pileKgPerM2: { low: 1.8, standard: 2.5, high: 3.5 }, wastePct: 8, labour: { hoursPerM2: 3, setupHours: 1 }, overheadPct: 10, marginPct: 30, taxPct: 0 };
+  if (cur) r.currency = cur;
+  if (m) { r.labour.hourlyRate = m.hourly; r.backingPerM2 = m.backing; r.bindingPerM = m.binding; r.finishingFlat = m.finishing; r.packagingFlat = m.packaging; }
+  return r;
+};
 const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
 const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => { a[k] = a[k] && typeof a[k] === 'object' ? a[k] : {}; a = a[k]; }); a[ks[ks.length - 1]] = v; };
 W.getRate = getP;
@@ -4948,6 +4993,7 @@ WS.register('settings', 'Account Settings', async (b) => {
     else if (t.id === 'pwSave') { const p = val('pw'); if (p.length < 8) return toast('Use at least 8 characters.', true); await SB().updatePassword(p); $('#pw').value = ''; toast('Password changed'); }
     else if (t.id === 'so') { await SB().signOut(); WS.close(); }
   }));
+  if (H.quote && H.quote.mount) H.quote.mount(b);
   b.addEventListener('change', guard(async e => { if (e.target.id !== 'logoF') return; const f = e.target.files[0]; if (!f) return; if (!/^image\/(png|jpeg|webp)$/.test(f.type)) return toast('Use a PNG, JPG or WebP image.', true); if (f.size > 2 * 1048576) return toast('That file is over 2 MB.', true);
     const path = SB().businessPath(bz.id, 'logo-' + Date.now() + '.' + (f.type === 'image/png' ? 'png' : f.type === 'image/webp' ? 'webp' : 'jpg')); await SB().upload('business-assets', path, f, f.type); await SB().update('businesses', { logo_path: path }, { eq: { id: bz.id } }); await XACCT.refresh(); $('#logoBox').textContent = 'Logo saved.'; toast('Logo saved'); }));
 });
@@ -5037,19 +5083,19 @@ WS.register('inventory', 'Inventory', async (b) => {
 /* ---------------------------------------------------------------- Rug Calculator */
 WS.register('calculator', 'Rug Calculator', async (b) => {
   const [ratesRow, designs, projects] = await Promise.all([db.one('biz_rates', { select: 'rates' }), db.sel('custom_designs', { select: 'id,name', order: 'updated_at.desc', limit: 200 }), db.sel('biz_projects', { select: 'id,title', order: 'created_at.desc', limit: 200 })]);
-  let rates = (ratesRow && ratesRow.rates) || {}, rows = [], last = null, facts = null; const yarns = H.yarns(), mayEdit = H.canWrite();
+  let rates = (ratesRow && ratesRow.rates) || {}, rows = [], last = null, facts = null; let starting = !Object.keys(rates).length; if (starting) rates = W.defaultRates(H.biz().currency); /* a new business starts from typical values */ const yarns = H.yarns(), mayEdit = H.canWrite();
   const rateForm = `<div class="xw-form">${W.RATE_FIELDS.map(([p, label, t]) => field('r_' + p.replace(/\./g, '__'), label, W.getRate(rates, p), t === 'text' ? { max: 3 } : { type: 'number', step: 'any', min: 0 })).join('')}</div>`;
   const colRow = (r, i) => `<div class="xw-bar" data-ci="${i}"><select data-cy aria-label="Yarn">${[['', 'Choose yarn']].concat(yarns.map(y => [y.id, y.code + ' - ' + y.name])).map(([k, t]) => `<option value="${esc(k)}"${r.yarnId === k ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><input type="number" data-cp value="${r.pct || ''}" min="0" max="100" step="any" placeholder="%" aria-label="Share %" style="width:90px"><button class="xw-b sm bad" data-crm="${i}" aria-label="Remove colour">✕</button></div>`;
   b.innerHTML = `${H.readOnlyNote()}<div class="xw-split"><div><section class="xw-sec"><h3>Your rug</h3><div class="xw-form">${field('cDes', 'Start from a saved design', '', { type: 'select', options: [['', 'Enter size by hand']].concat(designs.map(d => [d.id, d.name])) })}${field('cW', 'Width (cm)', 100, { type: 'number', min: 5, step: 'any' })}${field('cH', 'Height (cm)', 100, { type: 'number', min: 5, step: 'any' })}${field('cS', 'Shape', 'rect', { type: 'select', options: [['rect', 'Rectangle'], ['oval', 'Oval'], ['circle', 'Circle'], ['custom', 'Custom outline (from a design)']] })}${field('cR', 'Corner radius %', 0, { type: 'number', min: 0, max: 50 })}${field('cP', 'Pile', 'standard', { type: 'select', options: [['low', 'Low'], ['standard', 'Standard'], ['high', 'High']] })}</div><label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="cB" style="width:auto"> Bound / edged border</label>
   <h3 style="margin-top:14px">Colours</h3><div id="cCols"></div><div class="xw-bar"><button class="xw-b sm" id="cAdd"${yarns.length ? '' : ' disabled'}>Add colour</button></div><p class="xw-note">${yarns.length ? 'Shares are scaled to 100%.' : 'Add yarns in the Yarn Manager to map colours to your own stock.'}</p></section>
-  <section class="xw-sec"><h3>Your rates</h3><p class="xw-note">Nothing is pre-filled. Enter your own numbers; anything left empty is reported as missing rather than guessed.</p>${rateForm}<p class="xw-err" id="rErr" role="alert"></p><button class="xw-b pri" id="rSave"${mayEdit ? '' : ' disabled'}>Save rates</button></section></div>
+  <section class="xw-sec"><h3>Your rates</h3><p class="xw-note" id="rNote">${starting ? 'These are typical STARTING values so you can try the calculator now. They are not your real costs: change any number to match your business, then press Save rates.' : 'Your own numbers. Anything left empty is reported as missing rather than guessed.'}</p>${rateForm}<div class="xw-bar"><button class="xw-b sm" id="rDef"${mayEdit ? '' : ' disabled'}>Fill empty boxes with typical values</button></div><p class="xw-err" id="rErr" role="alert"></p><button class="xw-b pri" id="rSave"${mayEdit ? '' : ' disabled'}>Save rates</button></section></div>
   <div><section class="xw-sec" id="cOut" aria-live="polite"></section></div></div>`;
   const colsEl = b.querySelector('#cCols'), drawCols = () => { colsEl.innerHTML = rows.map(colRow).join('') || '<p class="xw-note">No colours added.</p>'; };
   const currency = () => rates.currency || (H.biz().currency || '');
   const input = () => ({ widthCm: +val('cW', b), heightCm: +val('cH', b), shape: val('cS', b), areaFraction: val('cS', b) === 'custom' && facts ? facts.areaFraction : undefined, perimeterM: val('cS', b) === 'custom' && facts ? facts.perimeterM : undefined, radius: +val('cR', b) || 0, pile: val('cP', b), binding: b.querySelector('#cB').checked, colours: rows.filter(r => r.yarnId && +r.pct > 0) });
   const calc = () => { last = W.calc(input(), rates, yarns); const o = b.querySelector('#cOut'), c = last, cur = currency();
     if (!c.ok) { o.innerHTML = `<h3>Estimate</h3><p class="xw-err">${esc(c.errors.join(' '))}</p>`; return; }
-    o.innerHTML = `<h3>Estimate</h3><p class="xw-note">Area ${c.areaM2} m2 | perimeter ${c.perimeterM} m${c.hours != null ? ' | ' + c.hours + ' tufting hours' : ''}${c.yarnKg != null ? ' | ' + c.yarnKg + ' kg yarn' : ''}</p>
+    o.innerHTML = `<h3>Estimate</h3>${starting ? '<p class="xw-note" role="status">Using typical starting values. Save your own rates for a real estimate.</p>' : ''}<p class="xw-note">Area ${c.areaM2} m2 | perimeter ${c.perimeterM} m${c.hours != null ? ' | ' + c.hours + ' tufting hours' : ''}${c.yarnKg != null ? ' | ' + c.yarnKg + ' kg yarn' : ''}</p>
     ${c.yarn.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th></th><th>Yarn</th><th class="num">Share</th><th class="num">kg needed</th><th class="num">Cost</th><th>Stock</th></tr></thead><tbody>${c.yarn.map(y => `<tr><td>${sw(y.hex)}</td><td>${esc(y.code)}</td><td class="num">${y.pct}%</td><td class="num">${y.kg}</td><td class="num">${y.cost == null ? '-' : money(y.cost, cur || 'USD')}</td><td>${y.enough === null ? '' : y.enough ? badge('enough', 'good') : badge('short by ' + Math.round((y.kg - y.stockKg) * 1000) / 1000 + ' kg', 'bad')}</td></tr>`).join('')}</tbody></table></div>` : ''}
     <div class="xw-tw"><table class="xw-t"><thead><tr><th>Cost line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>${c.lines.map(l => `<tr><td>${esc(l.label)}</td><td class="xw-note" style="margin:0">${esc(l.note || '')}</td><td class="num">${l.amount == null ? '<span class="xw-badge warn">missing</span>' : money(l.amount, cur || 'USD')}</td></tr>`).join('')}</tbody></table></div>
     ${c.missing.length ? `<p class="xw-note warn" role="status"><b>${c.missing.length} rate${c.missing.length > 1 ? 's' : ''} still to enter:</b> ${c.missing.map(m => esc(m.label)).join('; ')}. No total is shown until they are set.</p>` : ''}
@@ -5065,7 +5111,8 @@ WS.register('calculator', 'Rug Calculator', async (b) => {
     if (t.id === 'cAdd') { rows.push({ yarnId: '', pct: '' }); drawCols(); calc(); }
     else if (t.dataset.crm !== undefined) { rows.splice(+t.dataset.crm, 1); drawCols(); calc(); }
     else if (t.id === 'rSave') { const vals = {}; W.RATE_FIELDS.forEach(([p]) => { vals[p] = val('r_' + p.replace(/\./g, '__'), b); }); const r = W.ratesFromForm(vals); b.querySelector('#rErr').textContent = r.errors.join(' '); if (r.errors.length) return;
-      const ex = await db.one('biz_rates', { select: 'business_id' }); if (ex) await db.upd('biz_rates', { rates: r.rates, updated_at: new Date().toISOString() }, {}); else await db.ins('biz_rates', { rates: r.rates }); rates = r.rates; toast('Rates saved'); calc(); }
+      const ex = await db.one('biz_rates', { select: 'business_id' }); if (ex) await db.upd('biz_rates', { rates: r.rates, updated_at: new Date().toISOString() }, {}); else await db.ins('biz_rates', { rates: r.rates }); rates = r.rates; starting = false; const nt = b.querySelector('#rNote'); if (nt) nt.textContent = 'Your own numbers. Anything left empty is reported as missing rather than guessed.'; toast('Rates saved'); calc(); }
+    else if (t.id === 'rDef') { const d = W.defaultRates(currency() || H.biz().currency); let n = 0; W.RATE_FIELDS.forEach(([p]) => { const el = b.querySelector('#r_' + p.replace(/\./g, '__')); const v = W.getRate(d, p); if (el && el.value === '' && v != null) { el.value = v; n++; } }); toast(n ? n + ' empty box' + (n > 1 ? 'es' : '') + ' filled. Press Save rates to keep them.' : 'Nothing to fill: every box already has a value.'); }
     else if (t.id === 'cPlan') { const pid = val('cPrj', b); if (!pid) return toast('Choose a project first.', true); const mv = last.yarn.filter(y => y.kg > 0 && y.yarnId).map(y => ({ yarn_id: y.yarnId, kind: 'estimated_use', kg: y.kg, project_id: pid, note: 'Calculator estimate', created_by: SB().user().id })); if (!mv.length) return toast('Map each colour to a yarn first.', true); await db.ins('yarn_movements', mv); toast('Estimated use saved for ' + mv.length + ' yarn' + (mv.length > 1 ? 's' : '')); }
     else if (t.id === 'cQuote') { const refs = (await db.sel('biz_quotations', { select: 'ref', limit: 1000 })).map(x => x.ref), yr = new Date().getFullYear(), c = last, i = input(); const lines = { items: [{ desc: 'Custom tufted rug ' + i.widthCm + ' x ' + i.heightCm + ' cm', qty: 1, unit: c.price }], discountPct: 0, taxPct: rates.taxPct || 0 }; const tot = W.quoteTotals(lines.items, lines); lines.total = tot.total;
       await db.ins('biz_quotations', { ref: W.nextRef('Q', refs, yr), lines, currency: currency(), subtotal: tot.subtotal, status: 'draft' }); toast('Quotation draft created. Open Quotations to edit it.'); }
@@ -5096,11 +5143,11 @@ const wireDrop = (b, id, fn) => { const z = b.querySelector('#' + id + 'Z'); if 
 /* ---------------------------------------------------------------- Image to Vector */
 const LEVEL_NAMES = ['', 'Most detail', 'Detailed', 'Balanced', 'Simple', 'Simplest'];
 WS.register('vector', 'Image to Vector', async (b) => {
-  let src = handoff.canvas, name = handoff.name || '', res = null, level = 3, colours = 0, bg = '', pal = handoff.palette; handoff.canvas = null; handoff.palette = null;
+  let src = handoff.canvas, name = handoff.name || '', res = null, level = 2, colours = 8, bg = '', pal = handoff.palette; handoff.canvas = null; handoff.palette = null;
   const run = async () => {
     if (!src) return; const out = b.querySelector('#vOut'); out.innerHTML = '<p class="xw-note" role="status">Vectorising...</p>'; await new Promise(r => setTimeout(r, 30));
     const id = src.getContext('2d').getImageData(0, 0, src.width, src.height), t0 = performance.now();
-    res = V().vectorize({ width: id.width, height: id.height, data: id.data }, { level, colours: pal ? 0 : colours, palette: pal || undefined, background: bg || undefined }); res.ms = Math.round(performance.now() - t0); show();
+    res = V().vectorize({ width: id.width, height: id.height, data: id.data }, { level, colours: pal ? 0 : colours, palette: pal || undefined, background: bg || undefined, method: 'tufting' }); res.ms = Math.round(performance.now() - t0); show();
   };
   const show = () => {
     const out = b.querySelector('#vOut'); if (!res) { out.innerHTML = ''; return; }
@@ -5110,8 +5157,8 @@ WS.register('vector', 'Image to Vector', async (b) => {
     const before = canvasToImg(src), after = new Image(); after.alt = ''; after.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(V().toSvg(res, { scale: 1 })); H.baSlider(out.querySelector('#vBA'), before, after);
   };
   b.innerHTML = `<div class="xw-split"><div>${dropZone('vFile', 'Drop a PNG, JPG, WebP or SVG here, or click to choose (max 8 MB)')}<div id="vView" style="margin-top:12px"></div><div id="vOut"></div></div>
-  <section class="xw-sec"><h3>Settings</h3><div class="xw-f"><label for="vLv">Simplification: <b id="vLvN">${LEVEL_NAMES[level]}</b></label><input type="range" id="vLv" min="1" max="5" value="${level}"><small>Low = follows every detail. High = fewer, smoother shapes that are easier to tuft.</small></div>
-  ${field('vCol', 'Number of colours', '0', { type: 'select', options: [['0', 'Automatic'], ...[2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24].map(n => [String(n), String(n)])] })}
+  <section class="xw-sec"><h3>Settings</h3><div class="xw-f"><label for="vLv">Simplification: <b id="vLvN">${LEVEL_NAMES[level]}</b></label><input type="range" id="vLv" min="1" max="5" value="${level}"><small>Low = keeps small details. High = fewer, smoother shapes that are easier to tuft. Details and small accent colours are kept, up to the number of yarn colours you choose.</small></div>
+  ${field('vCol', 'Number of colours', String(colours), { type: 'select', options: [['0', 'Automatic'], ...[2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24].map(n => [String(n), String(n)])] })}
   <div class="xw-f"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="vBgOn" style="width:auto"> Leave one background colour out</label><input type="color" id="vBg" value="#ffffff" style="width:60px;height:34px;padding:2px" disabled></div>
   <p class="xw-note" id="vPal">${pal ? 'Using the ' + pal.length + ' colours from Colour Separation.' : ''}</p><button class="xw-b pri" id="vGo" disabled>Vectorise</button></section></div>`;
   const setSrc = (c, n) => { src = c; name = n; res = null; b.querySelector('#vView').innerHTML = ''; b.querySelector('#vGo').disabled = false; b.querySelector('#vOut').innerHTML = '<p class="xw-note">Image loaded (' + c.width + ' x ' + c.height + ' px). Adjust the settings, then press Vectorise.</p>'; };
@@ -5238,7 +5285,7 @@ WS.register('quotes', 'Quotations', async (b) => {
   const draw = async () => {
     const D = await load(); b._d = D; const list = D.qs.filter(r => !fs || r.status === fs);
     b.innerHTML = `${H.readOnlyNote()}<div class="xw-bar"><select id="qf" aria-label="Status"><option value="">Any status</option>${W.QUOTE_STATUS.map(s => `<option value="${s}"${fs === s ? ' selected' : ''}>${s}</option>`).join('')}</select><span class="xw-sp"></span><button class="xw-b pri" id="qNew"${mayEdit ? '' : ' disabled'}>New quotation</button></div>
-    ${list.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Ref</th><th>Customer</th><th>Project</th><th>Status</th><th class="num">Total</th><th>Valid until</th><th></th></tr></thead><tbody>${list.map(r => { const li = lineItems(r), tot = W.quoteTotals(li.items, li); return `<tr><td><b>${esc(r.ref)}</b></td><td>${esc(nm(D.customers, r.customer_id))}</td><td>${esc(nm(D.projects, r.project_id))}</td><td>${badge(r.status, statusKind(r.status))}</td><td class="num">${money(tot.total, r.currency)}</td><td>${esc(dateS(r.valid_until))}</td><td style="white-space:nowrap"><button class="xw-b sm" data-qe="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm" data-qp="${esc(r.id)}">PDF</button> <button class="xw-b sm" data-qo="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Make order</button> <button class="xw-b sm bad" data-qx="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`; }).join('')}</tbody></table></div>` : empty('No quotations yet.')}`;
+    ${list.length ? `<div class="xw-tw"><table class="xw-t"><thead><tr><th>Ref</th><th>Customer</th><th>Project</th><th>Status</th><th class="num">Total</th><th>Valid until</th><th></th></tr></thead><tbody>${list.map(r => { const li = lineItems(r), tot = W.quoteTotals(li.items, li); return `<tr><td><b>${esc(r.ref)}</b></td><td>${esc(nm(D.customers, r.customer_id))}</td><td>${esc(nm(D.projects, r.project_id))}</td><td>${badge(r.status, statusKind(r.status))}</td><td class="num">${money(tot.total, r.currency)}</td><td>${esc(dateS(r.valid_until))}</td><td style="white-space:nowrap"><button class="xw-b sm" data-qe="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Edit</button> <button class="xw-b sm" data-qp="${esc(r.id)}">Preview / download</button> <button class="xw-b sm" data-qo="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Make order</button> <button class="xw-b sm bad" data-qx="${esc(r.id)}"${mayEdit ? '' : ' disabled'}>Delete</button></td></tr>`; }).join('')}</tbody></table></div>` : empty('No quotations yet.')}`;
   };
   const editor = (r) => { const D = b._d, li = lineItems(r || {}), items = li.items.length ? li.items.map(i => ({ desc: i.desc, qty: i.qty, unit: i.unit })) : [{ desc: '', qty: 1, unit: '' }]; const isNew = !r.id;
     const lineHtml = () => items.map((i, k) => `<div class="xw-bar" data-li="${k}"><input type="text" data-ld value="${esc(i.desc)}" placeholder="Description" maxlength="200" aria-label="Description" style="flex:3"><input type="number" data-lq value="${esc(i.qty)}" min="0" step="any" placeholder="Qty" aria-label="Quantity" style="width:80px"><input type="number" data-lu value="${esc(i.unit)}" min="0" step="any" placeholder="Unit price" aria-label="Unit price" style="width:110px"><button class="xw-b sm bad" data-lrm="${k}" aria-label="Remove line">✕</button></div>`).join('');
@@ -5258,7 +5305,7 @@ WS.register('quotes', 'Quotations', async (b) => {
     const t = e.target, g = a => t.closest('[' + a + ']'); let x, D = b._d;
     if (t.closest('#qNew')) editor({});
     else if (x = g('data-qe')) editor(D.qs.find(r => r.id === x.dataset.qe));
-    else if (x = g('data-qp')) { const r = D.qs.find(v => v.id === x.dataset.qp); download(safeName(r.ref) + '.pdf', new Blob([quotePdf(r, D.customers.find(c => c.id === r.customer_id), D.projects.find(p => p.id === r.project_id))], { type: 'application/pdf' })); }
+    else if (x = g('data-qp')) { const r = D.qs.find(v => v.id === x.dataset.qp); if (H.quote) return H.quote.preview(r, D.customers.find(c => c.id === r.customer_id), D.projects.find(p => p.id === r.project_id)); download(safeName(r.ref) + '.pdf', new Blob([quotePdf(r, D.customers.find(c => c.id === r.customer_id), D.projects.find(p => p.id === r.project_id))], { type: 'application/pdf' })); }
     else if (x = g('data-qx')) { if (await ask('Delete this quotation?', 'Delete')) { await db.del('biz_quotations', { id: x.dataset.qx }); await draw(); } }
     else if (x = g('data-qo')) { const r = D.qs.find(v => v.id === x.dataset.qo), li = lineItems(r), tot = W.quoteTotals(li.items, li);
       const existing = await db.sel('biz_orders', { select: 'ref,quotation_id', limit: 1000 }); if (existing.some(o => o.quotation_id === r.id) && !(await ask('This quotation already has an order. Create another?', 'Create another'))) return;
@@ -5358,6 +5405,144 @@ WS.register('reports', 'Reports', async (b) => {
   draw();
 });
 
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ============ quotation document: one layout, drawn on a canvas, saved as PNG / JPG / PDF ============
+   layout() is pure (it only needs a text-measuring function), so it is unit-tested without a browser. render() draws the result on canvases.
+   A template is either the built-in layout (logo, business details, accent colour) or the maker's own uploaded template image used as the page
+   background (their letterhead); in that case the content is placed inside the margins they set. */
+(function (root) {
+'use strict';
+const Q = {};
+const PW = 1240, PH = 1754, HEX = /^#[0-9A-Fa-f]{6}$/, FONT = '"Inter","Segoe UI",Arial,"Noto Sans","Noto Sans Sinhala",sans-serif';
+Q.PAGE = { w: PW, h: PH };
+Q.DEFAULT_TEMPLATE = { mode: 'builtin', accent: '#1F7A3A', title: 'QUOTATION', footer: 'Thank you for your business.', terms: '', bank: '', showLogo: true, showSign: true, bgPath: '', area: { top: 0.2, bottom: 0.1, left: 0.07, right: 0.07 } };
+const num = (v, a, b, d) => { v = +v; return Number.isFinite(v) ? Math.min(b, Math.max(a, v)) : d; };
+const str = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, n);
+Q.sanitize = t => { t = t || {}; const d = Q.DEFAULT_TEMPLATE, a = t.area || {};
+  return { mode: t.mode === 'image' ? 'image' : 'builtin', accent: HEX.test(t.accent) ? t.accent.toUpperCase() : d.accent, title: str(t.title || d.title, 30), footer: t.footer == null ? d.footer : str(t.footer, 200), terms: str(t.terms, 1500), bank: str(t.bank, 600),
+    showLogo: t.showLogo !== false, showSign: t.showSign !== false, bgPath: /^[A-Za-z0-9/._-]{0,200}$/.test(t.bgPath || '') ? (t.bgPath || '') : '',
+    area: { top: num(a.top, 0, 0.6, d.area.top), bottom: num(a.bottom, 0, 0.4, d.area.bottom), left: num(a.left, 0, 0.3, d.area.left), right: num(a.right, 0, 0.3, d.area.right) } }; };
+Q.money = (n, cur) => { n = Number(n) || 0; try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: /^[A-Z]{3}$/.test(cur) ? cur : 'USD', currencyDisplay: 'code', minimumFractionDigits: 2 }).format(n).replace(/ /g, ' '); } catch (e) { return n.toFixed(2) + ' ' + cur; } };
+Q.totals = (items, o) => { o = o || {}; const sub = Math.round(items.reduce((s, i) => s + i.qty * i.unit, 0) * 100) / 100, dp = Math.min(100, Math.max(0, +o.discountPct || 0)), disc = Math.round(sub * dp) / 100, after = sub - disc, tp = Math.max(0, +o.taxPct || 0), tax = Math.round(after * tp) / 100;
+  return { subtotal: sub, discountPct: dp, discount: disc, taxPct: tp, tax, total: Math.round((after + tax) * 100) / 100 }; };
+const wrap = (text, size, maxW, measure, bold) => { const out = []; String(text || '').split(/\r?\n/).forEach(par => { let line = ''; par.split(/(\s+)/).forEach(w => { if (!w) return; const t = line + w; if (measure(t, size, bold) <= maxW || !line.trim()) line = t; else { out.push(line.trim()); line = w.trimStart(); } }); out.push(line.trim()); }); return out; };
+
+/** model: {business:{name,owner,phone,email,address[],logo:{w,h}|null}, customer:{name,email,phone,address[]}|null, quote:{ref,date,validUntil,currency,status,project,notes,discountPct,taxPct}, items:[{desc,qty,unit}]}
+ *  measure(text,size,bold) -> px width. Returns { pages:[{ops}], totals }. Ops use px on a 1240 x 1754 page. */
+Q.layout = (model, tpl, measure) => {
+  tpl = Q.sanitize(tpl); const img = tpl.mode === 'image', B = model.business || {}, C = model.customer, qt = model.quote || {}, cur = qt.currency || 'USD', items = (model.items || []).map(i => ({ desc: str(i.desc, 400), qty: +i.qty || 0, unit: +i.unit || 0 }));
+  const tot = Q.totals(items, qt), L = Math.round(PW * (img ? tpl.area.left : 0.07)), R = PW - Math.round(PW * (img ? tpl.area.right : 0.07)), TOP = img ? Math.round(PH * tpl.area.top) : 70, BOT = PH - Math.round(PH * (img ? tpl.area.bottom : 0.07)), W = R - L;
+  const pages = []; let ops, y, pageNo = 0; const ink = '#1A1F1A', mute = '#5C665C', acc = tpl.accent;
+  const T = (text, x, yy, s, o) => ops.push(Object.assign({ t: 'text', text: str(text, 600), x, y: yy, s, c: ink, a: 'l', b: false }, o || {}));
+  const rect = (x, yy, w, h, fill, o) => ops.push(Object.assign({ t: 'rect', x, y: yy, w, h, f: fill }, o || {})), line = (x1, y1, x2, y2, c) => ops.push({ t: 'line', x1, y1, x2, y2, c: c || '#D5DAD5' });
+  const newPage = () => { ops = []; pages.push({ ops }); pageNo++; if (img) ops.push({ t: 'img', key: 'bg', x: 0, y: 0, w: PW, h: PH }); y = TOP; };
+  const foot = () => { if (tpl.footer) T(tpl.footer, PW / 2, PH - 38, 17, { c: mute, a: 'c' }); };
+  newPage();
+  // header
+  if (!img) { rect(0, 0, PW, 16, acc); let hx = L; if (tpl.showLogo && B.logo) { const s = Math.min(240 / B.logo.w, 130 / B.logo.h, 1.5); ops.push({ t: 'img', key: 'logo', x: L, y: 50, w: Math.round(B.logo.w * s), h: Math.round(B.logo.h * s) }); y = 50 + Math.round(B.logo.h * s) + 14; } else y = 64;
+    const bl = [B.name, B.address && B.address.join(', '), B.phone, B.email].filter(Boolean); T(B.name || '', L, y + 22, 30, { b: true }); let by = y + 48; bl.slice(1).forEach(s => { T(s, L, by, 18, { c: mute }); by += 25; }); y = Math.max(by, 190);
+    T(tpl.title, R, 96, 46, { b: true, a: 'r', c: acc }); T(qt.ref || '', R, 134, 22, { a: 'r', b: true }); T('Date: ' + (qt.date || ''), R, 164, 19, { a: 'r', c: mute }); if (qt.validUntil) T('Valid until: ' + qt.validUntil, R, 190, 19, { a: 'r', c: mute }); }
+  else { T(tpl.title, R, y + 30, 40, { b: true, a: 'r', c: acc }); T((qt.ref || '') + (qt.date ? '   ' + qt.date : ''), R, y + 64, 20, { a: 'r', b: true }); if (qt.validUntil) T('Valid until: ' + qt.validUntil, R, y + 92, 18, { a: 'r', c: mute }); }
+  const topLeft = img ? y : y; y = img ? y + 8 : y + 12;
+  // customer block
+  const cl = C ? [C.name, ...(C.address || []), C.email, C.phone].filter(Boolean) : []; if (cl.length || qt.project) { T('PREPARED FOR', L, y + 18, 15, { b: true, c: acc }); let cy = y + 44; cl.forEach((s, i) => { T(s, L, cy, i ? 18 : 22, { b: !i, c: i ? mute : ink }); cy += i ? 25 : 30; }); if (qt.project) { T('Project: ' + qt.project, L, cy, 18, { c: mute }); cy += 25; } y = cy + 10; }
+  // items table
+  const cw = [Math.round(W * 0.52), Math.round(W * 0.1), Math.round(W * 0.19), W - Math.round(W * 0.52) - Math.round(W * 0.1) - Math.round(W * 0.19)], cx = [L, L + cw[0], L + cw[0] + cw[1], L + cw[0] + cw[1] + cw[2]];
+  const head = () => { rect(L, y, W, 44, acc); [['Description', cx[0] + 14, 'l'], ['Qty', cx[1] + cw[1] - 10, 'r'], ['Unit price', cx[2] + cw[2] - 10, 'r'], ['Amount', cx[3] + cw[3] - 14, 'r']].forEach(([h, x, a]) => T(h, x, y + 29, 18, { c: '#FFFFFF', b: true, a })); y += 44; };
+  head(); items.forEach((it, k) => { const ls = wrap(it.desc, 19, cw[0] - 28, measure), h = Math.max(46, ls.length * 26 + 20); if (y + h > BOT - 40) { foot(); newPage(); head(); }
+    if (k % 2) rect(L, y, W, h, '#F3F6F3'); ls.forEach((s, i) => T(s, cx[0] + 14, y + 30 + i * 26, 19)); const m = y + 30; T(String(it.qty), cx[1] + cw[1] - 10, m, 19, { a: 'r' }); T(Q.money(it.unit, cur), cx[2] + cw[2] - 10, m, 19, { a: 'r' }); T(Q.money(it.qty * it.unit, cur), cx[3] + cw[3] - 14, m, 19, { a: 'r', b: true }); line(L, y + h, R, y + h); y += h; });
+  // totals (kept together)
+  const trows = [['Subtotal', tot.subtotal]]; if (tot.discount) trows.push(['Discount ' + tot.discountPct + '%', -tot.discount]); if (tot.tax) trows.push(['Tax ' + tot.taxPct + '%', tot.tax]);
+  if (y + trows.length * 38 + 90 > BOT) { foot(); newPage(); }
+  y += 18; const tx = L + Math.round(W * 0.5); trows.forEach(([a, v]) => { T(a, tx, y + 24, 19, { c: mute }); T(Q.money(v, cur), R - 14, y + 24, 19, { a: 'r' }); y += 38; });
+  rect(tx, y + 4, R - tx, 60, acc); T('TOTAL', tx + 16, y + 43, 22, { c: '#FFFFFF', b: true }); T(Q.money(tot.total, cur), R - 16, y + 43, 26, { c: '#FFFFFF', b: true, a: 'r' }); y += 84;
+  // notes / terms / bank
+  const block = (title, text) => { if (!text) return; const ls = wrap(text, 17, W, measure), need = 34 + ls.length * 24; if (y + need > BOT - 10) { foot(); newPage(); } T(title, L, y + 20, 15, { b: true, c: acc }); ls.forEach((s, i) => T(s, L, y + 46 + i * 24, 17, { c: mute })); y += need + 6; };
+  block('NOTES', qt.notes); block('TERMS', tpl.terms); block('BANK DETAILS', tpl.bank);
+  if (tpl.showSign) { if (y + 110 > BOT) { foot(); newPage(); } y += 50; line(L, y + 30, L + 330, y + 30, '#8A948A'); T('Authorised signature', L, y + 52, 16, { c: mute }); line(R - 330, y + 30, R, y + 30, '#8A948A'); T('Customer acceptance', R - 330, y + 52, 16, { c: mute }); }
+  foot(); pages.forEach((p, i) => p.ops.push({ t: 'text', text: 'Page ' + (i + 1) + ' of ' + pages.length, x: R, y: PH - 38, s: 15, c: mute, a: 'r', b: false }));
+  return { pages, totals: tot, template: tpl };
+};
+
+/* ---- canvas drawing (browser only) ---- */
+Q.render = (layout, images) => layout.pages.map(pg => { const c = document.createElement('canvas'); c.width = PW; c.height = PH; const g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, PW, PH); g.textBaseline = 'alphabetic';
+  pg.ops.forEach(o => { if (o.t === 'rect') { g.fillStyle = o.f; g.fillRect(o.x, o.y, o.w, o.h); } else if (o.t === 'line') { g.strokeStyle = o.c; g.lineWidth = 1.5; g.beginPath(); g.moveTo(o.x1, o.y1); g.lineTo(o.x2, o.y2); g.stroke(); }
+    else if (o.t === 'img') { const im = images && images[o.key]; if (im) g.drawImage(im, o.x, o.y, o.w, o.h); } else if (o.t === 'text') { g.fillStyle = o.c; g.font = (o.b ? '700 ' : '400 ') + o.s + 'px ' + FONT; g.textAlign = o.a === 'r' ? 'right' : o.a === 'c' ? 'center' : 'left'; g.fillText(o.text, o.x, o.y); } });
+  return c; });
+Q.measurer = () => { const g = document.createElement('canvas').getContext('2d'); return (t, s, b) => { g.font = (b ? '700 ' : '400 ') + s + 'px ' + FONT; return g.measureText(t).width; }; };
+Q.blob = (canvas, type, q) => new Promise(res => canvas.toBlob(res, type, q || 0.92));
+
+/* ---- PDF: one A4 page per canvas, each a full-page JPEG (so any language and any template image prints exactly as previewed) ---- */
+const enc = s => { const o = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) o[i] = s.charCodeAt(i) & 255; return o; };
+Q.pdf = pages => {   // pages: [{jpeg:Uint8Array, w, h}]
+  const PWpt = 595.28, PHpt = 841.89, objs = [], add = b => { objs.push(b); return objs.length; }, cat = (...a) => { const n = a.reduce((s, x) => s + x.length, 0), o = new Uint8Array(n); let p = 0; a.forEach(x => { o.set(x, p); p += x.length; }); return o; };
+  const imgIds = pages.map(p => add(cat(enc(`<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.jpeg.length} >>\nstream\n`), p.jpeg, enc('\nendstream'))));
+  const conts = pages.map((p, i) => { const body = enc(`q ${PWpt} 0 0 ${PHpt} 0 0 cm /Im${i} Do Q`); return add(cat(enc(`<< /Length ${body.length} >>\nstream\n`), body, enc('\nendstream'))); });
+  const pagesId = objs.length + pages.length + 1, pageIds = pages.map((p, i) => add(enc(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${PWpt} ${PHpt}] /Resources << /XObject << /Im${i} ${imgIds[i]} 0 R >> >> /Contents ${conts[i]} 0 R >>`)));
+  add(enc(`<< /Type /Pages /Kids [${pageIds.map(i => i + ' 0 R').join(' ')}] /Count ${pageIds.length} >>`)); const root_ = add(enc(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`));
+  const chunks = [enc('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n')], offs = []; let pos = chunks[0].length;
+  objs.forEach((b, i) => { offs.push(pos); const a = enc(`${i + 1} 0 obj\n`), z = enc('\nendobj\n'); chunks.push(a, b, z); pos += a.length + b.length + z.length; });
+  chunks.push(enc(['xref', `0 ${objs.length + 1}`, '0000000000 65535 f '].concat(offs.map(o => String(o).padStart(10, '0') + ' 00000 n ')).join('\n') + `\ntrailer\n<< /Size ${objs.length + 1} /Root ${root_} 0 R >>\nstartxref\n${pos}\n%%EOF\n`)); return cat(...chunks); };
+
+if (typeof module !== 'undefined' && module.exports) module.exports = Q; else root.XQUOTE = Q;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ============ Workspace: quotation template (settings) and quotation documents (preview, PDF, PNG, JPG) ============ */
+(function (root) {
+'use strict';
+const WS = root.XWS, H = WS.h, { esc, field, val, dlg, download, toast, guard, safeName, dateS } = H;
+const SB = () => root.XSB, Q = () => root.XQUOTE, BUCKET = 'business-assets';
+const loadImg = blob => new Promise((ok, no) => { const u = URL.createObjectURL(blob), i = new Image(); i.onload = () => { ok(i); }; i.onerror = () => no(new Error('That image could not be read.')); i.src = u; });
+const fetchImg = async path => { if (!path) return null; try { const r = await fetch(await SB().signedUrl(BUCKET, path)); if (!r.ok) return null; return await loadImg(await r.blob()); } catch (e) { return null; } };
+const tplOf = () => Q().sanitize(((H.biz().settings || {}).quoteTemplate) || {});
+const bizModel = logo => { const bz = H.biz(), a = bz.address || {}; return { name: bz.name, owner: bz.owner_name, phone: bz.phone, email: bz.email, address: [a.line1, a.city].filter(Boolean), logo: logo ? { w: logo.naturalWidth, h: logo.naturalHeight } : null }; };
+const lineItems = q => { const l = q.lines; return Array.isArray(l) ? { items: l, discountPct: 0, taxPct: 0 } : { items: (l && l.items) || [], discountPct: (l && l.discountPct) || 0, taxPct: (l && l.taxPct) || 0 }; };
+const custModel = c => { if (!c) return null; const a = c.address || {}; return { name: c.name, email: c.email, phone: c.phone, address: [a.line1, a.city].filter(Boolean) }; };
+const fmtDate = d => dateS(d || new Date());
+
+/** builds the pages (canvases) for a quotation row or a sample, using the business logo and template */
+async function pagesFor(model, tpl) {
+  tpl = Q().sanitize(tpl); const [logo, bg] = await Promise.all([tpl.showLogo && tpl.mode === 'builtin' && H.biz().logo_path ? fetchImg(H.biz().logo_path) : null, tpl.mode === 'image' && tpl.bgPath ? fetchImg(tpl.bgPath) : null]);
+  model.business = bizModel(logo); const lay = Q().layout(model, tpl, Q().measurer()); return { layout: lay, canvases: Q().render(lay, { logo, bg }), missingBg: tpl.mode === 'image' && tpl.bgPath && !bg };
+}
+const quoteModel = (q, cust, proj) => { const li = lineItems(q); return { customer: custModel(cust), quote: { ref: q.ref, date: fmtDate(q.created_at), validUntil: q.valid_until ? fmtDate(q.valid_until) : '', currency: q.currency, project: proj ? proj.title : '', notes: q.notes || '', discountPct: li.discountPct, taxPct: li.taxPct }, items: li.items.map(i => ({ desc: i.desc, qty: i.qty, unit: i.unit })) }; };
+const SAMPLE = () => ({ customer: { name: 'Sample Customer', email: 'customer@example.com', phone: '+00 000 000 000', address: ['12 Example Street', 'Colombo'] }, quote: { ref: 'Q-SAMPLE-0001', date: fmtDate(), validUntil: '', currency: (H.biz().currency || 'USD').toUpperCase(), project: 'Custom keyboard rug', notes: 'This is a sample to preview your template.', discountPct: 0, taxPct: 0 }, items: [{ desc: 'Custom tufted keyboard rug 90 x 40 cm, standard pile', qty: 1, unit: 4500 }, { desc: 'Non-slip backing and binding', qty: 1, unit: 800 }] });
+
+const showDoc = async (title, model, tpl, name) => {
+  const out = await pagesFor(model, tpl), d = dlg(title, `<div class="xw-bar"><button class="xw-b pri" data-qd="pdf">Download PDF</button><button class="xw-b" data-qd="png">Download PNG</button><button class="xw-b" data-qd="jpg">Download JPG</button></div>${out.missingBg ? '<p class="xw-err">Your template image could not be loaded, so the plain page is shown.</p>' : ''}<div class="xw-qpv" id="qpv"></div>`);
+  const box = d.m.querySelector('#qpv'); out.canvases.forEach(c => { c.style.cssText = 'width:100%;max-width:640px;height:auto;border:1px solid #2a342a;border-radius:6px;margin:0 auto 12px;display:block;background:#fff'; c.setAttribute('role', 'img'); c.setAttribute('aria-label', 'Quotation page'); box.appendChild(c); });
+  d.m.addEventListener('click', guard(async e => { const b = e.target.closest('[data-qd]'); if (!b) return; const k = b.dataset.qd, base = safeName(name);
+    if (k === 'pdf') { const pg = []; for (const c of out.canvases) { const bl = await Q().blob(c, 'image/jpeg', 0.92); pg.push({ jpeg: new Uint8Array(await bl.arrayBuffer()), w: c.width, h: c.height }); } download(base + '.pdf', new Blob([Q().pdf(pg)], { type: 'application/pdf' })); }
+    else for (let i = 0; i < out.canvases.length; i++) download(base + (out.canvases.length > 1 ? '-page' + (i + 1) : '') + '.' + k, await Q().blob(out.canvases[i], k === 'png' ? 'image/png' : 'image/jpeg', 0.92)); }));
+  return out;
+};
+H.quote = { template: tplOf, pagesFor, quoteModel, preview: (q, cust, proj) => showDoc('Quotation ' + q.ref, quoteModel(q, cust, proj), tplOf(), q.ref) };
+
+/* ---- settings section: build / upload the template ---- */
+H.quote.mount = b => {
+  const bz = H.biz(), mayEdit = H.canWrite(); let t = tplOf(); const sec = document.createElement('section'); sec.className = 'xw-sec'; sec.id = 'qtSec';
+  const pct = v => Math.round(v * 100);
+  sec.innerHTML = `<h3>Quotation template</h3><p class="xw-note">Your logo, business details and the customer's details are filled in automatically. Choose the built-in layout, or upload your own template image (for example your letterhead) and the quotation is placed on it.</p>
+  <div class="xw-form">${field('qtMode', 'Layout', t.mode, { type: 'select', options: [['builtin', 'Built-in layout (logo + details)'], ['image', 'My uploaded template image']] })}${field('qtTitle', 'Document title', t.title, { max: 30 })}
+  <div class="xw-f"><label for="qtAcc">Accent colour</label><input type="color" id="qtAcc" value="${esc(t.accent)}"></div>${field('qtFoot', 'Footer line', t.footer, { max: 200 })}</div>
+  <div class="xw-f"><label for="qtBgF">Template image (PNG or JPG, A4 portrait works best, up to 6 MB)</label><input type="file" id="qtBgF" accept="image/png,image/jpeg"${mayEdit ? '' : ' disabled'}><small id="qtBgN">${t.bgPath ? 'A template image is saved.' : 'No template image uploaded.'}</small> <button class="xw-b sm" id="qtBgX"${t.bgPath && mayEdit ? '' : ' disabled'}>Remove image</button></div>
+  <div class="xw-form" id="qtArea">${[['top', 'Content starts (% from top)'], ['bottom', 'Bottom margin (%)'], ['left', 'Left margin (%)'], ['right', 'Right margin (%)']].map(([k, l]) => field('qtA_' + k, l, pct(t.area[k]), { type: 'number', min: 0, max: 60, step: 1 })).join('')}</div>
+  <small>When you use your own image, set the margins so the quotation stays inside the empty part of your template.</small>
+  ${field('qtTerms', 'Terms and conditions (printed on the quotation)', t.terms, { type: 'textarea', max: 1500 })}${field('qtBank', 'Bank / payment details', t.bank, { type: 'textarea', max: 600 })}
+  <div class="xw-bar"><label><input type="checkbox" id="qtLogo"${t.showLogo ? ' checked' : ''}> Show my logo (built-in layout)</label><label><input type="checkbox" id="qtSign"${t.showSign ? ' checked' : ''}> Signature lines</label></div>
+  <p class="xw-err" id="qtErr" role="alert"></p><div class="xw-bar"><button class="xw-b" id="qtPrev">Preview with sample data</button><button class="xw-b pri" id="qtSave"${mayEdit ? '' : ' disabled'}>Save template</button></div>`;
+  const anchor = b.querySelector('section:nth-of-type(2)'); if (anchor) anchor.after(sec); else b.appendChild(sec);
+  const read = () => Q().sanitize({ mode: val('qtMode', sec), title: val('qtTitle', sec).trim() || 'QUOTATION', accent: sec.querySelector('#qtAcc').value, footer: val('qtFoot', sec), terms: val('qtTerms', sec), bank: val('qtBank', sec), showLogo: sec.querySelector('#qtLogo').checked, showSign: sec.querySelector('#qtSign').checked, bgPath: t.bgPath,
+    area: { top: val('qtA_top', sec) / 100, bottom: val('qtA_bottom', sec) / 100, left: val('qtA_left', sec) / 100, right: val('qtA_right', sec) / 100 } });
+  sec.addEventListener('change', guard(async e => { if (e.target.id !== 'qtBgF') return; const f = e.target.files[0]; if (!f) return; if (!/^image\/(png|jpeg)$/.test(f.type)) return toast('Use a PNG or JPG image.', true); if (f.size > 6 * 1048576) return toast('That file is over 6 MB.', true);
+    await loadImg(f); const path = SB().businessPath(bz.id, 'quote-template-' + Date.now() + (f.type === 'image/png' ? '.png' : '.jpg')); await SB().upload(BUCKET, path, f, f.type); t = Object.assign({}, read(), { bgPath: path, mode: 'image' }); sec.querySelector('#qtMode').value = 'image'; sec.querySelector('#qtBgN').textContent = 'Template image uploaded. Press Save template to keep it.'; sec.querySelector('#qtBgX').disabled = false; e.target.value = ''; toast('Image uploaded'); }));
+  sec.addEventListener('click', guard(async e => { const id = e.target.id;
+    if (id === 'qtBgX') { t = Object.assign({}, read(), { bgPath: '' }); sec.querySelector('#qtBgN').textContent = 'No template image. Press Save template to keep this.'; e.target.disabled = true; }
+    else if (id === 'qtPrev') { const cur = read(); await showDoc('Template preview', SAMPLE(), cur, 'quotation-sample'); }
+    else if (id === 'qtSave') { const cur = read(); if (cur.mode === 'image' && !cur.bgPath) { sec.querySelector('#qtErr').textContent = 'Upload a template image first, or choose the built-in layout.'; return; } sec.querySelector('#qtErr').textContent = '';
+      await SB().update('businesses', { settings: Object.assign({}, bz.settings || {}, { quoteTemplate: cur }) }, { eq: { id: bz.id } }); await root.XACCT.refresh(); t = cur; toast('Quotation template saved'); } }));
+};
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* ============ Vector editing geometry for the Studio (pure functions, unit tested) ============

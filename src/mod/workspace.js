@@ -152,6 +152,7 @@ WS.register('settings', 'Account Settings', async (b) => {
     else if (t.id === 'pwSave') { const p = val('pw'); if (p.length < 8) return toast('Use at least 8 characters.', true); await SB().updatePassword(p); $('#pw').value = ''; toast('Password changed'); }
     else if (t.id === 'so') { await SB().signOut(); WS.close(); }
   }));
+  if (H.quote && H.quote.mount) H.quote.mount(b);
   b.addEventListener('change', guard(async e => { if (e.target.id !== 'logoF') return; const f = e.target.files[0]; if (!f) return; if (!/^image\/(png|jpeg|webp)$/.test(f.type)) return toast('Use a PNG, JPG or WebP image.', true); if (f.size > 2 * 1048576) return toast('That file is over 2 MB.', true);
     const path = SB().businessPath(bz.id, 'logo-' + Date.now() + '.' + (f.type === 'image/png' ? 'png' : f.type === 'image/webp' ? 'webp' : 'jpg')); await SB().upload('business-assets', path, f, f.type); await SB().update('businesses', { logo_path: path }, { eq: { id: bz.id } }); await XACCT.refresh(); $('#logoBox').textContent = 'Logo saved.'; toast('Logo saved'); }));
 });

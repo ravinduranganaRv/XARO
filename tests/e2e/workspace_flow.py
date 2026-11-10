@@ -10,6 +10,9 @@ def check(c, msg):
     print(('PASS ' if c else 'FAIL ') + msg)
     if not c: fails.append(msg)
 mock = Mock()
+def _hook(t, v, tb):
+    print('CRASH: page errors so far:', globals().get('errs')); sys.__excepthook__(t, v, tb)
+sys.excepthook = _hook
 def png_bytes(draw_fn, size=(400, 300), bg=(255, 255, 255)):
     im = Image.new('RGB', size, bg); d = ImageDraw.Draw(im); draw_fn(d, im); b = io.BytesIO(); im.save(b, 'PNG'); return b.getvalue()
 def logo(d, im): d.rectangle([40, 40, 200, 160], fill=(200, 30, 40)); d.ellipse([180, 100, 360, 260], fill=(20, 80, 200)); d.rectangle([220, 30, 380, 80], fill=(240, 200, 20))
@@ -23,7 +26,7 @@ with sync_playwright() as p:
     pg.set_default_timeout(10000); _click = pg.click; pg.click = lambda sel, **k: _click(sel, no_wait_after=True, **k); mock.attach(pg); pg.add_init_script(mock.session_script()); pg.add_init_script("window.requestAnimationFrame=cb=>setTimeout(()=>cb(performance.now()),3000)")
     pg.goto('file://' + os.path.abspath('index.html')); pg.wait_for_timeout(600)
     pg.evaluate("document.getElementById('gate') && document.getElementById('gate').remove(); document.body.classList.remove('gate-open'); XSTUDIO.open()"); pg.wait_for_selector('#studio.on')
-    pg.wait_for_function("!document.getElementById('stWork').hidden", timeout=8000)
+    pg.wait_for_selector('#stWork:not([hidden])', timeout=8000)
     check(pg.inner_text('#stAcct') == 'Rita', 'signed-in rug maker with a business sees the account chip and Workspace button')
     pg.click('#stWork'); pg.wait_for_selector('#xwork.on')
     names = pg.eval_on_selector_all('#xwork .xw-nav button', 'els => els.map(e => e.textContent)')
@@ -85,6 +88,9 @@ with sync_playwright() as p:
 
     # ---------------- Rug Calculator
     go('Rug Calculator'); pg.click('#cAdd'); pg.click('#cAdd'); pg.select_option('[data-ci="0"] [data-cy]', label='R1 - Red updated'); pg.fill('[data-ci="0"] [data-cp]', '75'); pg.select_option('[data-ci="1"] [data-cy]', label='B1 - Blue'); pg.fill('[data-ci="1"] [data-cp]', '25')
+    check(pg.inner_text('#rNote').lower().count('starting') >= 1 and pg.input_value('#r_wastePct') != '', 'new business sees editable typical starting rates')
+    for el in pg.query_selector_all('[id^=r_]'): el.fill('')   # the maker clears them to test the missing-rate path
+    pg.click('#rSave'); pg.wait_for_timeout(500)
     out = pg.inner_text('#cOut'); check('still to enter' in out and 'No total is shown' in out and pg.locator('#cOut .xw-total').count() == 0, 'with no rates entered the calculator lists what is missing and shows no total')
     check(pg.locator('#cOut .xw-badge:text-is("missing")').count() >= 3, 'cost lines without a rate are marked missing, not zero')
     for k, v in {'currency': 'lkr', 'pileKgPerM2__standard': '2', 'wastePct': '10', 'labour__hoursPerM2': '4', 'labour__hourlyRate': '5', 'backingPerM2': '3', 'finishingFlat': '4', 'packagingFlat': '1', 'marginPct': '25', 'taxPct': '5'}.items(): pg.fill('#r_' + k, v)
@@ -103,7 +109,11 @@ with sync_playwright() as p:
     pg.fill('[data-li="1"] [data-lu]', '-5'); pg.click('.xw-acts .pri'); check('unit price' in pg.inner_text('#qErr'), 'negative unit price is rejected'); pg.fill('[data-li="1"] [data-lu]', '10'); pg.click('.xw-acts .pri'); pg.wait_for_selector('.xw-mod', state='detached'); pg.wait_for_timeout(400)
     qd = mock.t['biz_quotations'][0]; check(qd['status'] == 'sent' and qd['subtotal'] == 86.2 and len(qd['lines']['items']) == 2 and qd['lines']['discountPct'] == 10 and qd['lines']['total'] == 81.46 and qd['customer_id'] and qd['project_id'], 'edited quotation stored with discount, tax and totals: ' + json.dumps({k: qd[k] for k in ('subtotal', 'status')}) + str(qd['lines'].get('total')))
     check([x for x in mock.t['biz_projects']][0]['status'] == 'quoted', 'sending a quotation marks the project as quoted')
-    path = dl('[data-qp]'); okp, txt = pdf_ok(path, qd['ref'], 'Ann Perera', 'Delivery', 'TOTAL: 81.46 LKR'); check(okp, 'quotation PDF is valid and carries the reference, customer, lines and total')
+    pg.click('[data-qp]'); pg.wait_for_selector('.xw-mod [data-qd=pdf]'); pg.wait_for_selector('#qpv canvas', timeout=15000)
+    path = dl('[data-qd=pdf]'); okq = subprocess.run(['qpdf','--check',path],capture_output=True).returncode == 0 and os.path.getsize(path) > 20000; check(okq, 'quotation PDF is valid and holds the rendered A4 page')
+    path = dl('[data-qd=png]'); check(open(path,'rb').read(8)[:4]==b'\x89PNG', 'quotation PNG downloads'); path = dl('[data-qd=jpg]'); check(open(path,'rb').read(3)==b'\xff\xd8\xff', 'quotation JPG downloads')
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(300)
+    if pg.locator('.xw-mod').count(): pg.click('.xw-mod .xw-acts button:not(.pri)'); pg.wait_for_timeout(300)
     pg.click('[data-qo]'); pg.fill('#oDue', '2026-12-10'); pg.click('.xw-acts .pri'); pg.wait_for_timeout(500); od = mock.t['biz_orders'][0]
     check(re.match(r'O-\d{4}-0001$', od['ref']) and od['total'] == 81.46 and od['paid'] == 0 and od['quotation_id'] == qd['id'] and od['due_date'] == '2026-12-10' and qd['status'] == 'accepted', 'order created from the quotation; quotation becomes accepted')
     check(mock.t['biz_projects'][0]['status'] == 'confirmed', 'project becomes confirmed')
@@ -134,7 +144,7 @@ with sync_playwright() as p:
     pg.click('[data-arc] >> nth=0'); pg.wait_for_timeout(500); check(mock.t['custom_designs'][0]['status'] == 'archived', 'archive')
     pg.select_option('#ds', 'archived'); pg.wait_for_timeout(500); check(pg.locator('.xw-dcard').count() == 1, 'archived view lists only archived designs'); pg.click('[data-arc]'); pg.wait_for_timeout(500); check(mock.t['custom_designs'][0]['status'] == 'draft', 'restore from archive')
     pg.select_option('#ds', 'active'); pg.select_option('#df', ''); pg.wait_for_timeout(500); pg.click('.xw-dcard:has-text("copy") [data-rm]'); pg.click('.xw-mod .xw-acts .bad'); pg.wait_for_timeout(500); check(len(mock.t['custom_designs']) == 1, 'delete asks first, then removes the design')
-    pg.click('[data-open] >> nth=0'); pg.wait_for_function("document.getElementById('xwork').classList.contains('on') === false", timeout=10000); pg.wait_for_timeout(500)
+    pg.click('[data-open] >> nth=0'); pg.wait_for_selector('#xwork:not(.on)', state='attached', timeout=10000); pg.wait_for_timeout(500)
     g = pg.evaluate('XSTUDIO.getDoc()'); check(g['cloudId'] == 'd-1' and len(g['doc']['layers']) == 2 and g['doc']['widthCm'] == 20, 'Open loads the cloud design into the editor and keeps its cloud id')
     check(pg.locator('#studio.on').count() == 1, 'studio is visible after opening a design')
     pg.click('#stWork'); pg.wait_for_selector('#xwork.on')
@@ -161,7 +171,7 @@ with sync_playwright() as p:
     pg.select_option('#vOut [data-mg] >> nth=0', index=1); pg.wait_for_timeout(500); check(pg.locator('#vOut .xw-prow').count() == n0 - 1, 'merging two colours leaves one fewer')
     pg.evaluate("document.querySelector('#vBA input[type=range]').value=20;document.querySelector('#vBA input[type=range]').dispatchEvent(new Event('input'))"); check('inset(0px 80%' in pg.evaluate("document.querySelector('#vBA .after').style.clipPath") or '80%' in pg.evaluate("document.querySelector('#vBA .after').style.clipPath"), 'before/after slider moves the split')
     path = dl('#vSvg'); sv = md.parse(path).documentElement; check(sv.tagName == 'svg' and len(sv.getElementsByTagName('path')) >= 2, 'SVG download is well-formed with vector paths')
-    pg.click('#vSend'); pg.fill('#sW', '100'); pg.click('.xw-acts .pri'); pg.wait_for_function("document.getElementById('xwork').classList.contains('on') === false"); pg.wait_for_timeout(600); g = pg.evaluate('XSTUDIO.getDoc()')['doc']
+    pg.click('#vSend'); pg.fill('#sW', '100'); pg.click('.xw-acts .pri'); pg.wait_for_selector('#xwork:not(.on)', state='attached'); pg.wait_for_timeout(600); g = pg.evaluate('XSTUDIO.getDoc()')['doc']
     check(len(g['layers']) >= 2 and all(l['type'] == 'path' for l in g['layers']) and all(l['fill'].startswith('BY-') for l in g['layers']) and g['bg'].startswith('BY-') and abs(g['heightCm'] / g['widthCm'] - 0.75) < 0.01, 'vector sent to the editor as editable path layers snapped to the rug maker\'s yarns, aspect kept')
     pg.click('[data-lt=lay]'); pg.wait_for_timeout(300); ly = pg.evaluate("document.querySelectorAll('#studio .ly').length"); check(ly == len(g['layers']), 'editor layer list shows the vector layers (%d)' % ly)
     cv = pg.evaluate("(()=>{const L=XSTUDIO_LIB,d=XSTUDIO.getDoc().doc,c=L.makeCanvas(d,200);L.render(d,c,{});const x=c.getContext('2d').getImageData(0,0,c.width,c.height).data;const s=new Set();for(let i=0;i<x.length;i+=64)s.add(x[i]+','+x[i+1]+','+x[i+2]);return s.size})()"); check(cv >= 3, 'path layers actually render in the editor canvas (%d distinct colours)' % cv)
@@ -188,6 +198,11 @@ with sync_playwright() as p:
     go('Account Settings'); pg.fill('#bu', 'us'); pg.click('#bSave'); pg.wait_for_timeout(200); print('DEBUG wsProfErr', repr(pg.inner_text('#wsProfErr'))); check('3 letters' in pg.inner_text('#wsProfErr'), 'bad currency rejected'); pg.fill('#bu', 'usd'); pg.fill('#bn', 'Rita Rugs'); pg.fill('#bt', 'Colombo'); pg.click('#bSave'); pg.wait_for_timeout(700)
     check(mock.business['name'] == 'Rita Rugs' and mock.business['currency'] == 'USD' and mock.business['address']['city'] == 'Colombo' and pg.inner_text('#xwBiz') == 'Rita Rugs', 'business profile saved and header updated')
     pg.set_input_files('#logoF', {'name': 'l.png', 'mimeType': 'image/png', 'buffer': png_bytes(logo)}); pg.wait_for_timeout(800); check(mock.business['logo_path'] and any(k.startswith('business-assets/b/b-1/') for k in mock.files), 'logo stored in private business storage')
+    pg.fill('#qtTitle', 'PROFORMA QUOTE'); pg.fill('#qtFoot', 'Thank you for choosing Rita Rugs'); pg.click('#qtSave'); pg.wait_for_timeout(500)
+    qt = (mock.business.get('settings') or {}).get('quoteTemplate') or {}; check(qt.get('title') == 'PROFORMA QUOTE' and 'Rita Rugs' in (qt.get('footer') or ''), 'quotation template saved to the business: ' + json.dumps(qt)[:160])
+    pg.click('#qtPrev'); pg.wait_for_selector('#qpv canvas', timeout=15000); check(pg.locator('#qpv canvas').count() >= 1, 'template preview renders an A4 page with sample data'); path = dl('[data-qd=jpg]'); check(open(path,'rb').read(3)==b'\xff\xd8\xff', 'template sample downloads as JPG')
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(300)
+    if pg.locator('.xw-mod').count(): pg.click('.xw-mod .xw-acts button:not(.pri)'); pg.wait_for_timeout(300)
     pg.set_input_files('#logoF', {'name': 'l.gif', 'mimeType': 'image/gif', 'buffer': b'GIF89a'}); check('PNG, JPG or WebP' in toast_text(), 'non-image logo refused')
     pg.fill('#mE', 'nope'); pg.click('#mAdd'); check('valid email' in toast_text(), 'invalid team email refused'); pg.fill('#mE', 'sam@example.com'); pg.select_option('#mR', 'manager'); pg.click('#mAdd'); pg.wait_for_timeout(800); check(len(mock.t['business_members']) == 2 and mock.t['business_members'][1]['role'] == 'manager', 'team member added as manager')
     pg.click('[data-rmm]'); pg.click('.xw-mod .xw-acts .bad'); pg.wait_for_timeout(700); check(len(mock.t['business_members']) == 1, 'team member removed')
@@ -196,13 +211,13 @@ with sync_playwright() as p:
 
     # ---------------- staff role is read-only in the UI (the database enforces it for real; see supabase/tests)
     mock.t['business_members'][0]['role'] = 'staff'; pg.reload(); pg.wait_for_timeout(600)
-    pg.evaluate("document.getElementById('gate') && document.getElementById('gate').remove(); document.body.classList.remove('gate-open'); XSTUDIO.open()"); pg.wait_for_function("!document.getElementById('stWork').hidden", timeout=8000); pg.evaluate('XWS.show("yarns")'); pg.wait_for_selector('#yAdd')
+    pg.evaluate("document.getElementById('gate') && document.getElementById('gate').remove(); document.body.classList.remove('gate-open'); XSTUDIO.open()"); pg.wait_for_selector('#stWork:not([hidden])', timeout=8000); pg.evaluate('XWS.show("yarns")'); pg.wait_for_selector('#yAdd')
     check(pg.is_disabled('#yAdd') and 'only owners and managers can change' in pg.inner_text('#xwBody'), 'staff role sees a read-only workspace with an explanation')
     pg.evaluate('XWS.show("settings")'); pg.wait_for_selector('#bSave'); check(pg.is_disabled('#bSave') and pg.locator('#mAdd').count() == 0, 'staff cannot edit the profile or manage the team')
 
     # ---------------- phone layout
     mc = br.new_context(viewport={'width': 390, 'height': 844}, accept_downloads=True); mp_ = mc.new_page(); mp_.route(re.compile(r'^https?://(?!mlrydpclqokizsqmigen)'), lambda r: r.abort()); mock.t['business_members'][0]['role'] = 'owner'; mock.attach(mp_); mp_.add_init_script(mock.session_script()); mp_.add_init_script("window.requestAnimationFrame=cb=>setTimeout(()=>cb(performance.now()),3000)")
-    mp_.goto('file://' + os.path.abspath('index.html')); mp_.wait_for_timeout(600); mp_.evaluate("document.getElementById('gate') && document.getElementById('gate').remove(); document.body.classList.remove('gate-open'); XSTUDIO.open()"); mp_.wait_for_function("!document.getElementById('stWork').hidden", timeout=8000)
+    mp_.goto('file://' + os.path.abspath('index.html')); mp_.wait_for_timeout(600); mp_.evaluate("document.getElementById('gate') && document.getElementById('gate').remove(); document.body.classList.remove('gate-open'); XSTUDIO.open()"); mp_.wait_for_selector('#stWork:not([hidden])', timeout=8000)
     for sec in ['dashboard', 'yarns', 'calculator', 'quotes', 'sheets', 'vector']:
         mp_.evaluate('XWS.show("%s")' % sec); mp_.wait_for_selector('#xwBody > *', timeout=8000); mp_.wait_for_timeout(500)
         w = mp_.evaluate("[document.documentElement.scrollWidth, document.querySelector('#xwMain').scrollWidth, document.querySelector('#xwMain').clientWidth]"); check(w[0] <= 391 and w[1] <= w[2] + 1, 'phone width: %s fits without sideways page scroll %s' % (sec, w))

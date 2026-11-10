@@ -40,14 +40,14 @@ with sync_playwright() as p:
     check(d['data']['account_type'] == 'rugmaker' and 'role' not in d['data'], 'sign-up sends rugmaker account type and no role')
     pg.click('.mod .x'); pg.click('#stAcct'); pg.fill('#acE', 'rm@x.co'); pg.fill('#acP', 'abcdefg1'); pg.click('#mAct .pri')
     pg.wait_for_selector('text=Set up your rug-making business'); check(True, 'rug maker without a business is asked to set one up')
-    pg.fill('#bzN', 'Rita Tufting'); pg.fill('#bzU', 'lkr'); pg.click('#mAct .pri'); pg.wait_for_function("document.getElementById('stAcct').textContent === 'Rita'", timeout=10000)
+    pg.fill('#bzN', 'Rita Tufting'); pg.fill('#bzU', 'lkr'); pg.click('#mAct .pri'); pg.wait_for_selector('#stAcct:text-is("Rita")', timeout=10000)
     cb = json.loads([l for l in log if 'rpc/create_business' in l[1]][0][2]); check(cb['p_name'] == 'Rita Tufting' and cb['p_currency'] == 'lkr', 'business created through the RPC')
     check(pg.inner_text('#stAcct') == 'Rita', 'account chip shows first name')
     # add an image layer via the library, then save to the cloud
     import io; from PIL import Image
     im = Image.new('RGB', (400, 300), (200, 30, 40)); [im.putpixel((x, y), (20, 80, 200)) for x in range(100, 300) for y in range(80, 220)]
     buf = io.BytesIO(); im.save(buf, 'PNG')
-    pg.set_input_files('#stFile', {'name': 'logo.png', 'mimeType': 'image/png', 'buffer': buf.getvalue()}); pg.wait_for_function("document.querySelectorAll('#studio .ly').length > 0", timeout=15000)
+    pg.set_input_files('#stFile', {'name': 'logo.png', 'mimeType': 'image/png', 'buffer': buf.getvalue()}); pg.wait_for_selector('#studio .ly', timeout=15000)
     pg.click('#stSave'); pg.fill('#sdN', 'Cloud rug'); pg.click('#mAct .pri')
     for _ in range(80):
         if any(l[0] == 'POST' and '/rest/v1/custom_designs' in l[1] for l in log): break
@@ -60,7 +60,7 @@ with sync_playwright() as p:
     pg.click('#stMine'); pg.wait_for_selector('text=In your account'); pg.wait_for_selector('text=Cloud rug')
     check(True, 'My designs lists the cloud design')
     pg.click('.mod .x'); pg.click('#stAcct'); pg.click('text=Sign out')
-    try: pg.wait_for_function("document.getElementById('stAcct').textContent === 'Sign in'", timeout=5000)
+    try: pg.wait_for_selector('#stAcct:text-is("Sign in")', timeout=8000)
     except Exception: pass
     check(pg.inner_text('#stAcct') == 'Sign in', 'sign out resets the account button')
     check(not errs, 'no page errors: ' + '; '.join(errs)[:200])
