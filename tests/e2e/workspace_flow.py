@@ -1,5 +1,5 @@
 # Browser test of the rug-maker workspace against a MOCK Supabase backend (tests/e2e/mock_supabase.py). Run: python3 tests/e2e/workspace_flow.py [stage]
-import io, json, os, re, subprocess, sys, csv
+import base64, io, json, os, re, subprocess, sys, csv
 sys.path.insert(0, os.path.dirname(__file__))
 from mock_supabase import Mock
 from playwright.sync_api import sync_playwright
@@ -117,6 +117,11 @@ with sync_playwright() as p:
     pg.click('[data-qo]'); pg.fill('#oDue', '2026-12-10'); pg.click('.xw-acts .pri'); pg.wait_for_timeout(500); od = mock.t['biz_orders'][0]
     check(re.match(r'O-\d{4}-0001$', od['ref']) and od['total'] == 81.46 and od['paid'] == 0 and od['quotation_id'] == qd['id'] and od['due_date'] == '2026-12-10' and qd['status'] == 'accepted', 'order created from the quotation; quotation becomes accepted')
     check(mock.t['biz_projects'][0]['status'] == 'confirmed', 'project becomes confirmed')
+    pg.wait_for_timeout(2500); ml = mock.mails; check(len(ml) == 1 and ml[0]['quotationId'] == qd['id'] and base64.b64decode(ml[0]['pdfBase64'])[:5] == b'%PDF-' and 'to' not in ml[0], 'confirming the order emails the quotation PDF (the browser sends no recipient: the server uses the customer on file)')
+    check(mock.t['biz_quotations'][0].get('emailed_to') == 'ann@example.com', 'the quotation records who it was emailed to')
+    go('Quotations'); check('Emailed' in pg.inner_text('#xwBody'), 'the Quotations tab shows the quotation as emailed')
+    mock.mail_status = 503; pg.click('[data-qm]'); pg.wait_for_timeout(2500); check('not switched on' in toast_text(), 'if email is not set up the maker is told plainly and can still download the PDF'); mock.mail_status = 200
+    pg.click('[data-qm]'); pg.wait_for_timeout(2500); check(len(mock.mails) == 3, 'the Email customer button sends again on request')
 
     # ---------------- Orders
     go('Orders'); pg.click('[data-op]'); pg.fill('#pA', '0'); pg.click('.xw-acts .pri'); check('above 0' in pg.inner_text('#pE'), 'zero payment rejected'); pg.fill('#pA', '30'); pg.click('.xw-acts .pri'); pg.wait_for_timeout(500)

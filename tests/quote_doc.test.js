@@ -16,3 +16,14 @@ test('sanitize: bad colours, huge text and odd paths are cleaned', () => { const
   assert.equal(s.accent, Q.DEFAULT_TEMPLATE.accent); assert.equal(s.terms.length, 1500); assert.equal(s.bgPath, ''); assert.equal(s.mode, 'builtin'); assert.ok(s.area.top <= 0.6 && s.area.left >= 0); });
 test('pdf: valid structure with one page per image', () => { const p = Q.pdf([{ jpeg: new Uint8Array([255, 216, 255, 217]), w: 10, h: 10 }, { jpeg: new Uint8Array([255, 216, 255, 217]), w: 10, h: 10 }]), s = Buffer.from(p).toString('latin1');
   assert.ok(s.startsWith('%PDF-1.4') && s.trimEnd().endsWith('%%EOF')); assert.ok(/\/Count 2/.test(s)); const x = +s.match(/startxref\n(\d+)/)[1]; assert.ok(s.slice(x).startsWith('xref')); });
+test('XARO preset: landscape page, fills the blanks of the artwork, totals only on the last page', () => {
+  const m = model(14); m.quote.taxPct = 5; m.quote.discountPct = 10; const l = Q.layout(m, { mode: 'preset', preset: 'xaro' }, measure);
+  assert.equal(l.w, 1754); assert.equal(l.h, 1240); assert.ok(l.pages.length >= 2); l.pages.forEach(p => { assert.equal(p.ops[0].key, 'bg'); p.ops.forEach(o => { if (o.t === 'text') assert.ok(o.y > 0 && o.y <= l.h && o.x >= 0 && o.x <= l.w); }); });
+  const tx = p => p.ops.filter(o => o.t === 'text').map(o => o.text); assert.ok(tx(l.pages[0]).includes('Q-2026-0001')); assert.ok(!tx(l.pages[0]).some(x => /includes tax/.test(x))); const last = tx(l.pages[l.pages.length - 1]); assert.ok(last.some(x => /includes tax 5%/.test(x)) && last.some(x => x.startsWith('-')) && last.includes('Page ' + l.pages.length + ' of ' + l.pages.length));
+  assert.ok(!tx(l.pages[0]).some(x => x === 'Subtotal'), 'labels come from the artwork, not drawn twice'); });
+test('XARO preset: unknown preset falls back to the built-in layout; admin model rounds quantity safely', () => {
+  assert.equal(Q.sanitize({ mode: 'preset', preset: 'nope' }).mode, 'builtin');
+  const a = Q.fromAdminRequest({ id: 'Q-1', at: '2026-11-10T10:00:00Z', name: 'A', email: 'a@x.com', phone: '1', cur: 'LKR', qty: 3, confirmed: 100, doc: { widthCm: 90, heightCm: 40, shape: 'rectangle', pile: 'standard' } }, 'Sri Lanka');
+  assert.equal(a.items[0].qty, 1); assert.equal(a.items[0].unit, 100); assert.ok(/3 pieces/.test(a.items[0].desc));
+  const b = Q.fromAdminRequest({ id: 'Q-2', name: 'B', qty: 2, confirmed: 100, cur: 'USD', doc: {} }); assert.equal(b.items[0].qty, 2); assert.equal(b.items[0].unit, 50); });
+test('pdf: landscape pages get an A4 landscape media box', () => { const p = Q.pdf([{ jpeg: new Uint8Array([255, 216, 255, 217]), w: 1754, h: 1240 }]); const s = Buffer.from(p).toString('latin1'); assert.ok(/MediaBox \[0 0 841\.89 595\.28\]/.test(s)); });

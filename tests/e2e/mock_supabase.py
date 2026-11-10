@@ -12,7 +12,7 @@ ENUMS = {'biz_projects': {'status': {'enquiry', 'quoted', 'confirmed', 'in_produ
 DEFAULTS = {'biz_yarns': {'stock_kg': 0, 'active': True, 'availability': 'unknown'}, 'biz_orders': {'paid': 0, 'status': 'open'}, 'biz_quotations': {'status': 'draft', 'lines': []}, 'biz_projects': {'status': 'enquiry'}, 'custom_designs': {'status': 'draft'}}
 class Mock:
     def __init__(self, user='u-1', bid='b-1'):
-        self.t = defaultdict(list); self.files = {}; self.log = []; self.user = user; self.bid = bid; self.n = 0
+        self.t = defaultdict(list); self.files = {}; self.log = []; self.mails = []; self.mail_status = 200; self.user = user; self.bid = bid; self.n = 0
         self.jwt = 'x.' + base64.urlsafe_b64encode(json.dumps({'sub': user, 'exp': 4102444800}).encode()).decode().rstrip('=') + '.y'
         self.t['profiles'].append({'id': user, 'email': 'rm@x.co', 'full_name': 'Rita Maker', 'role': 'customer', 'account_type': 'rugmaker', 'currency': 'LKR'})
         self.business = {'id': bid, 'name': 'Rita Tufting', 'owner_name': 'Rita', 'email': 'rm@x.co', 'phone': '', 'country': 'LK', 'currency': 'LKR', 'address': {}, 'logo_path': None, 'settings': {}}
@@ -49,6 +49,14 @@ class Mock:
         self.log.append((m, path + ('?' + p.query if p.query else ''), body[:400000]))
         def ok(b, s=200, h=None): route.fulfill(status=s, headers=dict(CORS, **(h or {})), body=json.dumps(b))
         def err(code, msg, s=400): route.fulfill(status=s, headers=CORS, body=json.dumps({'code': code, 'message': msg}))
+        if path.startswith('/functions/v1/send-quotation'):
+            try: b = json.loads(body)
+            except Exception: b = {}
+            self.mails.append(b)
+            if getattr(self, 'mail_status', 200) == 503: return err('not_configured', 'Email sending is not set up yet.', 503)
+            q = next((x for x in self.t.get('biz_quotations', []) if x['id'] == b.get('quotationId')), None); c = q and next((x for x in self.t.get('biz_customers', []) if x['id'] == q.get('customer_id')), None)
+            if not c or not c.get('email'): return err('no_customer_email', 'This customer has no valid email address.', 422)
+            q['emailed_at'] = '2026-11-11T08:00:00Z'; q['emailed_to'] = c['email']; return ok({'ok': True, 'to': c['email'], 'id': 're_mock'})
         if '/auth/v1/token' in path: return ok({'access_token': self.jwt, 'refresh_token': 'RT', 'expires_in': 3600, 'user': {'id': self.user, 'email': 'rm@x.co'}})
         if '/auth/v1/user' in path: return ok({'id': self.user, 'email': 'rm@x.co'})
         if path.startswith('/storage/v1/object/sign/'):

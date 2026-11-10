@@ -1,11 +1,12 @@
 # XARO edge functions
 
-Three Supabase Edge Functions (Deno / TypeScript). **They are unit tested with mocks only. They have NOT been run against Stripe, Anthropic or a deployed Supabase project.** Pure logic lives in `_shared/*.mjs` (no Deno APIs) and is covered by `tests/edge.test.mjs` (36 tests, `node --test tests/edge.test.mjs`).
+Four Supabase Edge Functions (Deno / TypeScript). **They are unit tested with mocks only. They have NOT been run against Stripe, Anthropic or a deployed Supabase project.** Pure logic lives in `_shared/*.mjs` (no Deno APIs) and is covered by `tests/edge.test.mjs` (36 tests, `node --test tests/edge.test.mjs`).
 
 | Function | Purpose | Auth |
 |---|---|---|
 | `create-checkout` | Browser sends SKU, qty, country, contact. Server recomputes every price, shipping fee and 50% deposit from the database, creates `orders` + `order_items`, then a Stripe Checkout Session, and returns its URL. | Optional user JWT (required only when a saved design is attached) |
 | `stripe-webhook` | Verifies the Stripe signature, then marks orders paid / deposit paid / cancelled / refunded idempotently. | Stripe signature only (deploy with JWT verification **off**) |
+| `send-quotation` | Emails a quotation PDF (rendered in the browser) to the customer on that quotation, via Resend. The recipient is read server-side from the customer record; the caller must be a signed-in member of that business (row-level security). Deployed 2026-11-11 (JWT on). Answers 503 "not set up" until the secrets below exist. | User JWT required |
 | `zaro-chat` | Sales assistant. Uses only public data (anon key). 503 when no AI key is set, so the page falls back to its offline FAQ. | Anonymous, soft rate limit |
 
 ## Rules implemented (and where they come from in the storefront)
@@ -18,6 +19,7 @@ Three Supabase Edge Functions (Deno / TypeScript). **They are unit tested with m
 ## Secrets (set in the Supabase dashboard, never in chat)
 Project Settings > Edge Functions > Secrets:
 `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (optional, default `claude-haiku-5-5`), `ALLOWED_ORIGINS` (comma separated, default `https://ravinduranganarv.github.io`), `SITE_URL` (optional).
+`RESEND_API_KEY`, `QUOTE_FROM_EMAIL` (a sender address on a domain verified in Resend; without a verified domain Resend only delivers to the account owner's own address).
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` are injected by the platform.
 
 ## Before going live (not done yet)

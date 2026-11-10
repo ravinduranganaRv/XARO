@@ -66,6 +66,12 @@ SB.signUp = async ({ email, password, fullName, phone, accountType }) => {
   const user = adopt(r); // a session exists only when email confirmation is switched off
   return { user: user || r.user || r, needsConfirmation: !r.access_token };
 };
+/** confirms a new account with the 6-digit code from the sign-up email (the link in the same email also works) and signs the person in */
+SB.verifyEmailCode = async (email, code) => {
+  if (!okEmail(email)) throw new SBError('Enter a valid email address.', 400, 'bad_email'); const t = String(code || '').replace(/\s/g, '');
+  if (!/^\d{6,8}$/.test(t)) throw new SBError('Enter the 6-digit code from the email.', 400, 'bad_code');
+  const r = await http('/auth/v1/verify', { method: 'POST', auth: false, body: { type: 'signup', email: email.trim(), token: t } }); const u = adopt(r); if (!u) throw new SBError('That code did not work. Check it and try again.', 400, 'bad_code'); return u; };
+SB.resendCode = email => { if (!okEmail(email)) throw new SBError('Enter a valid email address.', 400, 'bad_email'); return http('/auth/v1/resend', { method: 'POST', auth: false, body: { type: 'signup', email: email.trim() } }); };
 SB.signIn = async (email, password) => {
   if (!okEmail(email)) throw new SBError('Enter a valid email address.', 400, 'bad_email');
   const r = await http('/auth/v1/token?grant_type=password', { method: 'POST', auth: false, body: { email: email.trim(), password } });
@@ -124,6 +130,7 @@ SB.signedUrl = async (bucket, path, seconds = 300) => {
   const r = await http('/storage/v1/object/sign/' + bucket + '/' + path.split('/').map(encodeURIComponent).join('/'), { method: 'POST', body: { expiresIn: Math.min(3600, seconds) } });
   return SB.url + '/storage/v1' + r.signedURL;
 };
+SB.fn = (name, body) => http('/functions/v1/' + name, { method: 'POST', body });   // edge function, called with the signed-in user's token
 SB.removeFile = (bucket, paths) => http('/storage/v1/object/' + bucket, { method: 'DELETE', body: { prefixes: paths } });
 SB.personalPath = (file) => { const u = SB.user(); if (!u) throw new SBError('Please sign in first.', 401, 'no_session'); return u.id + '/' + Date.now().toString(36) + '-' + SB.safeName(file); };
 SB.businessPath = (bid, file) => 'b/' + bid + '/' + Date.now().toString(36) + '-' + SB.safeName(file);
