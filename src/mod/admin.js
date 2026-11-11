@@ -19,7 +19,7 @@ let ttT; const toast = (m, bad) => { tt.textContent = m; tt.className = 'tt on' 
 /* ---------------------------------------------------------------- session */
 const sess = () => { try { const v = JSON.parse(sessionStorage.getItem('xaro.adm') || 'null'); return v && v.exp > Date.now() ? v : null; } catch (e) { return null; } };
 const setSess = u => { try { if (u) sessionStorage.setItem('xaro.adm', JSON.stringify({ u, exp: Date.now() + SESSION_MS })); else sessionStorage.removeItem('xaro.adm'); } catch (e) {} };
-const meAdmin = () => { const s = sess(); if (!s) return null; const a = XD.admins().find(x => x.username === s.u && x.active); return a || null; };
+const meAdmin = () => { const s = sess(); if (!s) return null; const a = XD.admins().find(x => x.username === s.u && x.active); if (a && a.supa && !(window.XSB && window.XSB.signedIn())) return null; return a || null; };
 const can = p => { const a = meAdmin(); return !!a && (a.role === 'owner' || (a.perms || []).includes(p)); };
 let lastTouch = 0; const touch = () => { const n = Date.now(); if (n - lastTouch < 15000) return; lastTouch = n; const s = sess(); if (s) setSess(s.u); };
 ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { if (root.classList.contains('on')) touch(); }, { passive: true }));
@@ -54,7 +54,7 @@ const LOCK = 'lock';
 const lockState = () => XD.g(LOCK, { n: 0, until: 0 });
 function loginView() {
   root.innerHTML = `<div class="login"><form class="lcard" id="admForm" novalidate><img src="${IMG.logoBlock}" alt="XARO"><h2>Admin <span class="neon">login</span></h2><p>XARO Industries staff only</p>
-  <div class="field"><label for="aU">Username</label><input class="inp" id="aU" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+  <div class="field"><label for="aU">Email or username</label><input class="inp" id="aU" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
   <div class="field"><label for="aP">Password</label><div class="pw"><input class="inp" id="aP" type="password" autocomplete="current-password"><button type="button" id="aShow" aria-label="Show password">SHOW</button></div></div>
   <div class="err" id="aErr" role="alert"></div><button class="btn" type="submit" id="aGo">Sign in</button>
   <p style="margin-top:12px"><a href="#" id="aBack" style="color:var(--neon)">Back to the store</a></p></form></div>`;
@@ -67,11 +67,17 @@ function loginView() {
     if (L.until > Date.now()) { err.textContent = 'Too many attempts. Try again in ' + Math.ceil((L.until - Date.now()) / 60000) + ' min.'; return; }
     if (!u || !p) { err.textContent = 'Enter your username and password.'; return; }
     $('#aGo').disabled = true; err.textContent = '';
-    const a = XD.admins().find(x => x.username.toLowerCase() === u.toLowerCase()); let ok = false;
-    try { const h = await hashPw(p, a ? a.salt : '00'.repeat(16), a ? a.iter : 120000); ok = !!(a && a.active && h === a.hash); } catch (x) { ok = false; }
+    let a = XD.admins().find(x => x.username.toLowerCase() === u.toLowerCase()), ok = false, why = '';
+    if (u.includes('@')) {   // store owner / administrators sign in with their XARO account (Supabase Auth): no password hash is shipped in the page
+      try { const SB = window.XSB; await SB.signIn(u, p); const pr = await SB.profile(); if (pr && (pr.role === 'owner' || pr.role === 'admin')) { const nm = String(pr.full_name || u.split('@')[0]).slice(0, 80), key = u.trim().toLowerCase(), l = XD.admins(); let r = l.find(x => x.username === key);
+          const rec = { username: key, name: nm, role: pr.role === 'owner' ? 'owner' : 'staff', perms: XD.ALL_PERMS.map(x => x[0]).filter(x => pr.role === 'owner' || x !== 'admins'), active: true, supa: true, salt: '', hash: '', iter: 0 };
+          if (r) Object.assign(r, rec); else l.push(Object.assign(rec, { at: new Date().toISOString(), last: '' })); XD.saveAdmins(l); a = l.find(x => x.username === key); ok = true; }
+        else { why = 'This account does not have store admin access.'; try { await window.XSB.signOut(); } catch (x) { } } }
+      catch (x) { why = x && x.status && x.status < 500 && x.status !== 429 ? '' : (x && x.message) || ''; ok = false; }
+    } else { try { const h = a && a.hash ? await hashPw(p, a.salt, a.iter) : await hashPw(p, '00'.repeat(16), 120000); ok = !!(a && a.active && a.hash && !a.supa && h === a.hash); } catch (x) { ok = false; } }
     $('#aGo').disabled = false;
     if (ok) { XD.s(LOCK, { n: 0, until: 0 }); setSess(a.username); const l = XD.admins(); l.find(x => x.username === a.username).last = new Date().toISOString(); XD.saveAdmins(l); if (!/^#\/?admin\/\w+/i.test(location.hash)) location.hash = '#admin/dashboard'; render(); }
-    else { const n = (L.n || 0) + 1; XD.s(LOCK, n >= 5 ? { n: 0, until: Date.now() + 5 * 60000 } : { n, until: 0 }); err.textContent = n >= 5 ? 'Too many attempts. Locked for 5 minutes.' : (a && !a.active ? 'This account is disabled.' : 'Wrong username or password.') + ' (' + Math.max(0, 5 - n) + ' tries left)'; $('#aP').value = ''; $('#aP').focus(); }
+    else { const n = (L.n || 0) + 1; XD.s(LOCK, n >= 5 ? { n: 0, until: Date.now() + 5 * 60000 } : { n, until: 0 }); err.textContent = n >= 5 ? 'Too many attempts. Locked for 5 minutes.' : (why || (a && !a.active ? 'This account is disabled.' : 'Wrong email, username or password.')) + ' (' + Math.max(0, 5 - n) + ' tries left)'; $('#aP').value = ''; $('#aP').focus(); }
   });
   setTimeout(() => $('#aU').focus(), 60);
 }
@@ -89,7 +95,7 @@ function render() {
   <div class="main"><div class="bar"><h1>${esc(cur ? XADM.tabs[cur].title : 'No access')}</h1><div class="acts"><button class="b2" id="aPw">My password</button><button class="b2" id="aView">View store</button><button class="b2 bad" id="aOut">Log out</button></div></div><div id="admMain"></div></div></div>`;
   root.appendChild(tt);
   $$('.nv', root).forEach(b => b.onclick = () => { location.hash = '#admin/' + b.dataset.tab; });
-  $('#aView').onclick = () => { location.hash = ''; }; $('#aOut').onclick = () => { setSess(null); render(); };
+  $('#aView').onclick = () => { location.hash = ''; }; $('#aOut').onclick = async () => { const a = meAdmin(); if (a && a.supa) { try { await window.XSB.signOut(); } catch (e) { } } setSess(null); render(); };
   $('#aPw').onclick = myPassword;
   const box = $('#admMain'); if (!cur) { box.innerHTML = '<div class="empty2">Your account has no permissions yet. Ask the owner to enable some.</div>'; return; }
   try { XADM.tabs[cur].fn(box); } catch (e) { box.innerHTML = '<div class="empty2">Something went wrong in this section.</div>'; console.error(e); }

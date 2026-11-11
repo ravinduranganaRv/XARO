@@ -7,7 +7,7 @@
 const Q = {};
 const PW = 1240, PH = 1754, HEX = /^#[0-9A-Fa-f]{6}$/, FONT = '"Inter","Segoe UI",Arial,"Noto Sans","Noto Sans Sinhala",sans-serif';
 Q.PAGE = { w: PW, h: PH };
-Q.PRESETS = { xaro: { name: 'XARO Industries', w: 1754, h: 1240, iw: 1491, ih: 1055, src: '' } };   // ready-made templates (image set by quote_preset_*.js)
+Q.PRESETS = { xaro: { name: 'XARO Industries', w: 1754, h: 1240, iw: 1491, ih: 1055, url: 'assets/xaro-quotation-template.jpg' } };   // artwork is fetched only when a quotation is made (keeps the page light)   // ready-made templates (image set by quote_preset_*.js)
 Q.DEFAULT_TEMPLATE = { mode: 'builtin', accent: '#1F7A3A', title: 'QUOTATION', footer: 'Thank you for your business.', terms: '', bank: '', showLogo: true, showSign: true, bgPath: '', area: { top: 0.2, bottom: 0.1, left: 0.07, right: 0.07 } };
 const num = (v, a, b, d) => { v = +v; return Number.isFinite(v) ? Math.min(b, Math.max(a, v)) : d; };
 const str = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, n);
@@ -93,7 +93,9 @@ Q.fromAdminRequest = (o, countryName) => { const d = o.doc || {}, qty = Math.max
   const base = 'Custom tufted rug ' + (d.widthCm || '?') + ' x ' + (d.heightCm || '?') + ' cm, ' + (d.shape || 'rectangle') + ', ' + (d.pile || 'standard') + ' pile' + (d.frame ? ', framed' : '') + (d.borderCm ? ', border ' + d.borderCm + ' cm' : '');
   return { customer: { name: o.name, email: o.email, phone: o.phone, address: countryName ? [countryName] : [] }, quote: { ref: o.id, date: new Date(o.at || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }), validUntil: '', currency: o.cur || 'USD', notes: '', discountPct: 0, taxPct: 0 },
     items: [{ desc: even ? base : base + ' (' + qty + ' pieces)', qty: even ? qty : 1, unit: even ? unit : tot }] }; };
-Q.presetImage = key => new Promise(ok => { const P = Q.PRESETS[key]; if (!P || !P.src) return ok(null); if (P.img) return ok(P.img); const i = new Image(); i.onload = () => { P.img = i; ok(i); }; i.onerror = () => ok(null); i.src = P.src; });
+Q.presetImage = key => new Promise(ok => { const P = Q.PRESETS[key]; if (!P) return ok(null); if (P.img) return ok(P.img); const done = u => { const i = new Image(); i.onload = () => { P.img = i; ok(i); }; i.onerror = () => ok(null); i.src = u; };
+  if (P.src) return done(P.src); if (typeof fetch !== 'function') return ok(null);
+  fetch(P.url).then(r => r.ok ? r.blob() : Promise.reject()).then(b => done(URL.createObjectURL(b))).catch(() => ok(null)); });   // blob copy: same-origin, so the canvas stays exportable
 Q.blob = (canvas, type, q) => new Promise(res => canvas.toBlob(res, type, q || 0.92));
 
 /* ---- PDF: one A4 page per canvas, each a full-page JPEG (so any language and any template image prints exactly as previewed) ---- */

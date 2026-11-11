@@ -126,7 +126,7 @@ const SEED_ADMIN = /*%SEED_ADMIN%*/;
 const ALL_PERMS = [['dashboard', 'Dashboard and analytics'], ['customers', 'Customers'], ['orders', 'Orders'], ['products', 'Products'], ['pricing', 'Prices and currencies'], ['assistant', 'AI assistant'], ['settings', 'Settings and data'], ['admins', 'Admin users']];
 function admins() {
   const sv = g('admins', null); if (sv && sv.length) return sv;
-  const l = [{ username: 'Ravindu20007', name: 'Ravindu', role: 'owner', perms: ALL_PERMS.map(p => p[0]), active: true, salt: SEED_ADMIN.salt, hash: SEED_ADMIN.hash, iter: SEED_ADMIN.iter, at: new Date().toISOString(), last: '' }];
+  const l = [{ username: 'Ravindu20007', name: 'Ravindu', role: 'owner', perms: ALL_PERMS.map(p => p[0]), active: false, salt: SEED_ADMIN.salt, hash: SEED_ADMIN.hash, iter: SEED_ADMIN.iter, at: new Date().toISOString(), last: '' }];
   s('admins', l); return l;
 }
 const saveAdmins = l => s('admins', l);

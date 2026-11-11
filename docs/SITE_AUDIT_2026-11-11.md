@@ -10,7 +10,7 @@ Method: Supabase security + performance advisors on the real project, table/RLS 
 - Email confirmation is required before an account is usable.
 
 ## Security: things to fix or decide (highest first)
-1. **Store admin login is browser-side only.** The admin record (salt + password hash) ships in the public repo/page, so anyone can try passwords offline against it, and admin data (orders, quotes, settings) lives in the browser plus the Google Sheet, not behind server rules. Short-term: use a long random passphrase (14+ characters) and change it with the offline tool in `tools/admin_password_tool.html`. Proper fix: move admin sign-in to Supabase Auth (needs your approval).
+1. **[ADDRESSED 2026-11-11] Store admin login was browser-side only.** Fix shipped: the owner/administrators now sign in with their XARO (Supabase) account, only roles `owner` and `admin` are accepted, and the password hash was removed from the page. The old hash remains in git history, so never reuse that old password anywhere. Admin *data* (orders, quotes, settings) still lives in the browser plus the Google Sheet; moving it to the database is the remaining step. Original finding: The admin record (salt + password hash) ships in the public repo/page, so anyone can try passwords offline against it, and admin data (orders, quotes, settings) lives in the browser plus the Google Sheet, not behind server rules. Short-term: use a long random passphrase (14+ characters) and change it with the offline tool in `tools/admin_password_tool.html`. Proper fix: move admin sign-in to Supabase Auth (needs your approval).
 2. **Leaked-password protection is OFF** (Supabase advisor WARN). Turn it on in Supabase → Authentication → Password security (may require the Pro plan).
 3. **Supabase built-in email is heavily rate-limited** (a few emails per hour). Sign-up codes/links will fail once several people register. Set a custom SMTP (Resend offers SMTP) in Authentication → SMTP.
 4. **Free plan limits:** projects pause after about a week of no activity (sign-in would break) and there are no managed backups. Plan: export the database regularly, or move to Pro before real customers.
@@ -27,13 +27,13 @@ Method: Supabase security + performance advisors on the real project, table/RLS 
 - Mobile OTP: deferred by you.
 
 ## Performance
-- `index.html` is 2.86 MB (loads in 1.6 s locally; expect a few seconds on mobile data). About 0.5 MB is the embedded quotation template image, which does not compress. Recommendation: load the template (and other big images) on demand from `assets/`.
+- `index.html` was 2.86 MB; the quotation template image is now loaded on demand from `assets/`, so the page is 2.39 MB (loads in about 1.4 s locally).
 - Advisor: 44 unused indexes (INFO). Ignore for now; tables are nearly empty.
 - `audit_logs` already has 1,031 rows (mostly the 1,000-yarn import). Set a retention rule later.
 
 ## Design / accessibility / SEO
 - Phone width (390 px): no horizontal overflow; 1 `h1`; all form fields labelled; all buttons/links named; language, viewport, description, canonical, sitemap, robots and OG image all present.
-- 1 of 24 images has no `alt` text: add one.
+- Image alt text: the one image flagged is an intentional decorative image (`alt=""`), which is correct.
 - Not yet audited: colour contrast of the neon-green-on-black areas, keyboard use of the 3D Studio, screen-reader use of the Studio canvas.
 - Quotation template says "INVOICE" (artwork). Supply a "QUOTATION" version, or rename the document type.
 - Contact numbers and website on the template (+94 786472825 / +94 78 483 0704, +971 508590489, Xaroproducts.com) must match the store's settings; if you own xaroproducts.com, point it at the site.

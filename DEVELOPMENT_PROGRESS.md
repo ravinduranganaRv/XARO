@@ -51,3 +51,7 @@ Project XARO-STUDIO (Singapore). All six migrations are applied remotely and mir
 - Email: `send-quotation` edge function + migration 0008 (applied to the real project) + "Email customer" button and automatic email when an order is made from a quotation. Needs RESEND_API_KEY and QUOTE_FROM_EMAIL secrets (owner, in the Supabase dashboard).
 - Sign-up: 6-digit email code step (link still works). Needs {{ .Token }} added to the Supabase "Confirm signup" email template. Mobile OTP deferred by the owner.
 - Tests: 155 unit, all browser suites incl. new admin_quote_flow, 65 DB checks, storefront visual regression 0 diff.
+
+## 2026-11-11 (audit follow-up)
+- Admin sign-in moved to Supabase Auth for owner/admin roles (page no longer carries a password hash); local staff accounts still work by username. New test admin_supabase_login_flow.
+- Quotation template image now loaded on demand (page 2.86 -> 2.39 MB).

@@ -57,6 +57,12 @@ class Mock:
             q = next((x for x in self.t.get('biz_quotations', []) if x['id'] == b.get('quotationId')), None); c = q and next((x for x in self.t.get('biz_customers', []) if x['id'] == q.get('customer_id')), None)
             if not c or not c.get('email'): return err('no_customer_email', 'This customer has no valid email address.', 422)
             q['emailed_at'] = '2026-11-11T08:00:00Z'; q['emailed_to'] = c['email']; return ok({'ok': True, 'to': c['email'], 'id': 're_mock'})
+        if path.startswith('/auth/v1/token') and '"password"' in body:
+            try: b = json.loads(body)
+            except Exception: b = {}
+            if b.get('password') != 'Owner-pass-12345': return err('invalid_credentials', 'Invalid login credentials', 400)
+            return ok({'access_token': self.jwt, 'refresh_token': 'RT', 'expires_in': 3600, 'user': {'id': self.user, 'email': b.get('email')}})
+        if path.startswith('/auth/v1/logout'): self.signed_out = True; return ok({})
         if '/auth/v1/token' in path: return ok({'access_token': self.jwt, 'refresh_token': 'RT', 'expires_in': 3600, 'user': {'id': self.user, 'email': 'rm@x.co'}})
         if '/auth/v1/user' in path: return ok({'id': self.user, 'email': 'rm@x.co'})
         if path.startswith('/storage/v1/object/sign/'):
